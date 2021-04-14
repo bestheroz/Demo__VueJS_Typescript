@@ -1,0 +1,10 @@
+name: 'Clean'
+description: 'Clean the previous build'
+
+runs:
+  using: 'composite'
+  steps:
+    - run: |
+        echo "clean dist"
+        rm -rf dist
+      shell: bash
