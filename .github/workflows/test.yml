@@ -32,7 +32,6 @@ jobs:
 
       - name: npm install
         run: |
-          cd vue
           npm ci
         env:
           CI: true

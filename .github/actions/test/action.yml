@@ -6,6 +6,5 @@ runs:
   steps:
     - name: npm run lint
       run: |
-        cd vue
         npm run lint
       shell: bash

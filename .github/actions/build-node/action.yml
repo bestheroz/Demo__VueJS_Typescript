@@ -6,6 +6,5 @@ runs:
   steps:
     - run: |
         echo "npm run build"
-        cd vue
         npm run build
       shell: bash
