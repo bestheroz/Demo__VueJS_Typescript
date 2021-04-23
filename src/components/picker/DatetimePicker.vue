@@ -56,7 +56,12 @@
           :max="maxTime"
           :min="minTime"
         >
-          <v-btn outlined @click="setNow" :disabled="disableToday">
+          <v-btn
+            outlined
+            @click="setNow"
+            :disabled="disableToday"
+            v-if="disabledNow"
+          >
             지금
           </v-btn>
           <div class="flex-grow-1"></div>
@@ -96,6 +101,8 @@ export default class extends Vue {
   @Prop({ type: Boolean, default: false }) readonly endType!: boolean;
   @Prop({ type: Boolean, default: false }) readonly fullWidth!: boolean;
   @Prop({ type: Boolean, default: false }) readonly hideHint!: boolean;
+  @Prop({ type: Boolean }) readonly disabledNow!: boolean;
+  @Prop({ type: Boolean }) readonly disabledBeforeNow!: boolean;
   @Prop() readonly max!: string[];
   @Prop() readonly min!: string[];
 
@@ -121,15 +128,39 @@ export default class extends Vue {
   }
 
   get maxTime(): string | undefined {
-    return this.max?.length > 1 ? this.max[1] : undefined;
+    return this.max?.length > 1 && this.max[1] ? this.max[1] : undefined;
   }
 
   get minDate(): string | undefined {
-    return this.min?.length > 0 ? this.min[0] : undefined;
+    if (this.min?.length > 0) {
+      if (this.disabledBeforeNow) {
+        return dayjs(this.min[0]).isBefore(dayjs())
+          ? this.min[0]
+          : dayjs().format(this.DATEPICKER_FORMAT);
+      }
+      return this.min[0];
+    }
+    return this.disabledBeforeNow
+      ? dayjs().format(this.DATEPICKER_FORMAT)
+      : undefined;
   }
 
   get minTime(): string | undefined {
-    return this.min?.length > 1 ? this.min[1] : undefined;
+    if (this.min?.length > 1 && this.min[1]) {
+      if (this.disabledBeforeNow) {
+        return dayjs(this.min[1]).isBefore(dayjs())
+          ? this.min[1]
+          : this.useSeconds
+          ? dayjs().format(this.TIMEPICKER_FORMAT)
+          : dayjs().format(this.TIMEPICKER_MINUTE_FORMAT);
+      }
+      return this.min[1];
+    }
+    return this.disabledBeforeNow
+      ? this.useSeconds
+        ? dayjs().format(this.TIMEPICKER_FORMAT)
+        : dayjs().format(this.TIMEPICKER_MINUTE_FORMAT)
+      : undefined;
   }
 
   get style(): string | undefined {

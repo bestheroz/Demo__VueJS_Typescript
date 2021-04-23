@@ -17,6 +17,7 @@
           :max="maxDate"
           full-width
           start-type
+          :disabled-before-now="disabledStartBeforeNow"
         />
       </v-col>
       <v-col cols="6">
@@ -54,6 +55,7 @@
           :use-seconds="useSeconds"
           :max="maxDate"
           start-type
+          :disabled-before-now="disabledStartBeforeNow"
         />
         <datetime-picker
           ref="refEnd"
@@ -113,6 +115,7 @@ export default class extends Vue {
   @Prop({ type: Boolean, default: false }) readonly useSeconds!: boolean;
   @Prop({ type: Boolean, default: false }) readonly fullWidth!: boolean;
   @Prop({ type: Boolean, default: false }) readonly hideHint!: boolean;
+  @Prop({ type: Boolean }) readonly disabledStartBeforeNow!: boolean;
 
   @Ref("refStart") readonly refStart!: DatetimePicker;
   @Ref("refEnd") readonly refEnd!: DatetimePicker;
@@ -130,8 +133,14 @@ export default class extends Vue {
   }
 
   get minDate(): string[] | undefined {
-    if (!this.syncedStart) {
+    if (!this.syncedStart || !this.syncedEnd) {
       return undefined;
+    }
+    if (dayjs(this.syncedStart).diff(dayjs(this.syncedEnd), "days") !== 0) {
+      return [
+        dayjs(this.syncedStart).format(this.DATE_FORMAT),
+        this.useSeconds ? "00:00:00" : "00:00",
+      ];
     }
     return [
       dayjs(this.syncedStart).format(this.DATE_FORMAT),
@@ -142,8 +151,14 @@ export default class extends Vue {
   }
 
   get maxDate(): string[] | undefined {
-    if (!this.syncedEnd) {
+    if (!this.syncedStart || !this.syncedEnd) {
       return undefined;
+    }
+    if (dayjs(this.syncedStart).diff(dayjs(this.syncedEnd), "days") !== 0) {
+      return [
+        dayjs(this.syncedEnd).format(this.DATE_FORMAT),
+        this.useSeconds ? "23:59:59" : "23:59",
+      ];
     }
     return [
       dayjs(this.syncedEnd).format(this.DATE_FORMAT),
