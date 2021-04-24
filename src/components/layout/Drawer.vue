@@ -46,8 +46,8 @@
 
 <script lang="ts">
 import { Component, PropSync, Vue } from "vue-property-decorator";
-import type { Drawer } from "@/common/types";
-import { MENU_TYPE } from "@/common/selections";
+import type { Drawer } from "@/definitions/types";
+import { MENU_TYPE } from "@/definitions/selections";
 
 @Component({
   name: "Drawer",

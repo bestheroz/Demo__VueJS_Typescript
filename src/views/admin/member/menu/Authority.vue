@@ -38,10 +38,10 @@
 
 <script lang="ts">
 import { Component, Ref, Vue, Watch } from "vue-property-decorator";
-import { SelectItem } from "@/common/types";
+import { SelectItem } from "@/definitions/types";
 import AuthorityList from "@/views/admin/member/menu/AuthorityList.vue";
 import { getApi } from "@/utils/apis";
-import { Authority } from "@/common/models";
+import { Authority } from "@/definitions/models";
 
 @Component({
   name: "Authority",

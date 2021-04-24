@@ -68,11 +68,11 @@ import { confirmDelete } from "@/utils/alerts";
 import MenuEditDialog from "@/views/admin/menu/MenuEditDialog.vue";
 import ButtonSet from "@/components/speeddial/ButtonSet.vue";
 import draggable from "vuedraggable";
-import { defaultMenu } from "@/common/values";
+import { defaultMenu } from "@/definitions/defaults";
 import _ from "lodash";
-import type { Menu } from "@/common/models";
+import type { Menu } from "@/definitions/models";
 import RefreshDataBar from "@/components/history/RefreshDataBar.vue";
-import { MENU_TYPE } from "@/common/selections";
+import { MENU_TYPE } from "@/definitions/selections";
 
 interface MenuVO extends Menu {
   children: Menu[];

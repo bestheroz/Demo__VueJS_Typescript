@@ -88,7 +88,7 @@ import type {
   PageResult,
   Pagination,
   SelectItem,
-} from "@/common/types";
+} from "@/definitions/types";
 import { deleteApi, getApi, getExcelApi } from "@/utils/apis";
 import envs from "@/constants/envs";
 import ButtonSet from "@/components/speeddial/ButtonSet.vue";
@@ -96,8 +96,8 @@ import MemberEditDialog from "@/views/admin/member/MemberEditDialog.vue";
 import { confirmDelete } from "@/utils/alerts";
 import DataTableFilter from "@/components/datatable/DataTableFilter.vue";
 import qs from "qs";
-import { defaultMember } from "@/common/values";
-import type { Member } from "@/common/models";
+import { defaultMember } from "@/definitions/defaults";
+import type { Member } from "@/definitions/models";
 import _ from "lodash";
 import RefreshDataBar from "@/components/history/RefreshDataBar.vue";
 

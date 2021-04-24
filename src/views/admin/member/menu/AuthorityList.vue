@@ -109,10 +109,10 @@ import { Component, Ref, VModel, Vue, Watch } from "vue-property-decorator";
 import { getApi, postApi } from "@/utils/apis";
 import ButtonSet from "@/components/speeddial/ButtonSet.vue";
 import draggable from "vuedraggable";
-import { defaultAuthorityItem, defaultMenu } from "@/common/values";
-import type { Authority, Menu } from "@/common/models";
+import { defaultAuthorityItem, defaultMenu } from "@/definitions/defaults";
+import type { Authority, Menu } from "@/definitions/models";
 import RefreshDataBar from "@/components/history/RefreshDataBar.vue";
-import { AUTHORITY_TYPE } from "@/common/selections";
+import { AUTHORITY_TYPE } from "@/definitions/selections";
 
 @Component({
   name: "AuthorityList",

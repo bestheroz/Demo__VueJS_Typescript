@@ -1,16 +1,16 @@
 import Vue from "vue";
 import Vuex, { ActionContext } from "vuex";
 import createPersistedState from "vuex-persistedstate";
-import { Drawer, SelectItem } from "@/common/types";
+import { Drawer, SelectItem } from "@/definitions/types";
 import { axiosInstance, getApi, postApi } from "@/utils/apis";
 // eslint-disable-next-line camelcase
 import jwt_decode from "jwt-decode";
 import axios from "axios";
 import envs from "@/constants/envs";
 import router from "@/router";
-import { defaultUser } from "@/common/values";
-import type { Authority, Member, Menu } from "@/common/models";
-import { AuthorityItem } from "@/common/models";
+import { defaultUser } from "@/definitions/defaults";
+import type { Authority, Member, Menu } from "@/definitions/models";
+import { AuthorityItem } from "@/definitions/models";
 import { errorPage } from "@/utils/errors";
 import _ from "lodash";
 

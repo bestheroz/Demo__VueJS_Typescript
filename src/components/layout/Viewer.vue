@@ -17,9 +17,9 @@
 
 <script lang="ts">
 import { Component, Vue, Watch } from "vue-property-decorator";
-import type { Drawer } from "@/common/types";
+import type { Drawer } from "@/definitions/types";
 import { getVariableApi } from "@/utils/apis";
-import { defaultMenu } from "@/common/values";
+import { defaultMenu } from "@/definitions/defaults";
 import { errorPage } from "@/utils/errors";
 import _ from "lodash";
 

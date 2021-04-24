@@ -15,7 +15,7 @@
 import { Component, Ref, Vue } from "vue-property-decorator";
 import CodeList from "@/views/admin/code/CodeList.vue";
 import CodeType from "@/views/admin/code/CodeType.vue";
-import { Code } from "@/common/models";
+import { Code } from "@/definitions/models";
 
 @Component({
   name: "CodeWrapper",

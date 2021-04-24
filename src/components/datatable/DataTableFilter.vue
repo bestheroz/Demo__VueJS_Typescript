@@ -54,7 +54,7 @@ import {
   Vue,
   Watch,
 } from "vue-property-decorator";
-import type { DataTableHeader, SelectItem } from "@/common/types";
+import type { DataTableHeader, SelectItem } from "@/definitions/types";
 import _, { DebouncedFunc } from "lodash";
 
 @Component({ name: "DataTableFilter" })

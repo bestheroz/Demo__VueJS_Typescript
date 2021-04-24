@@ -143,7 +143,7 @@
 
 <script lang="ts">
 import { Component, PropSync, Ref, VModel, Vue } from "vue-property-decorator";
-import type { SelectItem } from "@/common/types";
+import type { SelectItem } from "@/definitions/types";
 import { getApi, patchApi, postApi } from "@/utils/apis";
 import DatetimePicker from "@/components/picker/DatetimePicker.vue";
 import { ValidationObserver } from "vee-validate";
@@ -151,7 +151,7 @@ import pbkdf2 from "pbkdf2";
 import ButtonIconTooltip from "@/components/button/ButtonIconTooltip.vue";
 import DialogTitle from "@/components/title/DialogTitle.vue";
 import DialogActionButton from "@/components/button/DialogActionButton.vue";
-import type { Member } from "@/common/models";
+import type { Member } from "@/definitions/models";
 import CreatedUpdatedBar from "@/components/history/CreatedUpdatedBar.vue";
 
 @Component({

@@ -108,13 +108,13 @@
 
 <script lang="ts">
 import { Component, PropSync, Ref, VModel, Vue } from "vue-property-decorator";
-import type { SelectItem } from "@/common/types";
+import type { SelectItem } from "@/definitions/types";
 import { getApi, postApi, putApi } from "@/utils/apis";
 import { ValidationObserver } from "vee-validate";
 import DialogTitle from "@/components/title/DialogTitle.vue";
 import ButtonIconTooltip from "@/components/button/ButtonIconTooltip.vue";
 import DialogActionButton from "@/components/button/DialogActionButton.vue";
-import type { Code } from "@/common/models";
+import type { Code } from "@/definitions/models";
 import CreatedUpdatedBar from "@/components/history/CreatedUpdatedBar.vue";
 
 @Component({

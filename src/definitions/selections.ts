@@ -1,4 +1,4 @@
-import { SelectItem } from "@/common/types";
+import { SelectItem } from "@/definitions/types";
 
 export const AUTHORITY_TYPE = {
   VIEW: "VIEW",

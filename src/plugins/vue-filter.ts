@@ -1,5 +1,5 @@
 import Vue from "vue";
-import { DateTime, SelectItem } from "@/common/types";
+import { DateTime, SelectItem } from "@/definitions/types";
 import { getTextOfSelectItem } from "@/utils/codes";
 import {
   formatDate,

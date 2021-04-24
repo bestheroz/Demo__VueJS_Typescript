@@ -1,4 +1,4 @@
-import { DateTime } from "@/common/types";
+import { DateTime } from "@/definitions/types";
 
 export interface Member {
   id?: number;

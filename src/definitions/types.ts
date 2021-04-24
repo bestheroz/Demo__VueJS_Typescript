@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import type { Menu } from "@/common/models";
+import type { Menu } from "@/definitions/models";
 
 export type DateTime = dayjs.ConfigType;
 

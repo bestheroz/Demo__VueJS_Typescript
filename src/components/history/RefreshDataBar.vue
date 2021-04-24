@@ -22,7 +22,7 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import type { DateTime } from "@/common/types";
+import type { DateTime } from "@/definitions/types";
 import dayjs from "dayjs";
 import ButtonIconTooltip from "@/components/button/ButtonIconTooltip.vue";
 

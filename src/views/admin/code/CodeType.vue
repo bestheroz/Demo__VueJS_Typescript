@@ -21,7 +21,7 @@
 <script lang="ts">
 import { Component, Emit, Vue, Watch } from "vue-property-decorator";
 import { getApi } from "@/utils/apis";
-import { Code } from "@/common/models";
+import { Code } from "@/definitions/models";
 
 @Component({
   name: "CodeType",

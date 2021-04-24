@@ -94,9 +94,9 @@ import { ValidationObserver } from "vee-validate";
 import ButtonIconTooltip from "@/components/button/ButtonIconTooltip.vue";
 import DialogTitle from "@/components/title/DialogTitle.vue";
 import DialogActionButton from "@/components/button/DialogActionButton.vue";
-import type { Menu } from "@/common/models";
+import type { Menu } from "@/definitions/models";
 import CreatedUpdatedBar from "@/components/history/CreatedUpdatedBar.vue";
-import { MenuTypeItems } from "@/common/selections";
+import { MenuTypeItems } from "@/definitions/selections";
 
 @Component({
   name: "MenuEditDialog",

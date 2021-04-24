@@ -155,7 +155,7 @@ import dayjs from "dayjs";
 import DatetimePicker from "@/components/picker/DatetimePicker.vue";
 import DateStartEndPicker from "@/components/picker/DateStartEndPicker.vue";
 import DatetimeStartEndPicker from "@/components/picker/DatetimeStartEndPicker.vue";
-import { DateTime } from "@/common/types";
+import { DateTime } from "@/definitions/types";
 
 @Component({
   name: "Picker",

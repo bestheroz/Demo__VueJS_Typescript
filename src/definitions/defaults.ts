@@ -5,9 +5,9 @@ import {
   Menu,
   AuthorityItem,
   CodeAuthority,
-} from "@/common/models";
+} from "@/definitions/models";
 import dayjs from "dayjs";
-import { AUTHORITY_TYPE } from "@/common/selections";
+import { AUTHORITY_TYPE } from "@/definitions/selections";
 
 export function defaultUser(): {
   id: number;
