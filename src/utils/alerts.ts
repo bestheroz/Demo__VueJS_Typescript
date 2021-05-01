@@ -14,7 +14,7 @@ const Toast = Swal.mixin({
   },
 });
 
-export function toastSuccess(message: string, timer = 50000): void {
+export function toastSuccess(message: string, timer = 5000): void {
   Toast.fire({
     icon: "success",
     timer: timer,
