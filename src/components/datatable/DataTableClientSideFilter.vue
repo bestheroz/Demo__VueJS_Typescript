@@ -46,7 +46,7 @@
 
 <script lang="ts">
 import { Component, Emit, Prop, Vue, Watch } from "vue-property-decorator";
-import type { DataTableHeader, SelectItem } from "@/common/types";
+import type { DataTableHeader, SelectItem } from "@/definitions/types";
 import _, { DebouncedFunc } from "lodash";
 
 @Component({ name: "DataTableClientSideFilter" })
@@ -152,11 +152,9 @@ div.v-data-table {
       text-align: center;
 
       td {
-        height: 1.5rem;
+        height: 1.8rem;
         padding-right: 2px;
         padding-left: 2px;
-        border-bottom: thin solid var(--v-secondary-base);
-        border-left: thin solid var(--v-secondary-base);
 
         div.v-input {
           div.v-input__append-inner {
@@ -240,10 +238,6 @@ div.v-data-table {
             }
           }
         }
-      }
-
-      td:last-child {
-        border-right: thin solid var(--v-secondary-base);
       }
     }
   }

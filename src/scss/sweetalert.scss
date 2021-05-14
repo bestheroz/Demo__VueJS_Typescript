@@ -4,12 +4,15 @@
   }
 
   .swal2-title {
-    color: var(--v-text-base);
+    color: var(--v-primary-base);
   }
 
   .swal2-content {
-    color: var(--v-text-base);
-    font-weight: 800;
+    color: var(--v-secondary-base);
+    text-align: center !important;
+  }
+  .swal2-actions {
+    margin-top: 1rem !important;
   }
   .swal2-popup {
     &.swal2-toast {
@@ -17,6 +20,6 @@
     }
   }
   .swal2-timer-progress-bar {
-    background-color: var(--v-text-base);
+    background-color: var(--v-secondary-base);
   }
 }

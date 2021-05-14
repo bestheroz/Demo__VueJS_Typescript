@@ -57,17 +57,15 @@ export async function confirm(
   title: string,
   text = "",
   confirmButtonText = "확인",
-  cancelButtonText = "취소",
 ): Promise<SweetAlertResult> {
   return await Toast.fire({
     title: title,
     text: text,
     icon: "question",
-    showCancelButton: true,
+    showConfirmButton: true,
+    showCancelButton: false,
     confirmButtonColor: "var(--v-primary-base)",
     confirmButtonText: confirmButtonText,
-    cancelButtonColor: "var(--v-secondary-base)",
-    cancelButtonText: cancelButtonText,
   });
 }
 
@@ -79,10 +77,9 @@ export async function confirmDelete(
     title: title,
     text: text,
     icon: "question",
-    showCancelButton: true,
+    showConfirmButton: true,
+    showCancelButton: false,
     confirmButtonColor: "var(--v-primary-base)",
     confirmButtonText: "삭제 하겠습니다",
-    cancelButtonColor: "var(--v-secondary-base)",
-    cancelButtonText: "취소",
   });
 }

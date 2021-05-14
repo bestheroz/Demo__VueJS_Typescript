@@ -1,44 +1,43 @@
 import Vue from "vue";
 import Vuex, { ActionContext } from "vuex";
 import createPersistedState from "vuex-persistedstate";
-import { Drawer, SelectItem } from "@/common/types";
-import { axiosInstance, getApi, postApi } from "@/utils/apis";
+import { Drawer, SelectItem } from "@/definitions/types";
 // eslint-disable-next-line camelcase
 import jwt_decode from "jwt-decode";
-import axios from "axios";
-import envs from "@/constants/envs";
-import router from "@/router";
-import { defaultUser } from "@/common/values";
-import type { Authority, Member, Menu } from "@/common/models";
-import { AuthorityItem } from "@/common/models";
-import { errorPage } from "@/utils/errors";
+import type { Authority, MemberConfig, Menu } from "@/definitions/models";
+import { AuthorityItem } from "@/definitions/models";
 import _ from "lodash";
+import Vuetify from "./plugins/vuetify";
+import { MENU_TYPE } from "@/definitions/selections";
+import config from "./configs";
+import { getAccessToken, getMemberCodes, uploadConfig } from "@/utils/commands";
+import { defaultMemberConfig } from "@/definitions/defaults";
+import { axiosInstance } from "@/utils/apis";
+import envs from "@/constants/envs";
 
 Vue.use(Vuex);
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const user = {
   state: {
-    user: defaultUser(),
+    id: 0,
+    userId: "",
+    name: "",
+    authorityId: 0,
     accessToken: null,
     refreshToken: null,
-    authority: [],
   },
   getters: {
     user: (state: any) => {
       return {
-        id: state.user.id,
-        userId: state.user.userId,
-        name: state.user.name,
-        authorityId: state.user.authorityId,
-        theme: state.user.theme || "light",
+        id: state.id,
+        userId: state.userId,
+        name: state.name,
+        authorityId: state.authorityId,
       };
     },
     loggedIn: (state: any): boolean => {
-      return !!state.user.id && !!state.accessToken && !!state.refreshToken;
-    },
-    theme: (state: any): string => {
-      return state.user.theme;
+      return !!state.id && !!state.accessToken && !!state.refreshToken;
     },
     accessToken: (state: any): string | null => {
       return state.accessToken;
@@ -46,93 +45,43 @@ const user = {
     refreshToken: (state: any): string | null => {
       return state.refreshToken;
     },
-    authority: (state: any): Authority => {
-      return state.authority || [];
-    },
-    drawers: (getters: any): Drawer[] => {
-      if (!getters.authority) {
-        return [];
-      }
-      const menuEntities = getters.authority.items.map(
-        (item: AuthorityItem) => item.menu,
-      );
-      const groupItems = menuEntities.filter((item: Menu) => item.type === "G");
-      const groupIndex = groupItems.map((group: Menu) =>
-        menuEntities.indexOf(group),
-      );
-      if (!groupIndex || groupIndex.length === 0) {
-        return menuEntities;
-      } else {
-        return [
-          ..._.take(menuEntities, groupIndex[0]),
-          ...groupItems.map((group: Menu, index: number) => {
-            let nextIndex;
-            if (groupIndex.length > index + 1) {
-              nextIndex = groupIndex[index + 1];
-            } else {
-              nextIndex = menuEntities.length;
-            }
-            const numberOfChildren = nextIndex - groupIndex[index] - 1;
-            return {
-              ...group,
-              children: _.take(
-                _.drop(menuEntities, groupIndex[index] + 1),
-                numberOfChildren,
-              ),
-            };
-          }),
-        ];
-      }
-    },
   },
   mutations: {
-    setUser(state: any, user: Member): void {
-      state.user = user;
-    },
-    setTheme(state: any, theme: string): void {
-      state.user.theme = theme;
-    },
     setAccessToken(state: any, accessToken: string): void {
-      const jwt = jwt_decode<{
-        exp: number;
-        userId: string;
-        userVO: string;
-      }>(accessToken);
-      state.user = JSON.parse(jwt.userVO);
+      const jwt =
+        jwt_decode<{
+          exp: number;
+          userId: string;
+          userVO: string;
+        }>(accessToken);
+      const user = JSON.parse(jwt.userVO);
+      state.id = user.id;
+      state.userId = user.userId;
+      state.name = user.name;
+      state.authorityId = user.authorityId;
       state.accessToken = accessToken;
     },
     setRefreshToken(state: any, refreshToken: string): void {
       state.refreshToken = refreshToken;
     },
-    setAuthority(state: any, authority: Authority): void {
-      state.authority = authority;
+    setUser: (
+      state: any,
+      member: {
+        id: number;
+        userId: string;
+        name: string;
+        authorityId: number;
+      },
+    ) => {
+      state.id = member.id;
+      state.userId = member.userId;
+      state.name = member.name;
+      state.authorityId = member.authorityId;
+      state.accessToken = null;
+      state.refreshToken = null;
     },
   },
   actions: {
-    toggleTheme: async function ({
-      commit,
-      getters,
-    }: ActionContext<any, any>): Promise<void> {
-      let theme;
-      if (getters.theme === "dark") {
-        theme = "light";
-      } else {
-        theme = "dark";
-      }
-      await postApi<{
-        theme: string;
-      }>(
-        "members/mine/changeTheme/",
-        {
-          theme: theme,
-        },
-        false,
-      );
-      commit("setTheme", theme);
-    },
-    clearUser({ commit }: ActionContext<any, any>): void {
-      commit("setUser", defaultUser());
-    },
     saveToken(
       { commit }: ActionContext<any, any>,
       payload: { accessToken: string; refreshToken: string },
@@ -140,78 +89,212 @@ const user = {
       commit("setAccessToken", payload.accessToken);
       commit("setRefreshToken", payload.refreshToken);
     },
-    async reissueAccessToken({
-      commit,
-      getters,
-      dispatch,
-    }: ActionContext<any, any>): Promise<void> {
-      try {
-        const response = await axios
-          .create({
-            baseURL: envs.API_HOST,
-            headers: {
-              contentType: "application/json",
-              Authorization: getters.accessToken,
-              AuthorizationR: getters.refreshToken,
-            },
-          })
-          .get("api/auth/refreshToken");
-        await commit("setAccessToken", response?.data?.data);
-      } catch (e) {
-        if (
-          e.response?.status === 401 ||
-          e.message === "Invalid token specified"
-        ) {
-          await dispatch("needLogin");
-        } else if ([403, 404, 500].includes(e.response?.status)) {
-          await errorPage(e.response?.status);
-        } else {
-          await errorPage(500);
-        }
-      }
-    },
-    async initAuthority({
+    async reIssueAccessToken({
       commit,
       getters,
     }: ActionContext<any, any>): Promise<void> {
-      const response = await getApi<Authority>(
-        `auth/${getters.user.authorityId}`,
+      await commit(
+        "setAccessToken",
+        await getAccessToken(getters.accessToken, getters.refreshToken),
       );
-      commit("setAuthority", response?.data);
-    },
-    clearAuthority({ commit }: ActionContext<any, any>): void {
-      commit("setAuthority", null);
     },
   },
 };
 
-const drawer = {
+const config1 = {
   state: {
-    selected: null,
+    globalTheme: config.theme.globalTheme as "light" | "dark",
+    toolbarTheme: config.theme.toolbarTheme as "global" | "light" | "dark",
+    menuTheme: config.theme.menuTheme as "global" | "light" | "dark",
+    toolbarDetached: config.theme.isToolbarDetached,
+    contentBoxed: config.theme.isContentBoxed,
+    primaryColor: config.theme.light.primary,
   },
   getters: {
-    selected: (state: any): number | null => {
-      return state.selected || null;
+    config: (state: MemberConfig): MemberConfig => {
+      return {
+        ...state,
+      };
+    },
+    globalTheme: (state: MemberConfig): "light" | "dark" => {
+      Vuetify.framework.theme.dark = state.globalTheme === "dark";
+      return state.globalTheme;
+    },
+    menuTheme: (state: MemberConfig): "global" | "light" | "dark" => {
+      return state.menuTheme;
+    },
+    toolbarTheme: (state: MemberConfig): "global" | "light" | "dark" => {
+      return state.toolbarTheme;
+    },
+    isToolbarDetached: (state: MemberConfig): boolean => {
+      return state.toolbarDetached;
+    },
+    isContentBoxed: (state: MemberConfig): boolean => {
+      return state.contentBoxed;
+    },
+    primaryColor: (state: MemberConfig): string => {
+      return state.primaryColor;
     },
   },
   mutations: {
-    setSelected(state: any, selected: number): void {
-      state.selected = selected;
+    setGlobalTheme: (state: MemberConfig, globalTheme: "light" | "dark") => {
+      state.globalTheme = globalTheme;
+    },
+    setContentBoxed: (state: MemberConfig, isContentBoxed: boolean) => {
+      state.contentBoxed = isContentBoxed;
+    },
+    setMenuTheme: (state: any, menuTheme: "global" | "light" | "dark") => {
+      state.menuTheme = menuTheme;
+    },
+    setToolbarTheme: (
+      state: MemberConfig,
+      toolbarTheme: "global" | "light" | "dark",
+    ) => {
+      state.toolbarTheme = toolbarTheme;
+    },
+    setToolbarDetached: (state: MemberConfig, isToolbarDetached: boolean) => {
+      state.toolbarDetached = isToolbarDetached;
+    },
+    setPrimaryColor: (state: MemberConfig, primaryColor: string) => {
+      state.primaryColor = primaryColor;
+    },
+    setConfig: (state: MemberConfig, config: MemberConfig) => {
+      state.globalTheme = config.globalTheme;
+      state.contentBoxed = config.contentBoxed;
+      state.menuTheme = config.menuTheme;
+      state.toolbarTheme = config.toolbarTheme;
+      state.toolbarDetached = config.toolbarDetached;
+      state.primaryColor = config.primaryColor;
     },
   },
   actions: {
-    setMenuSelected(
-      { commit }: ActionContext<any, any>,
-      selected: number,
-    ): void {
-      commit("setSelected", selected);
+    setGlobalTheme: async (
+      { commit, getters }: ActionContext<any, any>,
+      globalTheme: "light" | "dark",
+    ) => {
+      commit("setGlobalTheme", globalTheme);
+      uploadConfig(getters.config);
     },
-    clearMenuSelected({ commit }: ActionContext<any, any>): void {
-      commit("setSelected", null);
+    setContentBoxed: async (
+      { commit, getters }: ActionContext<any, any>,
+      isContentBoxed: boolean,
+    ) => {
+      commit("setContentBoxed", isContentBoxed);
+      uploadConfig(getters.config);
+    },
+    setMenuTheme: async (
+      { commit, getters }: ActionContext<any, any>,
+      menuTheme: "global" | "light" | "dark",
+    ) => {
+      commit("setMenuTheme", menuTheme);
+      uploadConfig(getters.config);
+    },
+    setToolbarTheme: async (
+      { commit, getters }: ActionContext<any, any>,
+      toolbarTheme: "global" | "light" | "dark",
+    ) => {
+      commit("setToolbarTheme", toolbarTheme);
+      uploadConfig(getters.config);
+    },
+    setToolbarDetached: async (
+      { commit, getters }: ActionContext<any, any>,
+      isToolbarDetached: boolean,
+    ) => {
+      commit("setToolbarDetached", isToolbarDetached);
+      uploadConfig(getters.config);
+    },
+    setPrimaryColor: async (
+      { commit, getters }: ActionContext<any, any>,
+      primaryColor: string,
+    ) => {
+      commit("setPrimaryColor", primaryColor);
+      uploadConfig(getters.config);
+    },
+    resetConfig: ({ commit, getters }: ActionContext<any, any>) => {
+      commit("setConfig", defaultMemberConfig());
+      uploadConfig(getters.config);
     },
   },
 };
-
+const authority = {
+  state: {
+    code: "",
+    name: "",
+    items: [],
+  },
+  getters: {
+    drawers: (state: any): Drawer[] => {
+      if (!state.items || state.items.length === 0) {
+        return [];
+      }
+      const drawers: Drawer[] = state.items
+        .map((item: AuthorityItem) => item.menu)
+        .map((m: Menu) => {
+          return {
+            text: m.name,
+            type: m.type,
+            icon: m.icon,
+            link: m.url,
+            exact: true,
+          };
+        });
+      const groupItems: Drawer[] = drawers.filter((item: Drawer) => item.icon);
+      const groupIndex = groupItems.map((group: Drawer) =>
+        drawers.indexOf(group),
+      );
+      if (!groupIndex || groupIndex.length === 0) {
+        return [
+          {
+            text: "",
+            type: MENU_TYPE.G,
+            items: drawers,
+          },
+        ];
+      } else {
+        return [
+          {
+            text: "",
+            type: MENU_TYPE.G,
+            items: [
+              ..._.take(drawers, groupIndex[0]),
+              ...groupItems.map((group: Drawer, index: number) => {
+                let nextIndex;
+                if (groupIndex.length > index + 1) {
+                  nextIndex = groupIndex[index + 1];
+                } else {
+                  nextIndex = drawers.length;
+                }
+                const numberOfChildren = nextIndex - groupIndex[index] - 1;
+                return {
+                  ...group,
+                  items: _.take(
+                    _.drop(drawers, groupIndex[index] + 1),
+                    numberOfChildren,
+                  ),
+                };
+              }),
+            ],
+          },
+        ];
+      }
+    },
+  },
+  mutations: {
+    setAuthority(state: any, authority: Authority): void {
+      state.code = authority.code;
+      state.name = authority.name;
+      state.items = authority.items;
+    },
+  },
+  actions: {
+    async resetAuthority({ commit }: ActionContext<any, any>): Promise<void> {
+      const response = await axiosInstance
+        .get(`${envs.API_HOST}api/members/mine/authority`)
+        .then();
+      commit("setAuthority", response.data.data);
+    },
+  },
+};
 const codes = {
   state: {
     memberCodes: null,
@@ -227,31 +310,23 @@ const codes = {
     },
   },
   actions: {
-    async initMemberCodes({ commit }: ActionContext<any, any>): Promise<void> {
-      const response = await getApi<SelectItem[]>("members/codes");
-      commit("setMemberCodes", response?.data);
-    },
-    clearCache({ commit }: ActionContext<any, any>): void {
-      commit("setMemberCodes", null);
+    async resetMemberCodes({ commit }: ActionContext<any, any>): Promise<void> {
+      commit("setMemberCodes", await getMemberCodes());
     },
   },
 };
-const command = {
-  state: {},
-  mutations: {},
-  actions: {
-    async needLogin(): Promise<void> {
-      if (router.currentRoute.path !== "/login") {
-        await router.push("/login?login=need");
-      }
+const etc = {
+  state: {
+    selectedMenuName: null,
+  },
+  getters: {
+    selectedMenuName: (state: any): string => {
+      return state.selectedMenuName?.split("(팝업)").join("") || "";
     },
-    async logout(): Promise<void> {
-      try {
-        axiosInstance.delete(`${envs.API_HOST}api/auth/logout`).then();
-      } catch (e) {
-        console.error(e);
-      }
-      await router.push("/login").then();
+  },
+  mutations: {
+    setSelectedMenu(state: any, menuName: string): void {
+      state.selectedMenuName = menuName;
     },
   },
 };
@@ -260,9 +335,10 @@ export default new Vuex.Store({
   strict: true,
   modules: {
     user,
-    drawer,
+    config1,
+    authority,
     codes,
-    command,
+    etc,
   },
   plugins: [createPersistedState()],
 });

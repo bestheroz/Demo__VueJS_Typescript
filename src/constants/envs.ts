@@ -1,5 +1,7 @@
 export default Object.freeze({
   ENV: process.env.NODE_ENV || "development",
+  PRODUCT_TITLE: process.env.VUE_APP_PRODUCT_TITLE || "Demo",
+  PRODUCT_VERSION: process.env.VUE_APP_PRODUCT_VERSION || "ver.210515",
   API_HOST: process.env.VUE_APP_BASE_API_URL || "http://localhost:8080/",
   // Locale
   LOCALE: process.env.VUE_APP_LOCALE || "ko-KR",

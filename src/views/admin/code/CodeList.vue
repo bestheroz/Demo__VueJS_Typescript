@@ -1,18 +1,7 @@
 <template>
   <div>
-    <button-set
-      :loading="saving"
-      add-button
-      @click:add="showAddDialog"
-      delete-button
-      :delete-disabled="!selected || selected.length === 0"
-      @click:delete="remove"
-      reload-button
-      @click:reload="getList"
-    />
-    <v-card flat>
-      <v-card-text class="py-0">
-        <refresh-data-bar ref="refRefreshDataBar" @reload="getList" />
+    <v-card>
+      <v-card-text>
         <v-data-table
           v-model="selected"
           must-sort
@@ -25,7 +14,6 @@
           item-key="value"
           single-select
           show-select
-          dense
           :footer-props="envs.FOOTER_PROPS_MAX_100"
         >
           <template #header>
@@ -41,24 +29,18 @@
             </span>
           </template>
           <template #[`item.available`]="{ item }">
-            <span style="display: inline-flex">
-              <v-checkbox
-                readonly
-                :input-value="item.available"
-                :ripple="false"
-                dense
-                hide-details
-                class="mt-0"
-              />
-            </span>
+            <v-icon v-if="item.available" small color="success">
+              mdi-check-circle
+            </v-icon>
+            <v-icon v-else small> mdi-circle-outline </v-icon>
           </template>
           <template v-if="AUTHORITY" #[`item.authority`]="{ item }">
             <v-chip
               v-text="getTextOfSelectItem(AUTHORITY, authority.authorityId)"
               v-for="authority in item.authorities"
               :key="authority.id"
-              color="accent"
-              outlined
+              color="primary"
+              small
             />
           </template>
           <template #[`item.updatedBy`]="{ item }">
@@ -66,6 +48,11 @@
           </template>
           <template #[`item.updated`]="{ item }">
             {{ item.updated | formatDatetime }}
+          </template>
+          <template #[`item.actions`]="{ item }">
+            <v-btn icon @click="remove(item)">
+              <v-icon color="error"> mdi-delete-outline </v-icon>
+            </v-btn>
           </template>
         </v-data-table>
       </v-card-text>
@@ -81,33 +68,27 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop, Ref, Vue, Watch } from "vue-property-decorator";
-import type { DataTableHeader, SelectItem } from "@/common/types";
+import { Component, Emit, Prop, Vue, Watch } from "vue-property-decorator";
+import type { DataTableHeader, SelectItem } from "@/definitions/types";
 import { deleteApi, getApi } from "@/utils/apis";
 import envs from "@/constants/envs";
 import DataTableClientSideFilter from "@/components/datatable/DataTableClientSideFilter.vue";
 import qs from "querystring";
-import ButtonSet from "@/components/speeddial/ButtonSet.vue";
 import CodeEditDialog from "@/views/admin/code/CodeEditDialog.vue";
 import { confirmDelete } from "@/utils/alerts";
-import { defaultCode } from "@/common/values";
-import type { Code } from "@/common/models";
+import { defaultCode } from "@/definitions/defaults";
+import type { Code } from "@/definitions/models";
 import _ from "lodash";
-import RefreshDataBar from "@/components/history/RefreshDataBar.vue";
 import { getTextOfSelectItem } from "@/utils/codes";
 
 @Component({
-  name: "CodeList",
   components: {
-    RefreshDataBar,
     CodeEditDialog,
-    ButtonSet,
     DataTableClientSideFilter,
   },
 })
 export default class extends Vue {
   @Prop({ required: true }) readonly type!: string;
-  @Ref() readonly refRefreshDataBar!: RefreshDataBar;
 
   readonly envs: typeof envs = envs;
   readonly getTextOfSelectItem = getTextOfSelectItem;
@@ -154,21 +135,27 @@ export default class extends Vue {
         value: "authority",
         filterType: "select",
         filterSelectItem: this.AUTHORITY.filter((a) => a.value !== 1),
-        width: "30rem",
       },
       {
         text: "작업 일시",
         align: "center",
         value: "updated",
         filterable: false,
-        width: "10rem",
+        width: "11rem",
       },
       {
         text: "작업자",
         align: "start",
         value: "updatedBy",
         filterable: false,
-        width: "7rem",
+        width: "8rem",
+      },
+      {
+        text: "",
+        align: "center",
+        value: "actions",
+        filterable: false,
+        sortable: false,
       },
     ];
   }
@@ -190,7 +177,6 @@ export default class extends Vue {
       this.loading = false;
       this.items = response?.data || [];
     }
-    this.refRefreshDataBar.triggerRefreshed();
   }
 
   @Emit("created")
@@ -209,7 +195,7 @@ export default class extends Vue {
       ...this.items.slice(findIndex + 1),
     ];
   }
-  protected showAddDialog(): void {
+  public showAddDialog(): void {
     this.editItem = { ...defaultCode(), type: this.type };
     this.dialog = true;
   }
@@ -219,16 +205,14 @@ export default class extends Vue {
     this.dialog = true;
   }
 
-  protected async remove(): Promise<void> {
-    const result = await confirmDelete();
+  protected async remove(value: Code): Promise<void> {
+    const result = await confirmDelete(undefined, `코드: ${value.value}`);
     if (result.value) {
       this.saving = true;
-      const response = await deleteApi<Code>(
-        `admin/codes/${this.selected[0].id}/`,
-      );
+      const response = await deleteApi<Code>(`admin/codes/${value.id}/`);
       this.saving = false;
       if (response?.code?.startsWith("S")) {
-        window.localStorage.removeItem(`code__${this.selected[0].id}`);
+        window.localStorage.removeItem(`code__${value.id}`);
         this.items = this.items.filter(
           (item) => item.id !== (response.data?.id || 0),
         );

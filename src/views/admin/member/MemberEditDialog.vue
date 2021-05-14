@@ -1,21 +1,18 @@
 <template>
   <div>
-    <v-dialog v-model="syncedDialog" max-width="100%" width="60vw">
-      <v-card>
-        <dialog-title :is-new="isNew" prefix="사용자">
-          <template #buttons>
-            <button-icon-tooltip
-              icon="mdi-window-close"
-              text="닫기"
-              @click="syncedDialog = false"
-              top
-            />
-          </template>
-        </dialog-title>
+    <v-bottom-sheet v-model="syncedDialog" inset scrollable>
+      <v-card class="pb-4">
+        <dialog-title
+          v-model="vModel.available"
+          :is-new="isNew"
+          prefix="사용자"
+          with-switch
+          @click:close="syncedDialog = false"
+        />
         <v-card-text>
           <ValidationObserver ref="observer">
-            <v-row dense>
-              <v-col cols="12" md="4">
+            <v-row>
+              <v-col cols="12" md="3">
                 <ValidationProvider
                   v-slot="{ errors }"
                   name="사용자아이디"
@@ -30,7 +27,7 @@
                   />
                 </ValidationProvider>
               </v-col>
-              <v-col cols="12" md="4">
+              <v-col cols="12" md="3">
                 <ValidationProvider
                   v-slot="{ errors }"
                   name="사용자명"
@@ -44,14 +41,7 @@
                   />
                 </ValidationProvider>
               </v-col>
-              <v-col cols="12" md="4">
-                <v-switch
-                  v-model="vModel.available"
-                  :label="vModel.available | getSwitchLabel"
-                  inset
-                />
-              </v-col>
-              <v-col cols="12" md="4">
+              <v-col cols="12" md="3">
                 <ValidationProvider
                   v-slot="{ errors }"
                   name="권한"
@@ -70,16 +60,15 @@
                   />
                 </ValidationProvider>
               </v-col>
-              <v-col cols="12" md="4">
+              <v-col cols="12" md="3">
                 <datetime-picker
                   v-model="vModel.expired"
                   label="만료일"
                   full-width
                 />
               </v-col>
-              <v-col cols="12" md="4">
+              <v-col cols="12" md="3" v-if="isNew">
                 <ValidationProvider
-                  v-if="isNew"
                   v-slot="{ errors }"
                   name="비밀번호"
                   vid="password"
@@ -96,7 +85,7 @@
                   />
                 </ValidationProvider>
               </v-col>
-              <v-col cols="12" md="4">
+              <v-col cols="12" md="3">
                 <ValidationProvider
                   v-if="isNew"
                   v-slot="{ errors }"
@@ -114,53 +103,46 @@
                     @click:append="show2 = !show2"
                   />
                 </ValidationProvider>
-                <v-btn
-                  v-if="!isNew"
-                  color="warning"
-                  outlined
-                  @click="resetPassword"
-                >
+                <v-btn v-else color="primary" outlined @click="resetPassword">
                   비밀번호 초기화
                 </v-btn>
               </v-col>
             </v-row>
           </ValidationObserver>
+          <button-with-icon
+            block
+            text="저장"
+            icon="mdi-content-save"
+            :loading="loading"
+            @click="save"
+          />
         </v-card-text>
         <created-updated-bar
           :created-date-time="vModel.created"
           :updated-date-time="vModel.updated"
-          v-if="vModel.created || vModel.updated"
-        />
-        <dialog-action-button
-          :loading="loading"
-          @click:save="save"
-          @click:close="syncedDialog = false"
         />
       </v-card>
-    </v-dialog>
+    </v-bottom-sheet>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, PropSync, Ref, VModel, Vue } from "vue-property-decorator";
-import type { SelectItem } from "@/common/types";
+import type { SelectItem } from "@/definitions/types";
 import { getApi, patchApi, postApi } from "@/utils/apis";
 import DatetimePicker from "@/components/picker/DatetimePicker.vue";
 import { ValidationObserver } from "vee-validate";
 import pbkdf2 from "pbkdf2";
-import ButtonIconTooltip from "@/components/button/ButtonIconTooltip.vue";
 import DialogTitle from "@/components/title/DialogTitle.vue";
-import DialogActionButton from "@/components/button/DialogActionButton.vue";
-import type { Member } from "@/common/models";
+import type { Member } from "@/definitions/models";
 import CreatedUpdatedBar from "@/components/history/CreatedUpdatedBar.vue";
+import ButtonWithIcon from "@/components/button/ButtonWithIcon.vue";
 
 @Component({
-  name: "MemberEditDialog",
   components: {
+    ButtonWithIcon,
     CreatedUpdatedBar,
-    DialogActionButton,
     DialogTitle,
-    ButtonIconTooltip,
     DatetimePicker,
   },
 })
@@ -203,7 +185,7 @@ export default class extends Vue {
     const response = await postApi<Member>("admin/members/", params);
     this.loading = false;
     if (response?.code?.startsWith("S")) {
-      await this.$store.dispatch("initMemberCodes");
+      await this.$store.dispatch("resetMemberCodes");
       this.syncedDialog = false;
       this.$emit("created", response.data);
     }
@@ -224,9 +206,9 @@ export default class extends Vue {
     this.loading = false;
     if (response?.code?.startsWith("S")) {
       if (this.vModel.id === this.$store.getters.user.id) {
-        await this.$store.dispatch("reissueAccessToken");
+        await this.$store.dispatch("reIssueAccessToken");
       }
-      await this.$store.dispatch("initMemberCodes");
+      await this.$store.dispatch("resetMemberCodes");
       this.syncedDialog = false;
       this.$emit("updated", response.data);
     }

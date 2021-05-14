@@ -1,20 +1,8 @@
 <template>
   <div>
-    <button-set
-      :loading="saving"
-      add-button
-      @click:add="showAddDialog"
-      delete-button
-      :delete-disabled="!selected || selected.length === 0"
-      @click:delete="remove"
-      reload-button
-      @click:reload="getList"
-      excel-button
-      @click:excel="excel"
-    />
-    <v-card flat>
-      <v-card-text class="pb-0">
-        <refresh-data-bar ref="refRefreshDataBar" @reload="getList" />
+    <page-title @click="showAddDialog" />
+    <v-card>
+      <v-card-text>
         <v-data-table
           v-model="selected"
           must-sort
@@ -26,7 +14,6 @@
           item-key="id"
           single-select
           show-select
-          dense
           :height="height"
           :footer-props="envs.FOOTER_PROPS_MAX_100"
         >
@@ -45,19 +32,17 @@
             </a>
           </template>
           <template #[`item.available`]="{ item }">
-            <span style="display: inline-flex">
-              <v-checkbox
-                readonly
-                :input-value="item.available"
-                :ripple="false"
-                dense
-                hide-details
-                class="mt-0"
-              />
-            </span>
+            <v-icon v-if="item.available" small color="success">
+              mdi-check-circle
+            </v-icon>
+            <v-icon v-else small> mdi-circle-outline </v-icon>
           </template>
           <template v-if="AUTHORITY" #[`item.authorityId`]="{ item }">
-            {{ item.authorityId | getCodeText(AUTHORITY) }}
+            <v-chip
+              v-text="getTextOfSelectItem(AUTHORITY, item.authorityId)"
+              color="primary"
+              small
+            />
           </template>
           <template #[`item.expired`]="{ item }">
             {{ item.expired | formatDatetime }}
@@ -67,6 +52,11 @@
           </template>
           <template #[`item.updatedBy`]="{ item }">
             {{ item.updatedBy | formatMemberNm }}
+          </template>
+          <template #[`item.actions`]="{ item }">
+            <v-btn icon @click="remove(item)">
+              <v-icon color="error"> mdi-delete-outline </v-icon>
+            </v-btn>
           </template>
         </v-data-table>
       </v-card-text>
@@ -82,39 +72,37 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Ref, Vue, Watch } from "vue-property-decorator";
+import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 import type {
   DataTableHeader,
   PageResult,
   Pagination,
   SelectItem,
-} from "@/common/types";
+} from "@/definitions/types";
 import { deleteApi, getApi, getExcelApi } from "@/utils/apis";
 import envs from "@/constants/envs";
-import ButtonSet from "@/components/speeddial/ButtonSet.vue";
 import MemberEditDialog from "@/views/admin/member/MemberEditDialog.vue";
 import { confirmDelete } from "@/utils/alerts";
 import DataTableFilter from "@/components/datatable/DataTableFilter.vue";
 import qs from "qs";
-import { defaultMember } from "@/common/values";
-import type { Member } from "@/common/models";
+import { defaultMember } from "@/definitions/defaults";
+import type { Member } from "@/definitions/models";
 import _ from "lodash";
-import RefreshDataBar from "@/components/history/RefreshDataBar.vue";
+import { getTextOfSelectItem } from "@/utils/codes";
+import PageTitle from "@/components/title/PageTitle.vue";
 
 @Component({
-  name: "MemberList",
   components: {
-    RefreshDataBar,
+    PageTitle,
     DataTableFilter,
     MemberEditDialog,
-    ButtonSet,
   },
 })
 export default class extends Vue {
   @Prop() readonly height!: number | string;
-  @Ref() readonly refRefreshDataBar!: RefreshDataBar;
 
   readonly envs: typeof envs = envs;
+  readonly getTextOfSelectItem = getTextOfSelectItem;
   selected: Member[] = [];
   pagination: Pagination = {
     page: 1,
@@ -149,13 +137,12 @@ export default class extends Vue {
         value: "authorityId",
         filterType: "select",
         filterSelectItem: this.AUTHORITY,
-        width: "8rem",
       },
       {
         text: "만료일",
         align: "center",
         value: "expired",
-        width: "10rem",
+        width: "11rem",
         filterable: false,
       },
       {
@@ -170,14 +157,21 @@ export default class extends Vue {
         align: "center",
         value: "updated",
         filterable: false,
-        width: "10rem",
+        width: "11rem",
       },
       {
         text: "작업자",
         align: "start",
         value: "updatedBy",
         filterable: false,
-        width: "7rem",
+        width: "8rem",
+      },
+      {
+        text: "",
+        align: "center",
+        value: "actions",
+        filterable: false,
+        sortable: false,
       },
     ];
   }
@@ -204,7 +198,6 @@ export default class extends Vue {
     );
     this.loading = false;
     this.items = response?.data?.content || [];
-    this.refRefreshDataBar.triggerRefreshed();
   }
 
   protected onCreated(value: Member): void {
@@ -231,16 +224,17 @@ export default class extends Vue {
     this.dialog = true;
   }
 
-  protected async remove(): Promise<void> {
-    const result = await confirmDelete();
+  protected async remove(value: Member): Promise<void> {
+    const result = await confirmDelete(
+      undefined,
+      `사용자아이디: ${value.userId}`,
+    );
     if (result.value) {
       this.saving = true;
-      const response = await deleteApi<Member>(
-        `admin/members/${this.selected[0].id}/`,
-      );
+      const response = await deleteApi<Member>(`admin/members/${value.id}/`);
       this.saving = false;
       if (response?.code?.startsWith("S")) {
-        await this.$store.dispatch("initMemberCodes");
+        await this.$store.dispatch("resetMemberCodes");
         this.items = this.items.filter(
           (item) => item.id !== (response.data?.id || 0),
         );

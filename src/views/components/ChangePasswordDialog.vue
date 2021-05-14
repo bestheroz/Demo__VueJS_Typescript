@@ -1,20 +1,14 @@
 <template>
   <div>
-    <v-dialog v-model="syncedDialog" max-width="100%" width="25vw">
-      <v-card>
-        <dialog-title text="비밀번호 변경">
-          <template #buttons>
-            <button-icon-tooltip
-              icon="mdi-window-close"
-              text="닫기"
-              @click="syncedDialog = false"
-              top
-            />
-          </template>
-        </dialog-title>
+    <v-bottom-sheet v-model="syncedDialog" inset scrollable>
+      <v-card class="pb-4">
+        <dialog-title
+          text="비밀번호 변경"
+          @click:close="syncedDialog = false"
+        />
         <v-card-text>
           <ValidationObserver ref="observer">
-            <v-row dense>
+            <v-row>
               <v-col cols="12">
                 <ValidationProvider
                   v-slot="{ errors }"
@@ -72,28 +66,28 @@
             </v-row>
           </ValidationObserver>
         </v-card-text>
-        <dialog-action-button
+        <button-with-icon
+          block
+          text="저장"
+          icon="mdi-content-save"
           :loading="loading"
-          @click:save="save"
-          @click:close="syncedDialog = false"
+          @click="save"
         />
       </v-card>
-    </v-dialog>
+    </v-bottom-sheet>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, PropSync, Ref, Vue } from "vue-property-decorator";
-import { postApi } from "@/utils/apis";
+import { patchApi } from "@/utils/apis";
 import { ValidationObserver } from "vee-validate";
 import pbkdf2 from "pbkdf2";
 import DialogTitle from "@/components/title/DialogTitle.vue";
-import ButtonIconTooltip from "@/components/button/ButtonIconTooltip.vue";
-import DialogActionButton from "@/components/button/DialogActionButton.vue";
+import ButtonWithIcon from "@/components/button/ButtonWithIcon.vue";
 
 @Component({
-  name: "ChangePasswordDialog",
-  components: { DialogActionButton, ButtonIconTooltip, DialogTitle },
+  components: { ButtonWithIcon, DialogTitle },
 })
 export default class extends Vue {
   @PropSync("dialog", { required: true, type: Boolean }) syncedDialog!: boolean;
@@ -114,10 +108,10 @@ export default class extends Vue {
     }
 
     this.loading = true;
-    const response = await postApi<{
+    const response = await patchApi<{
       oldPassword: string;
       newPassword: string;
-    }>("members/mine/changePassword/", {
+    }>("members/mine/password/", {
       oldPassword: pbkdf2
         .pbkdf2Sync(this.oldPassword, "salt", 1, 32, "sha512")
         .toString(),

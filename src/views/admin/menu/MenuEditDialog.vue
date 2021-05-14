@@ -1,20 +1,15 @@
 <template>
   <div>
-    <v-dialog v-model="syncedDialog" max-width="100%" width="60vw">
-      <v-card>
-        <dialog-title :is-new="isNew" prefix="메뉴">
-          <template #buttons>
-            <button-icon-tooltip
-              icon="mdi-window-close"
-              text="닫기"
-              @click="syncedDialog = false"
-              top
-            />
-          </template>
-        </dialog-title>
+    <v-bottom-sheet v-model="syncedDialog" inset scrollable>
+      <v-card class="pb-4">
+        <dialog-title
+          :is-new="isNew"
+          prefix="메뉴"
+          @click:close="syncedDialog = false"
+        />
         <v-card-text>
           <ValidationObserver ref="observer">
-            <v-row dense>
+            <v-row>
               <v-col cols="12" md="3">
                 <ValidationProvider
                   v-slot="{ errors }"
@@ -62,7 +57,7 @@
                 <v-text-field
                   v-model="vModel.icon"
                   label="메뉴 아이콘"
-                  append-icon="mdi-dock-window"
+                  append-icon="mdi-open-in-new"
                   @click:append="linkIconSite"
                 />
               </v-col>
@@ -71,19 +66,20 @@
               </v-col>
             </v-row>
           </ValidationObserver>
+          <button-with-icon
+            block
+            text="저장"
+            icon="mdi-content-save"
+            :loading="loading"
+            @click="save"
+          />
         </v-card-text>
         <created-updated-bar
           :created-date-time="vModel.created"
           :updated-date-time="vModel.updated"
-          v-if="vModel.created || vModel.updated"
-        />
-        <dialog-action-button
-          :loading="saving"
-          @click:save="save"
-          @click:close="syncedDialog = false"
         />
       </v-card>
-    </v-dialog>
+    </v-bottom-sheet>
   </div>
 </template>
 
@@ -91,20 +87,17 @@
 import { Component, PropSync, Ref, VModel, Vue } from "vue-property-decorator";
 import { postApi, putApi } from "@/utils/apis";
 import { ValidationObserver } from "vee-validate";
-import ButtonIconTooltip from "@/components/button/ButtonIconTooltip.vue";
 import DialogTitle from "@/components/title/DialogTitle.vue";
-import DialogActionButton from "@/components/button/DialogActionButton.vue";
-import type { Menu } from "@/common/models";
+import type { Menu } from "@/definitions/models";
 import CreatedUpdatedBar from "@/components/history/CreatedUpdatedBar.vue";
-import { MenuTypeItems } from "@/common/selections";
+import { MenuTypeItems } from "@/definitions/selections";
+import ButtonWithIcon from "@/components/button/ButtonWithIcon.vue";
 
 @Component({
-  name: "MenuEditDialog",
   components: {
+    ButtonWithIcon,
     CreatedUpdatedBar,
-    DialogActionButton,
     DialogTitle,
-    ButtonIconTooltip,
   },
 })
 export default class extends Vue {
@@ -113,7 +106,7 @@ export default class extends Vue {
   @Ref("observer") readonly observer!: InstanceType<typeof ValidationObserver>;
 
   readonly ENDPOINT_URL = "admin/menus/";
-  saving = false;
+  loading = false;
   MenuTypeItems = MenuTypeItems;
 
   get isNew(): boolean {
@@ -129,25 +122,25 @@ export default class extends Vue {
   }
 
   protected async create(): Promise<void> {
-    this.saving = true;
+    this.loading = true;
     const response = await postApi<Menu>(this.ENDPOINT_URL, this.vModel);
-    this.saving = false;
+    this.loading = false;
     if (response?.code?.startsWith("S")) {
-      await this.$store.dispatch("initAuthority");
+      await this.$store.dispatch("resetAuthority");
       this.syncedDialog = false;
       this.$emit("created", response.data);
     }
   }
 
   protected async update(): Promise<void> {
-    this.saving = true;
+    this.loading = true;
     const response = await putApi<Menu>(
       `${this.ENDPOINT_URL}${this.vModel.id}/`,
       this.vModel,
     );
-    this.saving = false;
+    this.loading = false;
     if (response?.code?.startsWith("S")) {
-      await this.$store.dispatch("initAuthority");
+      await this.$store.dispatch("resetAuthority");
       this.syncedDialog = false;
       this.$emit("updated", response.data);
     }
