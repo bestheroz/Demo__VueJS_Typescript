@@ -1,0 +1,187 @@
+<template>
+  <div>
+    <v-card flat :loading="loading">
+      <v-card-text>
+        <v-row dense>
+          <v-col cols="5">
+            <v-list dense>
+              <draggable
+                tag="div"
+                v-model="vModel.items"
+                v-bind="dragOptions"
+                handle=".drag-handle"
+                @end="onDraggableEnd"
+              >
+                <transition-group type="transition" name="flip-list">
+                  <v-list-item
+                    :key="item.displayOrder"
+                    v-for="item in vModel.items"
+                    class="elevation-1 bottom-dotted"
+                  >
+                    <v-list-item-icon>
+                      <v-icon v-text="item.menu.icon" />
+                    </v-list-item-icon>
+                    <v-list-item-content
+                      style="display: inline-block"
+                      class="py-0"
+                    >
+                      <v-btn icon>
+                        <v-icon class="drag-handle"> mdi-sort </v-icon>
+                      </v-btn>
+                      {{ item.menu.name }}
+                    </v-list-item-content>
+                    <br />
+                    <v-chip-group multiple v-model="item.typesJson">
+                      <v-chip
+                        :value="AUTHORITY_TYPE.VIEW"
+                        color="primary"
+                        disabled
+                      >
+                        <v-icon>mdi-eye</v-icon>
+                      </v-chip>
+                      <v-chip
+                        :outlined="
+                          !item.typesJson.includes(AUTHORITY_TYPE.WRITE)
+                        "
+                        color="primary"
+                        :value="AUTHORITY_TYPE.WRITE"
+                        :disabled="vModel.code === 'SUPER'"
+                      >
+                        <v-icon>mdi-content-save-outline</v-icon>
+                      </v-chip>
+                      <v-chip
+                        :outlined="
+                          !item.typesJson.includes(AUTHORITY_TYPE.DELETE)
+                        "
+                        color="primary"
+                        :value="AUTHORITY_TYPE.DELETE"
+                        :disabled="vModel.code === 'SUPER'"
+                      >
+                        <v-icon>mdi-delete-outline</v-icon>
+                      </v-chip>
+                    </v-chip-group>
+                  </v-list-item>
+                </transition-group>
+              </draggable>
+            </v-list>
+          </v-col>
+          <v-col cols="7">
+            <v-card-text class="py-0 elevation-1">
+              <v-chip-group
+                v-model="selectedChips"
+                column
+                multiple
+                @change="onChangeSelectedChip"
+              >
+                <v-chip
+                  v-for="item in menus"
+                  :value="item"
+                  :key="item.id"
+                  :outlined="!selectedChips.includes(item)"
+                  color="primary"
+                  :disabled="vModel.code === 'SUPER'"
+                >
+                  <v-icon v-text="item.icon" v-if="item.icon" />
+                  {{ item.name }}
+                </v-chip>
+              </v-chip-group>
+            </v-card-text>
+          </v-col>
+        </v-row>
+      </v-card-text>
+    </v-card>
+  </div>
+</template>
+
+<script lang="ts">
+import { Component, VModel, Vue, Watch } from "vue-property-decorator";
+import { getApi, postApi } from "@/utils/apis";
+import draggable from "vuedraggable";
+import { defaultAuthorityItem, defaultMenu } from "@/definitions/defaults";
+import type { Authority, Menu } from "@/definitions/models";
+import { AUTHORITY_TYPE } from "@/definitions/selections";
+
+@Component({
+  components: { draggable },
+})
+export default class extends Vue {
+  @VModel({ required: true }) vModel!: Authority;
+
+  menus: Menu[] = [];
+  selectedChips: Menu[] = [];
+  loading = false;
+  saving = false;
+  drag = false;
+
+  readonly AUTHORITY_TYPE = AUTHORITY_TYPE;
+
+  get dragOptions(): { animation: number } {
+    return {
+      animation: 200,
+    };
+  }
+
+  protected async created(): Promise<void> {
+    const response = await getApi<Menu[]>("admin/menus/");
+    this.menus = response?.data || [];
+    this.watchItem(this.vModel);
+  }
+
+  @Watch("vModel")
+  protected watchItem(val: Authority): void {
+    if (val.code === "SUPER") {
+      this.selectedChips = this.menus;
+    } else {
+      this.selectedChips = val.items.map(
+        (item) =>
+          this.menus.find((menu) => menu.id === item.menu?.id) || defaultMenu(),
+      );
+    }
+    this.onChangeSelectedChip(this.selectedChips);
+  }
+
+  protected onDraggableEnd(): void {
+    this.vModel.items = this.vModel.items.map((item, index) => {
+      return { ...item, displayOrder: index + 1 };
+    });
+  }
+
+  protected onChangeSelectedChip(selectedChips: Menu[]): void {
+    this.vModel.items = selectedChips.map((select, index) => {
+      return {
+        ...(this.vModel.items.find((item) => item.menu.id === select.id) || {
+          ...defaultAuthorityItem(),
+          menu: select,
+          typesJson:
+            this.vModel.code === "SUPER"
+              ? [
+                  AUTHORITY_TYPE.VIEW,
+                  AUTHORITY_TYPE.WRITE,
+                  AUTHORITY_TYPE.DELETE,
+                ]
+              : [AUTHORITY_TYPE.VIEW],
+        }),
+        displayOrder: index + 1,
+      };
+    });
+  }
+
+  public async saveItems(): Promise<void> {
+    this.saving = true;
+    const response = await postApi<Authority>(
+      `admin/authorities/${this.vModel.code}`,
+      this.vModel,
+    );
+    this.saving = false;
+    if (response?.code?.startsWith("S") && response.data) {
+      await this.$store.dispatch("resetAuthority");
+      this.vModel = response.data;
+    }
+  }
+}
+</script>
+<style lang="scss" scoped>
+.bottom-dotted {
+  border-bottom: 1px dotted var(--v-secondary-base);
+}
+</style>

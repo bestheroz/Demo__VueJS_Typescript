@@ -1,17 +1,14 @@
 <template>
   <div>
-    <v-dialog v-model="syncedDialog" persistent max-width="100%" width="60vw">
-      <v-card>
-        <dialog-title :is-new="isNew" prefix="코드">
-          <template #buttons>
-            <button-icon-tooltip
-              icon="mdi-window-close"
-              text="닫기"
-              @click="syncedDialog = false"
-              top
-            />
-          </template>
-        </dialog-title>
+    <v-bottom-sheet v-model="syncedDialog" inset scrollable>
+      <v-card class="pb-4">
+        <dialog-title
+          v-model="vModel.available"
+          :is-new="isNew"
+          prefix="코드"
+          with-switch
+          @click:close="syncedDialog = false"
+        />
         <v-card-text>
           <ValidationObserver ref="observer">
             <v-row>
@@ -29,13 +26,6 @@
                   />
                 </ValidationProvider>
               </v-col>
-              <v-col cols="12" md="4">
-                <v-switch
-                  v-model="vModel.available"
-                  :label="vModel.available | getSwitchLabel"
-                />
-              </v-col>
-              <v-col cols="0" md="4" />
               <v-col cols="12" md="4">
                 <ValidationProvider
                   v-slot="{ errors }"
@@ -90,39 +80,37 @@
               </v-col>
             </v-row>
           </ValidationObserver>
+          <button-with-icon
+            block
+            text="저장"
+            icon="mdi-content-save"
+            :loading="loading"
+            @click="save"
+          />
         </v-card-text>
         <created-updated-bar
           :created-date-time="vModel.created"
           :updated-date-time="vModel.updated"
-          v-if="vModel.created || vModel.updated"
-        />
-        <dialog-action-button
-          :loading="loading"
-          @click:save="save"
-          @click:close="syncedDialog = false"
         />
       </v-card>
-    </v-dialog>
+    </v-bottom-sheet>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, PropSync, Ref, VModel, Vue } from "vue-property-decorator";
-import type { SelectItem } from "@/common/types";
+import type { SelectItem } from "@/definitions/types";
 import { getApi, postApi, putApi } from "@/utils/apis";
 import { ValidationObserver } from "vee-validate";
 import DialogTitle from "@/components/title/DialogTitle.vue";
-import ButtonIconTooltip from "@/components/button/ButtonIconTooltip.vue";
-import DialogActionButton from "@/components/button/DialogActionButton.vue";
-import type { Code } from "@/common/models";
+import type { Code } from "@/definitions/models";
 import CreatedUpdatedBar from "@/components/history/CreatedUpdatedBar.vue";
+import ButtonWithIcon from "@/components/button/ButtonWithIcon.vue";
 
 @Component({
-  name: "CodeEditDialog",
   components: {
+    ButtonWithIcon,
     CreatedUpdatedBar,
-    DialogActionButton,
-    ButtonIconTooltip,
     DialogTitle,
   },
 })

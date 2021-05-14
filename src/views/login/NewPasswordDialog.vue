@@ -7,10 +7,20 @@
       class="elevation-12"
     >
       <v-card>
-        <dialog-title text="비밀번호 초기화" />
+        <dialog-title text="비밀번호 초기화">
+          <template #buttons>
+            <button-icon-tooltip
+              icon="mdi-content-save-settings-outline"
+              text="저장"
+              :loading="loading"
+              @click="save"
+              top
+            />
+          </template>
+        </dialog-title>
         <v-card-text>
           <ValidationObserver ref="observer">
-            <v-row dense>
+            <v-row>
               <v-col cols="12">
                 <ValidationProvider
                   v-slot="{ errors }"
@@ -51,17 +61,6 @@
           </ValidationObserver>
         </v-card-text>
         <v-divider />
-        <v-card-actions>
-          <v-spacer />
-          <button-icon-tooltip
-            icon="mdi-content-save-settings-outline"
-            text="저장"
-            color="warning"
-            :loading="loading"
-            @click="save"
-            top
-          />
-        </v-card-actions>
       </v-card>
     </v-dialog>
   </div>
@@ -77,7 +76,6 @@ import ButtonIconTooltip from "@/components/button/ButtonIconTooltip.vue";
 import DialogTitle from "@/components/title/DialogTitle.vue";
 
 @Component({
-  name: "NewPasswordDialog",
   components: { DialogTitle, ButtonIconTooltip },
 })
 export default class extends Vue {

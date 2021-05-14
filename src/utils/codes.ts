@@ -1,4 +1,4 @@
-import { SelectItem } from "@/common/types";
+import { SelectItem } from "@/definitions/types";
 
 export function getTextOfSelectItem<T = string>(
   codes: SelectItem<T>[] | null,

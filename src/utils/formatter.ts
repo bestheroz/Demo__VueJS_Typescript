@@ -1,5 +1,5 @@
 import store from "@/store";
-import { DateTime, SelectItem } from "@/common/types";
+import { DateTime, SelectItem } from "@/definitions/types";
 import dayjs from "dayjs";
 import _ from "lodash";
 

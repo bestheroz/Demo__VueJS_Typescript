@@ -1,5 +1,5 @@
 import Vue from "vue";
-import { DateTime, SelectItem } from "@/common/types";
+import { DateTime, SelectItem } from "@/definitions/types";
 import { getTextOfSelectItem } from "@/utils/codes";
 import {
   formatDate,
@@ -26,7 +26,10 @@ Vue.filter(
 );
 Vue.filter(
   "getCodeText",
-  function (value: string, codes: SelectItem[] | null): string {
+  function (
+    value: string,
+    codes: SelectItem<string | number>[] | null,
+  ): string {
     return getTextOfSelectItem(codes, value);
   },
 );

@@ -1,21 +1,63 @@
 <template>
-  <router-view />
+  <v-app>
+    <!-- Layout component -->
+    <component :is="currentLayout" v-if="isRouterLoaded">
+      <transition name="fade" mode="out-in">
+        <router-view />
+      </transition>
+    </component>
+  </v-app>
 </template>
 
 <script lang="ts">
 import "@/scss/common.scss";
 import { Component, Vue, Watch } from "vue-property-decorator";
 import { getVariableApi } from "@/utils/apis";
+import Vuetify from "@/plugins/vuetify";
+import DefaultLayout from "@/layouts/DefaultLayout.vue";
+import SimpleLayout from "@/layouts/SimpleLayout.vue";
 
-@Component({ name: "App" })
+@Component({
+  components: {
+    DefaultLayout,
+    SimpleLayout,
+  },
+})
 export default class extends Vue {
+  title: string | null = null;
+
+  get isRouterLoaded(): boolean {
+    return this.$route.name !== null;
+  }
+
+  get currentLayout(): string {
+    return (this.$route.meta.layout || "default") + "Layout";
+  }
+
   protected async mounted(): Promise<void> {
     document.title = (await getVariableApi("title")) || "";
   }
 
-  @Watch("$store.getters.theme", { immediate: true })
-  watchTheme(val: string): void {
-    this.$vuetify.theme.dark = val === "dark";
+  @Watch("$store.getters.primaryColor", { immediate: true })
+  watchPrimaryColor(val: string): void {
+    Vuetify.framework.theme.themes.dark.primary = val;
+    Vuetify.framework.theme.themes.light.primary = val;
   }
 }
 </script>
+<style scoped>
+/**
+ * Transition animation between pages
+ */
+.fade-enter-active,
+.fade-leave-active {
+  transition-duration: 0.2s;
+  transition-property: opacity;
+  transition-timing-function: ease;
+}
+
+.fade-enter,
+.fade-leave-active {
+  opacity: 0;
+}
+</style>

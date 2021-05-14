@@ -2,16 +2,16 @@
   <div>
     <v-card flat :loading="loading">
       <v-card-text class="py-0">
-        <v-chip-group v-model="selected" column active-class="primary">
+        <v-chip-group v-model="selected" column dense mandatory>
           <v-chip
             v-for="item in items"
             :value="item"
             filter
             :key="item"
-            outlined
-          >
-            {{ item }}
-          </v-chip>
+            :outlined="selected !== item"
+            color="primary"
+            v-text="item"
+          />
         </v-chip-group>
       </v-card-text>
     </v-card>
@@ -21,10 +21,9 @@
 <script lang="ts">
 import { Component, Emit, Vue, Watch } from "vue-property-decorator";
 import { getApi } from "@/utils/apis";
-import { Code } from "@/common/models";
+import { Code } from "@/definitions/models";
 
 @Component({
-  name: "CodeType",
   components: {},
 })
 export default class extends Vue {
