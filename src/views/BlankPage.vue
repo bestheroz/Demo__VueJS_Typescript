@@ -1,15 +1,7 @@
 <template>
-  <div>
-    <v-container class="fill-height" fluid style="height: 60vh">
-      <v-row align="center" justify="center">
-        <v-col cols="12" class="text-center">
-          <h1 style="font-size: 3rem" v-text="title" class="primary--text" />
-        </v-col>
-        <v-col cols="12" class="text-center">
-          <h1 :style="`color: ${color}`" v-text="now" />
-        </v-col>
-      </v-row>
-    </v-container>
+  <div class="flex-grow-1 align-center justify-center d-flex flex-column">
+    <h1 style="font-size: 3rem" v-text="title" class="primary--text" />
+    <h1 :style="`color: ${color}`" v-text="now" />
   </div>
 </template>
 

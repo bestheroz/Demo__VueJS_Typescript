@@ -170,6 +170,7 @@ export default class extends Vue {
         text: "",
         align: "center",
         value: "actions",
+        width: "5rem",
         filterable: false,
         sortable: false,
       },
