@@ -73,12 +73,7 @@
 
 <script lang="ts">
 import { Component, Ref, Vue } from "vue-property-decorator";
-import {
-  alertAxiosError,
-  ApiDataResult,
-  axiosInstance,
-  getVariableApi,
-} from "@/utils/apis";
+import { alertAxiosError, ApiDataResult, axiosInstance } from "@/utils/apis";
 import NewPasswordDialog from "@/views/login/NewPasswordDialog.vue";
 import { ValidationObserver } from "vee-validate";
 import pbkdf2 from "pbkdf2";
@@ -97,12 +92,10 @@ export default class extends Vue {
   userId = "";
   password = "";
   show1 = false;
-  title = "";
   loading = false;
   dialog = false;
 
   protected async created(): Promise<void> {
-    this.title = (await getVariableApi("title")) || "";
     this.$vuetify.theme.dark = false;
   }
 

@@ -103,7 +103,6 @@
 import MainMenu from "../components/navigation/MainMenu.vue";
 import { Component, Vue, Watch } from "vue-property-decorator";
 import envs from "@/constants/envs";
-import { getVariableApi } from "@/utils/apis";
 import ButtonIconTooltip from "@/components/button/ButtonIconTooltip.vue";
 import dayjs from "dayjs";
 import { logout } from "@/utils/commands";
@@ -146,7 +145,7 @@ export default class extends Vue {
     });
   }
   protected async created(): Promise<void> {
-    this.title = (await getVariableApi("title")) || "";
+    this.title = envs.PRODUCT_TITLE;
     this.now = dayjs().format("YYYY년 MM월 DD일 HH시 mm분 ss초");
     this.interval = window.setInterval(() => {
       this.now = dayjs().format("YYYY년 MM월 DD일 HH시 mm분 ss초");
@@ -155,7 +154,7 @@ export default class extends Vue {
 
   @Watch("$store.getters.selectedMenuName")
   protected async watchTitle(val: string): Promise<void> {
-    document.title = ((await getVariableApi("title")) || "") + `:: ${val}`;
+    document.title = this.title + `:: ${val}`;
   }
 
   protected goHome(): void {

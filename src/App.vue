@@ -12,10 +12,10 @@
 <script lang="ts">
 import "@/scss/common.scss";
 import { Component, Vue, Watch } from "vue-property-decorator";
-import { getVariableApi } from "@/utils/apis";
 import Vuetify from "@/plugins/vuetify";
 import DefaultLayout from "@/layouts/DefaultLayout.vue";
 import SimpleLayout from "@/layouts/SimpleLayout.vue";
+import envs from "@/constants/envs";
 
 @Component({
   components: {
@@ -35,7 +35,7 @@ export default class extends Vue {
   }
 
   protected async mounted(): Promise<void> {
-    document.title = (await getVariableApi("title")) || "";
+    document.title = envs.PRODUCT_TITLE;
   }
 
   @Watch("$store.getters.primaryColor", { immediate: true })
