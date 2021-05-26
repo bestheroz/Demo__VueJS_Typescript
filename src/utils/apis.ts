@@ -9,7 +9,6 @@ export const axiosInstance = axios.create({
   baseURL: envs.API_HOST,
   headers: {
     contentType: "application/json",
-    Authorization: store.getters.accessToken,
   },
 });
 
@@ -186,7 +185,6 @@ const axiosInstanceForExcel = axios.create({
   baseURL: envs.API_HOST,
   responseType: "blob",
   headers: {
-    Authorization: store.getters.accessToken,
     "Content-Type":
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   },
