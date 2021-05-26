@@ -106,7 +106,6 @@ const config1 = {
     globalTheme: config.theme.globalTheme as "light" | "dark",
     toolbarTheme: config.theme.toolbarTheme as "global" | "light" | "dark",
     menuTheme: config.theme.menuTheme as "global" | "light" | "dark",
-    toolbarDetached: config.theme.isToolbarDetached,
     contentBoxed: config.theme.isContentBoxed,
     primaryColor: config.theme.light.primary,
   },
@@ -125,9 +124,6 @@ const config1 = {
     },
     toolbarTheme: (state: MemberConfig): "global" | "light" | "dark" => {
       return state.toolbarTheme;
-    },
-    isToolbarDetached: (state: MemberConfig): boolean => {
-      return state.toolbarDetached;
     },
     isContentBoxed: (state: MemberConfig): boolean => {
       return state.contentBoxed;
@@ -152,9 +148,6 @@ const config1 = {
     ) => {
       state.toolbarTheme = toolbarTheme;
     },
-    setToolbarDetached: (state: MemberConfig, isToolbarDetached: boolean) => {
-      state.toolbarDetached = isToolbarDetached;
-    },
     setPrimaryColor: (state: MemberConfig, primaryColor: string) => {
       state.primaryColor = primaryColor;
     },
@@ -163,7 +156,6 @@ const config1 = {
       state.contentBoxed = config.contentBoxed;
       state.menuTheme = config.menuTheme;
       state.toolbarTheme = config.toolbarTheme;
-      state.toolbarDetached = config.toolbarDetached;
       state.primaryColor = config.primaryColor;
     },
   },

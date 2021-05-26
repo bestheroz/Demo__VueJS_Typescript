@@ -9,7 +9,6 @@ export interface MemberConfig {
   globalTheme: "light" | "dark";
   toolbarTheme: "global" | "light" | "dark";
   menuTheme: "global" | "light" | "dark";
-  toolbarDetached: boolean;
   contentBoxed: boolean;
   primaryColor: string;
 }
