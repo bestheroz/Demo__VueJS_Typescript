@@ -1,14 +1,14 @@
 import axios, { AxiosError } from "axios";
 import envs from "@/constants/envs";
-import { errorPage } from "@/utils/errors";
+import { goErrorPage } from "@/utils/errors";
 import store from "@/store";
 import { toastError, toastSuccess } from "@/utils/alerts";
+import { goLoginPage } from "@/utils/commands";
 
 export const axiosInstance = axios.create({
   baseURL: envs.API_HOST,
   headers: {
     contentType: "application/json",
-    Authorization: store.getters.accessToken,
   },
 });
 
@@ -37,10 +37,10 @@ axiosInstance.interceptors.response.use(
         return refreshToken && axios.request(refreshToken.config);
       }
       if ([400, 401].includes(error.response?.status)) {
-        await store.dispatch("needLogin");
+        await goLoginPage();
         return;
       } else if ([403, 404, 500].includes(error.response.status)) {
-        await errorPage(error.response.status);
+        await goErrorPage(error.response.status);
         return;
       }
     }
@@ -185,7 +185,6 @@ const axiosInstanceForExcel = axios.create({
   baseURL: envs.API_HOST,
   responseType: "blob",
   headers: {
-    Authorization: store.getters.accessToken,
     "Content-Type":
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   },
@@ -217,7 +216,7 @@ axiosInstanceForExcel.interceptors.response.use(
           const refreshToken = await apiRefreshToken(error);
           return refreshToken && axios.request(refreshToken.config);
         }
-        await store.dispatch("needLogin");
+        await goLoginPage();
         return;
       } else if (
         error.response.status === 404 &&
@@ -229,7 +228,7 @@ axiosInstanceForExcel.interceptors.response.use(
       }
       // 404는 그냥... 로그보면서 판단하자
       if ([403, 500].includes(error.response.status)) {
-        await errorPage(error.response.status);
+        await goErrorPage(error.response.status);
         return;
       }
     }
@@ -261,7 +260,13 @@ export async function getExcelApi(url: string): Promise<void> {
 }
 
 async function apiRefreshToken(error: AxiosError) {
-  await store.dispatch("reissueAccessToken");
+  try {
+    await store.dispatch("reIssueAccessToken");
+  } catch (e) {
+    console.error(e);
+    await goLoginPage();
+    return;
+  }
   error.config.headers.Authorization = store.getters.accessToken;
   error.config.headers.AuthorizationR = store.getters.refreshToken;
   return error;

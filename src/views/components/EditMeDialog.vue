@@ -1,20 +1,11 @@
 <template>
   <div>
-    <v-dialog v-model="syncedDialog" max-width="100%" width="25vw">
-      <v-card>
-        <dialog-title text="내 정보 변경">
-          <template #buttons>
-            <button-icon-tooltip
-              icon="mdi-window-close"
-              text="닫기"
-              @click="syncedDialog = false"
-              top
-            />
-          </template>
-        </dialog-title>
+    <v-bottom-sheet v-model="syncedDialog" inset scrollable>
+      <v-card class="pb-4">
+        <dialog-title text="내 정보 변경" @click:close="syncedDialog = false" />
         <v-card-text>
           <ValidationObserver ref="observer">
-            <v-row dense>
+            <v-row>
               <v-col cols="12">
                 <v-text-field
                   v-model="item.userId"
@@ -54,9 +45,9 @@
                   />
                 </ValidationProvider>
               </v-col>
-              <v-col cols="5" class="text-right pt-7">
+              <v-col cols="5" class="text-right">
                 <v-btn
-                  color="warning"
+                  color="primary"
                   outlined
                   small
                   @click="newPasswordDialog = true"
@@ -64,23 +55,22 @@
                   비밀번호 변경
                 </v-btn>
               </v-col>
-              <v-col cols="12">
-                <datetime-picker
-                  v-model="item.created"
-                  disabled
-                  label="가입일"
-                />
-              </v-col>
             </v-row>
           </ValidationObserver>
+          <button-with-icon
+            block
+            text="저장"
+            icon="mdi-content-save"
+            :loading="loading"
+            @click="save"
+          />
         </v-card-text>
-        <dialog-action-button
-          :loading="loading"
-          @click:save="save"
-          @click:close="syncedDialog = false"
+        <created-updated-bar
+          :created-date-time="item.created"
+          :updated-date-time="item.updated"
         />
       </v-card>
-    </v-dialog>
+    </v-bottom-sheet>
     <change-password-dialog
       :dialog.sync="newPasswordDialog"
       v-if="newPasswordDialog"
@@ -91,26 +81,21 @@
 <script lang="ts">
 import { Component, PropSync, Ref, Vue } from "vue-property-decorator";
 import { getApi, patchApi } from "@/utils/apis";
-import DatetimePicker from "@/components/picker/DatetimePicker.vue";
 import ChangePasswordDialog from "@/views/components/ChangePasswordDialog.vue";
 import { ValidationObserver } from "vee-validate";
 import pbkdf2 from "pbkdf2";
-import ButtonIconTooltip from "@/components/button/ButtonIconTooltip.vue";
 import DialogTitle from "@/components/title/DialogTitle.vue";
-import DialogActionButton from "@/components/button/DialogActionButton.vue";
-import { defaultMember } from "@/common/values";
-import type { Member } from "@/common/models";
+import { defaultMember } from "@/definitions/defaults";
+import type { Member } from "@/definitions/models";
 import CreatedUpdatedBar from "@/components/history/CreatedUpdatedBar.vue";
+import ButtonWithIcon from "@/components/button/ButtonWithIcon.vue";
 
 @Component({
-  name: "EditMeDialog",
   components: {
+    ButtonWithIcon,
     CreatedUpdatedBar,
-    DialogActionButton,
     DialogTitle,
-    ButtonIconTooltip,
     ChangePasswordDialog,
-    DatetimePicker,
   },
 })
 export default class extends Vue {
@@ -141,8 +126,8 @@ export default class extends Vue {
     const response = await patchApi<Member>("members/mine", payload);
     this.loading = false;
     if (response?.code?.startsWith("S")) {
-      await this.$store.dispatch("reissueAccessToken");
-      await this.$store.dispatch("initMemberCodes");
+      await this.$store.dispatch("reIssueAccessToken");
+      await this.$store.dispatch("resetMemberCodes");
       this.syncedDialog = false;
     }
   }

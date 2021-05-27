@@ -6,22 +6,20 @@ import Swal from "sweetalert2/src/sweetalert2.js";
 const Toast = Swal.mixin({
   toast: true,
   position: "top",
-  showConfirmButton: true,
-  confirmButtonText: "X",
+  showCloseButton: true,
+  showConfirmButton: false,
   didOpen: (toast) => {
     toast.addEventListener("mouseenter", Swal.stopTimer);
     toast.addEventListener("mouseleave", Swal.resumeTimer);
   },
 });
 
-export function toastSuccess(message: string, timer = 5000): void {
+export function toastSuccess(message: string, timer = 3000): void {
   Toast.fire({
     icon: "success",
-    iconColor: "var(--v-success-base)",
     timer: timer,
     timerProgressBar: !!timer,
     title: message,
-    confirmButtonColor: "var(--v-success-base)",
   });
 }
 export function toastInfo(message: string, timer = 5000): void {
@@ -31,7 +29,6 @@ export function toastInfo(message: string, timer = 5000): void {
     timer: timer,
     timerProgressBar: !!timer,
     title: message,
-    confirmButtonColor: "var(--v-info-base)",
   });
 }
 export function toastWarning(message: string, timer?: number): void {
@@ -41,7 +38,6 @@ export function toastWarning(message: string, timer?: number): void {
     timer: timer,
     timerProgressBar: !!timer,
     title: message,
-    confirmButtonColor: "var(--v-warning-base)",
   });
 }
 export function toastError(message: string, timer?: number): void {
@@ -51,7 +47,6 @@ export function toastError(message: string, timer?: number): void {
     timer: timer,
     timerProgressBar: !!timer,
     title: message,
-    confirmButtonColor: "var(--v-error-base)",
   });
 }
 export function toastCloseAll(): void {
@@ -62,17 +57,15 @@ export async function confirm(
   title: string,
   text = "",
   confirmButtonText = "확인",
-  cancelButtonText = "취소",
 ): Promise<SweetAlertResult> {
   return await Toast.fire({
     title: title,
     text: text,
     icon: "question",
-    showCancelButton: true,
+    showConfirmButton: true,
+    showCancelButton: false,
     confirmButtonColor: "var(--v-primary-base)",
     confirmButtonText: confirmButtonText,
-    cancelButtonColor: "var(--v-secondary-base)",
-    cancelButtonText: cancelButtonText,
   });
 }
 
@@ -84,10 +77,9 @@ export async function confirmDelete(
     title: title,
     text: text,
     icon: "question",
-    showCancelButton: true,
+    showConfirmButton: true,
+    showCancelButton: false,
     confirmButtonColor: "var(--v-primary-base)",
     confirmButtonText: "삭제 하겠습니다",
-    cancelButtonColor: "var(--v-secondary-base)",
-    cancelButtonText: "취소",
   });
 }

@@ -1,19 +1,19 @@
 <template>
   <div>
-    <button-set
-      :loading="saving"
-      reload-button
-      @click:reload="getList"
-      add-button
-      @click:add="showAddDialog"
-      save-button
-      save-text="순서저장"
-      @click:save="saveItems"
-    />
-    <v-card flat>
+    <page-title @click="showAddDialog" more-actions>
+      <template #list>
+        <v-list>
+          <v-list-item @click="saveItems">
+            <v-list-item-title>
+              <v-icon class="drag-handle"> mdi-sort </v-icon> 순서저장
+            </v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </template>
+    </page-title>
+    <v-card>
       <v-card-text>
-        <v-list dense>
-          <refresh-data-bar ref="refRefreshDataBar" @reload="getList" />
+        <v-list>
           <draggable
             tag="div"
             v-model="items"
@@ -22,28 +22,31 @@
           >
             <transition-group type="transition" name="flip-list">
               <v-list-item
+                dense
                 :key="item.id"
                 v-for="item in items"
-                class="elevation-1"
-                dense
-                @dblclick="showEditDialog(item)"
+                class="elevation-1 bottom-dotted"
               >
                 <v-list-item-icon>
                   <v-icon v-text="item.icon" />
                 </v-list-item-icon>
                 <v-list-item-content style="display: inline-block" class="py-0">
-                  <v-icon color="primary" class="drag-handle">
-                    mdi-sort
-                  </v-icon>
-                  {{ item.name }}
+                  <v-btn icon>
+                    <v-icon class="drag-handle"> mdi-sort </v-icon>
+                  </v-btn>
+                  <a class="text--anchor" @click="showEditDialog(item)">
+                    {{ item.name }}
+                  </a>
                 </v-list-item-content>
                 <v-list-item-content style="display: inline-block" class="py-0">
                   {{ item.url }}
                 </v-list-item-content>
                 <v-list-item-action style="display: inline-block" class="my-0">
-                  <v-icon color="error" @click="onDelete(item)">
-                    mdi-minus
-                  </v-icon>
+                  <div class="actions">
+                    <v-btn icon @click="onDelete(item)">
+                      <v-icon color="error"> mdi-delete-outline </v-icon>
+                    </v-btn>
+                  </div>
                 </v-list-item-action>
               </v-list-item>
             </transition-group>
@@ -62,29 +65,30 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Ref, Vue } from "vue-property-decorator";
+import { Component, Prop, Vue } from "vue-property-decorator";
 import { deleteApi, getApi, postApi } from "@/utils/apis";
 import { confirmDelete } from "@/utils/alerts";
 import MenuEditDialog from "@/views/admin/menu/MenuEditDialog.vue";
-import ButtonSet from "@/components/speeddial/ButtonSet.vue";
 import draggable from "vuedraggable";
-import { defaultMenu } from "@/common/values";
+import { defaultMenu } from "@/definitions/defaults";
 import _ from "lodash";
-import type { Menu } from "@/common/models";
-import RefreshDataBar from "@/components/history/RefreshDataBar.vue";
-import { MENU_TYPE } from "@/common/selections";
+import type { Menu } from "@/definitions/models";
+import { MENU_TYPE } from "@/definitions/selections";
+import PageTitle from "@/components/title/PageTitle.vue";
 
 interface MenuVO extends Menu {
   children: Menu[];
 }
 
 @Component({
-  name: "MenuList",
-  components: { RefreshDataBar, ButtonSet, MenuEditDialog, draggable },
+  components: {
+    PageTitle,
+    MenuEditDialog,
+    draggable,
+  },
 })
 export default class extends Vue {
   @Prop() readonly height!: number | string;
-  @Ref() readonly refRefreshDataBar!: RefreshDataBar;
 
   items: Menu[] = [];
   loading = false;
@@ -110,7 +114,6 @@ export default class extends Vue {
     const response = await getApi<MenuVO[]>("admin/menus/");
     this.loading = false;
     this.items = response?.data || [];
-    this.refRefreshDataBar.triggerRefreshed();
   }
 
   protected onCreated(value: Menu): void {
@@ -138,13 +141,13 @@ export default class extends Vue {
   }
 
   protected async onDelete(value: Menu): Promise<void> {
-    const result = await confirmDelete();
+    const result = await confirmDelete(undefined, `메뉴명: ${value.name}`);
     if (result.value) {
       this.saving = true;
       const response = await deleteApi<Menu>(`admin/menus/${value.id}/`);
       this.saving = false;
       if (response?.code?.startsWith("S")) {
-        await this.$store.dispatch("initAuthority");
+        await this.$store.dispatch("resetAuthority");
         this.items = this.items.filter(
           (item) => item.id !== (response.data?.id || 0),
         );
@@ -170,9 +173,14 @@ export default class extends Vue {
     );
     this.saving = false;
     if (response?.code?.startsWith("S")) {
-      await this.$store.dispatch("initAuthority");
+      await this.$store.dispatch("resetAuthority");
       this.items = response.data || [];
     }
   }
 }
 </script>
+<style lang="scss" scoped>
+.bottom-dotted {
+  border-bottom: 1px dotted var(--v-secondary-base);
+}
+</style>
