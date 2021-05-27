@@ -133,10 +133,13 @@ export default class extends Vue {
   }
 
   get minDate(): string[] | undefined {
-    if (!this.syncedStart || !this.syncedEnd) {
+    if (!this.syncedStart) {
       return undefined;
     }
-    if (dayjs(this.syncedStart).diff(dayjs(this.syncedEnd), "days") !== 0) {
+    if (
+      this.syncedEnd &&
+      dayjs(this.syncedStart).diff(dayjs(this.syncedEnd), "days") !== 0
+    ) {
       return [
         dayjs(this.syncedStart).format(this.DATE_FORMAT),
         this.useSeconds ? "00:00:00" : "00:00",
@@ -151,10 +154,13 @@ export default class extends Vue {
   }
 
   get maxDate(): string[] | undefined {
-    if (!this.syncedStart || !this.syncedEnd) {
+    if (!this.syncedEnd) {
       return undefined;
     }
-    if (dayjs(this.syncedStart).diff(dayjs(this.syncedEnd), "days") !== 0) {
+    if (
+      this.syncedStart &&
+      dayjs(this.syncedStart).diff(dayjs(this.syncedEnd), "days") !== 0
+    ) {
       return [
         dayjs(this.syncedEnd).format(this.DATE_FORMAT),
         this.useSeconds ? "23:59:59" : "23:59",
