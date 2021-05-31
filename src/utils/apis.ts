@@ -147,32 +147,6 @@ export async function getCodesApi<SelectItem>(
   }
 }
 
-export async function getVariableApi<T = string>(
-  variable: string,
-): Promise<T | null> {
-  const item = window.localStorage.getItem(`variable__${variable}`);
-  if (item) {
-    return JSON.parse(item);
-  } else {
-    try {
-      const response = await axiosInstance.get<ApiDataResult<T>>(
-        `api/variables/${variable}`,
-      );
-      const result = response?.data?.data || null;
-      if (result) {
-        window.localStorage.setItem(
-          `variable__${variable}`,
-          JSON.stringify(result),
-        );
-      }
-      return result;
-    } catch (error) {
-      // console.warn(getErrorResult(error).message);
-      return null;
-    }
-  }
-}
-
 function alertResponseMessage(data: ApiDataResult<unknown>): void {
   if (data.code.startsWith("S")) {
     toastSuccess(data.message);
