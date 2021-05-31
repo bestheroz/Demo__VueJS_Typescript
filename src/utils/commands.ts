@@ -2,10 +2,11 @@ import router from "@/router";
 import axios from "axios";
 import envs from "@/constants/envs";
 import { goErrorPage } from "@/utils/errors";
-import { ApiDataResult, axiosInstance, getApi } from "@/utils/apis";
+import { deleteApi, getApi, postApi } from "@/utils/apis";
 import { MemberConfig } from "@/definitions/models";
 import { SelectItem } from "@/definitions/types";
 import _ from "lodash";
+import { defaultMemberConfig } from "@/definitions/defaults";
 
 export async function goLoginPage(): Promise<void> {
   if (router.currentRoute.path !== "/login") {
@@ -42,9 +43,7 @@ export async function getAccessToken(
 
 const uploadConfigHandler = _.debounce((config: MemberConfig) => {
   try {
-    axiosInstance
-      .post<ApiDataResult<MemberConfig>>("/api/members/mine/config/", config)
-      .then();
+    postApi<MemberConfig>("members/mine/config/", config).then();
   } catch (e) {
     console.error(e);
   }
@@ -54,20 +53,18 @@ export function uploadConfig(config: MemberConfig): void {
 }
 
 export async function getYourConfig(): Promise<MemberConfig> {
-  const response = await axiosInstance.get(
-    `${envs.API_HOST}api/members/mine/config`,
-  );
-  return response.data.data;
+  const response = await getApi<MemberConfig>("members/mine/config");
+  return response.data || defaultMemberConfig();
 }
 
-export async function getMemberCodes(): Promise<SelectItem[] | undefined> {
+export async function getMemberCodes(): Promise<SelectItem[]> {
   const response = await getApi<SelectItem[]>("members/codes");
-  return response.data;
+  return response.data || [];
 }
 
 export function logout(): void {
   try {
-    axiosInstance.delete(`${envs.API_HOST}api/auth/logout`).then();
+    deleteApi("auth/logout").then();
   } catch (e) {
     console.error(e);
   }

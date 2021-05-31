@@ -12,8 +12,7 @@ import { MENU_TYPE } from "@/definitions/selections";
 import config from "./configs";
 import { getAccessToken, getMemberCodes, uploadConfig } from "@/utils/commands";
 import { defaultMemberConfig } from "@/definitions/defaults";
-import { axiosInstance } from "@/utils/apis";
-import envs from "@/constants/envs";
+import { getApi } from "@/utils/apis";
 
 Vue.use(Vuex);
 
@@ -280,10 +279,8 @@ const authority = {
   },
   actions: {
     async resetAuthority({ commit }: ActionContext<any, any>): Promise<void> {
-      const response = await axiosInstance
-        .get(`${envs.API_HOST}api/members/mine/authority`)
-        .then();
-      commit("setAuthority", response.data.data);
+      const response = await getApi("members/mine/authority").then();
+      commit("setAuthority", response.data);
     },
   },
 };

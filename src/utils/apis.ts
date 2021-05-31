@@ -1,4 +1,4 @@
-import axios, { AxiosError } from "axios";
+import axios, { AxiosError, AxiosResponse } from "axios";
 import envs from "@/constants/envs";
 import { goErrorPage } from "@/utils/errors";
 import store from "@/store";
@@ -12,6 +12,39 @@ export const axiosInstance = axios.create({
   },
 });
 
+const defaultApiDataResultError = () => {
+  return {
+    code: "FFFF",
+    data: null,
+    message: "Unknown error",
+  };
+};
+
+const onRejected = async (error: AxiosError) => {
+  if (error?.message === "Network Error") {
+    toastError("Service Unavailable");
+    return;
+  }
+  if (error?.response) {
+    if (error.response.headers.refreshtoken === "must") {
+      const refreshToken = await apiRefreshToken(error);
+      return refreshToken && axios.request(refreshToken.config);
+    }
+    if ([400, 401].includes(error.response?.status)) {
+      await goLoginPage();
+      return;
+    } else if ([403, 404, 500].includes(error.response.status)) {
+      await goErrorPage(error.response.status);
+      return;
+    }
+  }
+  if (process.env.NODE_ENV === "development") {
+    alertAxiosError(error);
+  }
+  console.error(error);
+  return Promise.reject(error);
+};
+
 axiosInstance.interceptors.request.use(
   function (config) {
     config.headers.Authorization = store.getters.accessToken;
@@ -23,45 +56,49 @@ axiosInstance.interceptors.request.use(
   },
 );
 axiosInstance.interceptors.response.use(
-  function (response) {
-    return response;
-  },
-  async function (error: AxiosError) {
-    if (error?.message === "Network Error") {
-      toastError("Service Unavailable");
-      return;
-    }
-    if (error?.response) {
-      if (error.response.headers.refreshtoken === "must") {
-        const refreshToken = await apiRefreshToken(error);
-        return refreshToken && axios.request(refreshToken.config);
-      }
-      if ([400, 401].includes(error.response?.status)) {
-        await goLoginPage();
-        return;
-      } else if ([403, 404, 500].includes(error.response.status)) {
-        await goErrorPage(error.response.status);
-        return;
-      }
-    }
-    if (process.env.NODE_ENV === "development") {
-      alertAxiosError(error);
-    }
-    console.warn(error);
-    return Promise.reject(error);
-  },
+  (response) => response,
+  async (error: AxiosError) => onRejected(error),
 );
 
 export interface ApiDataResult<T> {
   code: string;
-  data?: T;
+  data?: T | null;
   message: string;
   paginationTotalLength?: number;
 }
 
-export async function getApi<T>(url: string): Promise<ApiDataResult<T>> {
+export async function getApi<T>(url: string): Promise<ApiDataResult<T | null>> {
   const response = await axiosInstance.get<ApiDataResult<T>>(`api/${url}`);
-  return response?.data;
+  if (response) {
+    return response.data;
+  } else {
+    toastError("Unknown error");
+    return defaultApiDataResultError();
+  }
+}
+
+function alertResponseMessage(data: ApiDataResult<unknown>): void {
+  if (data.code.startsWith("S")) {
+    toastSuccess(data.message);
+  } else {
+    console.error(data.message);
+    toastError(data.message);
+  }
+}
+
+function getResultData<T>(
+  response: AxiosResponse<ApiDataResult<T>>,
+  alert: boolean,
+): ApiDataResult<T> {
+  if (response) {
+    if (alert) {
+      alertResponseMessage(response.data);
+    }
+    return response.data;
+  } else {
+    toastError("Unknown error");
+    return defaultApiDataResultError();
+  }
 }
 
 export async function postApi<T>(
@@ -73,11 +110,7 @@ export async function postApi<T>(
     `api/${url}`,
     data,
   );
-  // response.status === 201
-  if (alert) {
-    alertResponseMessage(response?.data);
-  }
-  return response?.data;
+  return getResultData(response, alert);
 }
 
 export async function putApi<T>(
@@ -89,11 +122,7 @@ export async function putApi<T>(
     `api/${url}`,
     data,
   );
-  // response.status === 200
-  if (alert) {
-    alertResponseMessage(response?.data);
-  }
-  return response?.data;
+  return getResultData(response, alert);
 }
 
 export async function patchApi<T>(
@@ -105,11 +134,7 @@ export async function patchApi<T>(
     `api/${url}`,
     data,
   );
-  // response.status === 200
-  if (alert) {
-    alertResponseMessage(response?.data);
-  }
-  return response?.data;
+  return getResultData(response, alert);
 }
 
 export async function deleteApi<T>(
@@ -117,11 +142,7 @@ export async function deleteApi<T>(
   alert = true,
 ): Promise<ApiDataResult<T>> {
   const response = await axiosInstance.delete(`api/${url}`);
-  // response.status === 204
-  if (alert) {
-    alertResponseMessage(response?.data);
-  }
-  return response?.data;
+  return getResultData(response, alert);
 }
 
 export async function getCodesApi<SelectItem>(
@@ -135,23 +156,21 @@ export async function getCodesApi<SelectItem>(
       const response = await axiosInstance.get<ApiDataResult<SelectItem[]>>(
         `api/codes/?type=${type}`,
       );
-      const result = response?.data?.data || [];
-      if (result.length > 0) {
-        window.localStorage.setItem(`code__${type}`, JSON.stringify(result));
+      if (response) {
+        const result = response?.data?.data || [];
+        if (result.length > 0) {
+          window.localStorage.setItem(`code__${type}`, JSON.stringify(result));
+        }
+        return result;
+      } else {
+        toastError("Unknown error");
+        return [];
       }
-      return result;
     } catch (error) {
-      // console.warn(getErrorResult(error).message);
+      toastError(error.message);
+      console.error(error.message);
       return [];
     }
-  }
-}
-
-function alertResponseMessage(data: ApiDataResult<unknown>): void {
-  if (data.code.startsWith("S")) {
-    toastSuccess(data.message);
-  } else {
-    toastError(data.message);
   }
 }
 
@@ -176,39 +195,8 @@ axiosInstanceForExcel.interceptors.request.use(
 );
 
 axiosInstanceForExcel.interceptors.response.use(
-  function (response) {
-    return response;
-  },
-  async function (error: AxiosError) {
-    if (error?.message === "Network Error") {
-      toastError("Service Unavailable");
-      return;
-    }
-    if (error?.response) {
-      if ([400, 401].includes(error.response?.status)) {
-        if (error.response.headers.refreshtoken === "must") {
-          const refreshToken = await apiRefreshToken(error);
-          return refreshToken && axios.request(refreshToken.config);
-        }
-        await goLoginPage();
-        return;
-      } else if (
-        error.response.status === 404 &&
-        error.response.headers.refreshtoken === "must"
-      ) {
-        // 로컬환경때문에 추가
-        const refreshToken = await apiRefreshToken(error);
-        return refreshToken && axios.request(refreshToken.config);
-      }
-      // 404는 그냥... 로그보면서 판단하자
-      if ([403, 500].includes(error.response.status)) {
-        await goErrorPage(error.response.status);
-        return;
-      }
-    }
-    alertAxiosError(error);
-    return Promise.reject(error);
-  },
+  (response) => response,
+  async (error: AxiosError) => onRejected(error),
 );
 
 export async function getExcelApi(url: string): Promise<void> {

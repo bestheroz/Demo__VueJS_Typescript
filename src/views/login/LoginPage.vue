@@ -78,11 +78,7 @@ import NewPasswordDialog from "@/views/login/NewPasswordDialog.vue";
 import { ValidationObserver } from "vee-validate";
 import pbkdf2 from "pbkdf2";
 import { toastCloseAll, toastError } from "@/utils/alerts";
-import {
-  defaultAuthority,
-  defaultMemberConfig,
-  defaultUser,
-} from "@/definitions/defaults";
+import { defaultAuthority, defaultUser } from "@/definitions/defaults";
 import { getYourConfig } from "@/utils/commands";
 
 @Component({ components: { NewPasswordDialog } })
@@ -139,10 +135,7 @@ export default class extends Vue {
           refreshToken: response.data.data.refreshToken,
         });
         await this.$store.dispatch("resetAuthority");
-        await this.$store.commit(
-          "setConfig",
-          (await getYourConfig()) || defaultMemberConfig(),
-        );
+        await this.$store.commit("setConfig", await getYourConfig());
         await this.$store.dispatch("resetMemberCodes");
         toastCloseAll();
         await this.$router.push("/");
