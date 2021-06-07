@@ -47,12 +47,11 @@ const user = {
   },
   mutations: {
     setAccessToken(state: any, accessToken: string): void {
-      const jwt =
-        jwt_decode<{
-          exp: number;
-          userId: string;
-          userVO: string;
-        }>(accessToken);
+      const jwt = jwt_decode<{
+        exp: number;
+        userId: string;
+        userVO: string;
+      }>(accessToken);
       const user = JSON.parse(jwt.userVO);
       state.id = user.id;
       state.userId = user.userId;
@@ -203,7 +202,9 @@ const config1 = {
     },
     resetConfig: ({ commit, getters }: ActionContext<any, any>) => {
       commit("setConfig", defaultMemberConfig());
-      uploadConfig(getters.config);
+      if (getters.loggedIn) {
+        uploadConfig(getters.config);
+      }
     },
   },
 };
