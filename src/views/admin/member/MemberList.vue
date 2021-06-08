@@ -142,7 +142,7 @@ export default class extends Vue {
         text: "만료일",
         align: "center",
         value: "expired",
-        width: "11rem",
+        width: "11.5rem",
         filterable: false,
       },
       {
@@ -157,7 +157,7 @@ export default class extends Vue {
         align: "center",
         value: "updated",
         filterable: false,
-        width: "11rem",
+        width: "11.5rem",
       },
       {
         text: "작업자",

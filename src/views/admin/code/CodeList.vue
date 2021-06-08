@@ -141,7 +141,7 @@ export default class extends Vue {
         align: "center",
         value: "updated",
         filterable: false,
-        width: "11rem",
+        width: "11.5rem",
       },
       {
         text: "작업자",
