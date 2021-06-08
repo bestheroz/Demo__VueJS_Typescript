@@ -10,4 +10,13 @@
   .theme--dark.v-btn:not(.v-btn--flat):not(.v-btn--text):not(.v-btn--outlined) {
     background-color: initial;
   }
+  .v-data-table {
+    table {
+      tr {
+        td {
+          border-bottom: thin dotted var(--v-secondary-base) !important;
+        }
+      }
+    }
+  }
 }
