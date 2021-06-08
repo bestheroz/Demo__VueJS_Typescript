@@ -43,7 +43,7 @@ export async function getAccessToken(
 
 const uploadConfigHandler = _.debounce((config: MemberConfig) => {
   try {
-    postApi<MemberConfig>("members/mine/config/", config).then();
+    postApi<MemberConfig>("members/mine/config/", config, false).then();
   } catch (e) {
     console.error(e);
   }
@@ -64,7 +64,7 @@ export async function getMemberCodes(): Promise<SelectItem[]> {
 
 export function logout(): void {
   try {
-    deleteApi("auth/logout").then();
+    deleteApi("auth/logout", false).then();
   } catch (e) {
     console.error(e);
   }
