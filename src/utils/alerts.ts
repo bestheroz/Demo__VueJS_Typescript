@@ -4,7 +4,6 @@ import { SweetAlertResult } from "sweetalert2";
 import Swal from "sweetalert2/src/sweetalert2.js";
 
 const Toast = Swal.mixin({
-  backdrop: false,
   toast: true,
   position: "top",
   showCloseButton: true,
