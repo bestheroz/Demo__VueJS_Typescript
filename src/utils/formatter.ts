@@ -1,7 +1,7 @@
 import store from "@/store";
 import { DateTime, SelectItem } from "@/definitions/types";
 import dayjs from "dayjs";
-import _ from "lodash";
+import { truncate } from "lodash";
 
 export function getMemberNm(value: string | undefined | null): string {
   const find: SelectItem = store.getters.memberCodes.find(
@@ -31,7 +31,7 @@ export function getEllipseText(
   if (value === undefined || value === null || value === "") {
     return "-";
   }
-  return _.truncate(value, {
+  return truncate(value, {
     length: length,
   });
 }

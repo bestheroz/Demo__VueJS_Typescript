@@ -47,7 +47,7 @@
 <script lang="ts">
 import { Component, Emit, Prop, Vue, Watch } from "vue-property-decorator";
 import type { DataTableHeader, SelectItem } from "@/definitions/types";
-import _, { DebouncedFunc } from "lodash";
+import { debounce, DebouncedFunc, isArray } from "lodash";
 
 @Component({ name: "DataTableClientSideFilter" })
 export default class extends Vue {
@@ -62,13 +62,13 @@ export default class extends Vue {
     () => {
       //
     }
-  > = _.debounce(this.debouncedHeader, 100);
+  > = debounce(this.debouncedHeader, 100);
 
   readonly debounceFilter: DebouncedFunc<
     () => {
       //
     }
-  > = _.debounce(this.debouncedFilter, 100);
+  > = debounce(this.debouncedFilter, 100);
 
   readonly USE_YN: SelectItem[] = [
     { value: "true", text: "예" },
@@ -118,7 +118,7 @@ export default class extends Vue {
       ) {
         return;
       }
-      if (_.isArray(filter)) {
+      if (isArray(filter)) {
         output = output.filter((value) => {
           return (
             !this.filterMaps[index] ||

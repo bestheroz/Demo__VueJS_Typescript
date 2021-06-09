@@ -71,7 +71,7 @@ import { confirmDelete } from "@/utils/alerts";
 import MenuEditDialog from "@/views/admin/menu/MenuEditDialog.vue";
 import draggable from "vuedraggable";
 import { defaultMenu } from "@/definitions/defaults";
-import _ from "lodash";
+import { cloneDeep } from "lodash";
 import type { Menu } from "@/definitions/models";
 import { MENU_TYPE } from "@/definitions/selections";
 import PageTitle from "@/components/title/PageTitle.vue";
@@ -136,7 +136,7 @@ export default class extends Vue {
     this.dialog = true;
   }
   protected showEditDialog(value: Menu): void {
-    this.editItem = _.cloneDeep(value);
+    this.editItem = cloneDeep(value);
     this.dialog = true;
   }
 

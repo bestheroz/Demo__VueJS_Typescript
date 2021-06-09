@@ -5,7 +5,7 @@ import { goErrorPage } from "@/utils/errors";
 import { deleteApi, getApi, postApi } from "@/utils/apis";
 import { MemberConfig } from "@/definitions/models";
 import { SelectItem } from "@/definitions/types";
-import _ from "lodash";
+import { debounce } from "lodash";
 import { defaultMemberConfig } from "@/definitions/defaults";
 
 export async function goLoginPage(): Promise<void> {
@@ -41,7 +41,7 @@ export async function getAccessToken(
   }
 }
 
-const uploadConfigHandler = _.debounce((config: MemberConfig) => {
+const uploadConfigHandler = debounce((config: MemberConfig) => {
   try {
     postApi<MemberConfig>("members/mine/config/", config, false).then();
   } catch (e) {

@@ -55,7 +55,7 @@ import {
   Watch,
 } from "vue-property-decorator";
 import type { DataTableHeader, SelectItem } from "@/definitions/types";
-import _, { DebouncedFunc } from "lodash";
+import { debounce, DebouncedFunc } from "lodash";
 
 @Component({ name: "DataTableFilter" })
 export default class extends Vue {
@@ -69,13 +69,13 @@ export default class extends Vue {
     () => {
       //
     }
-  > = _.debounce(this.debouncedHeader, 100);
+  > = debounce(this.debouncedHeader, 100);
 
   readonly debounceFilter: DebouncedFunc<
     () => {
       //
     }
-  > = _.debounce(this.debouncedFilter, 300);
+  > = debounce(this.debouncedFilter, 300);
 
   readonly USE_YN: SelectItem[] = [
     { value: "true", text: "예" },

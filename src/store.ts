@@ -6,7 +6,7 @@ import { Drawer, SelectItem } from "@/definitions/types";
 import jwt_decode from "jwt-decode";
 import type { Authority, MemberConfig, Menu } from "@/definitions/models";
 import { AuthorityItem } from "@/definitions/models";
-import _ from "lodash";
+import { drop, take } from "lodash";
 import Vuetify from "./plugins/vuetify";
 import { MENU_TYPE } from "@/definitions/selections";
 import config from "./configs";
@@ -248,7 +248,7 @@ const authority = {
             text: "",
             type: MENU_TYPE.G,
             items: [
-              ..._.take(drawers, groupIndex[0]),
+              ...take(drawers, groupIndex[0]),
               ...groupItems.map((group: Drawer, index: number) => {
                 let nextIndex;
                 if (groupIndex.length > index + 1) {
@@ -259,8 +259,8 @@ const authority = {
                 const numberOfChildren = nextIndex - groupIndex[index] - 1;
                 return {
                   ...group,
-                  items: _.take(
-                    _.drop(drawers, groupIndex[index] + 1),
+                  items: take(
+                    drop(drawers, groupIndex[index] + 1),
                     numberOfChildren,
                   ),
                 };
