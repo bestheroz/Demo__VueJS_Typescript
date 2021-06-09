@@ -6,7 +6,7 @@ import { Drawer, SelectItem } from "@/definitions/types";
 import jwt_decode from "jwt-decode";
 import type { Authority, MemberConfig, Menu } from "@/definitions/models";
 import { AuthorityItem } from "@/definitions/models";
-import { drop, take } from "lodash";
+import { drop, take } from "lodash-es";
 import Vuetify from "./plugins/vuetify";
 import { MENU_TYPE } from "@/definitions/selections";
 import config from "./configs";

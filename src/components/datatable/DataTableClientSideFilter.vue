@@ -47,7 +47,7 @@
 <script lang="ts">
 import { Component, Emit, Prop, Vue, Watch } from "vue-property-decorator";
 import type { DataTableHeader, SelectItem } from "@/definitions/types";
-import { debounce, DebouncedFunc, isArray } from "lodash";
+import { debounce, DebouncedFunc, isArray } from "lodash-es";
 
 @Component({ name: "DataTableClientSideFilter" })
 export default class extends Vue {

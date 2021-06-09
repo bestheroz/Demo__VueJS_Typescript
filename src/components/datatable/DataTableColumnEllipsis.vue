@@ -42,7 +42,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
-import { debounce, DebouncedFunc, uniqueId } from "lodash";
+import { debounce, DebouncedFunc, uniqueId } from "lodash-es";
 
 @Component({ name: "DataTableColumnEllipsis" })
 export default class extends Vue {

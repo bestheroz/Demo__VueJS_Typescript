@@ -1,7 +1,7 @@
 import store from "@/store";
 import { DateTime, SelectItem } from "@/definitions/types";
 import dayjs from "dayjs";
-import { truncate } from "lodash";
+import { truncate } from "lodash-es";
 
 export function getMemberNm(value: string | undefined | null): string {
   const find: SelectItem = store.getters.memberCodes.find(

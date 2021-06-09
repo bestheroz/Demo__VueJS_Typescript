@@ -5,7 +5,7 @@ import { goErrorPage } from "@/utils/errors";
 import { deleteApi, getApi, postApi } from "@/utils/apis";
 import { MemberConfig } from "@/definitions/models";
 import { SelectItem } from "@/definitions/types";
-import { debounce } from "lodash";
+import { debounce } from "lodash-es";
 import { defaultMemberConfig } from "@/definitions/defaults";
 
 export async function goLoginPage(): Promise<void> {

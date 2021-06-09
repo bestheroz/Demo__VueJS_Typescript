@@ -87,7 +87,7 @@ import DataTableFilter from "@/components/datatable/DataTableFilter.vue";
 import qs from "qs";
 import { defaultMember } from "@/definitions/defaults";
 import type { Member } from "@/definitions/models";
-import { cloneDeep } from "lodash";
+import { cloneDeep } from "lodash-es";
 import { getTextOfSelectItem } from "@/utils/codes";
 import PageTitle from "@/components/title/PageTitle.vue";
 

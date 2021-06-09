@@ -16,6 +16,7 @@ import Vuetify from "@/plugins/vuetify";
 import DefaultLayout from "@/layouts/DefaultLayout.vue";
 import SimpleLayout from "@/layouts/SimpleLayout.vue";
 import envs from "@/constants/envs";
+import { cloneDeep } from "lodash-es";
 
 @Component({
   components: {
@@ -35,6 +36,7 @@ export default class extends Vue {
   }
 
   protected async mounted(): Promise<void> {
+    cloneDeep("");
     document.title = envs.PRODUCT_TITLE;
   }
 

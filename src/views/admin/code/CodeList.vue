@@ -78,7 +78,7 @@ import CodeEditDialog from "@/views/admin/code/CodeEditDialog.vue";
 import { confirmDelete } from "@/utils/alerts";
 import { defaultCode } from "@/definitions/defaults";
 import type { Code } from "@/definitions/models";
-import { cloneDeep } from "lodash";
+import { cloneDeep } from "lodash-es";
 import { getTextOfSelectItem } from "@/utils/codes";
 
 @Component({

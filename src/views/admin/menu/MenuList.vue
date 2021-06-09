@@ -71,7 +71,7 @@ import { confirmDelete } from "@/utils/alerts";
 import MenuEditDialog from "@/views/admin/menu/MenuEditDialog.vue";
 import draggable from "vuedraggable";
 import { defaultMenu } from "@/definitions/defaults";
-import { cloneDeep } from "lodash";
+import { cloneDeep } from "lodash-es";
 import type { Menu } from "@/definitions/models";
 import { MENU_TYPE } from "@/definitions/selections";
 import PageTitle from "@/components/title/PageTitle.vue";
