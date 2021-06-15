@@ -79,7 +79,7 @@ import type {
   Pagination,
   SelectItem,
 } from "@/definitions/types";
-import { deleteApi, getApi, getExcelApi } from "@/utils/apis";
+import { deleteApi, getApi, getFileApi } from "@/utils/apis";
 import envs from "@/constants/envs";
 import MemberEditDialog from "@/views/admin/member/MemberEditDialog.vue";
 import { confirmDelete } from "@/utils/alerts";
@@ -245,7 +245,7 @@ export default class extends Vue {
 
   protected async excel(): Promise<void> {
     this.saving = true;
-    await getExcelApi("admin/members/download/excel/");
+    await getFileApi("admin/members/download/excel/");
     this.saving = false;
   }
 }

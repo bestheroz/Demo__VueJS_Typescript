@@ -199,7 +199,7 @@ axiosInstanceForExcel.interceptors.response.use(
   async (error: AxiosError) => onRejected(error),
 );
 
-export async function getExcelApi(url: string): Promise<void> {
+export async function getFileApi(url: string): Promise<void> {
   const response = await axiosInstanceForExcel.get<Blob>(`api/${url}`);
   const newUrl = window.URL.createObjectURL(
     new Blob([response?.data], { type: response.headers["content-type"] }),
