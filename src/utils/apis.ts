@@ -213,6 +213,9 @@ export async function getFileApi(url: string): Promise<void> {
       .split("=")
       .pop()
       .split(";")
+      .join("")
+      // eslint-disable-next-line
+      .split('"')
       .join(""),
   );
   document.body.appendChild(tempLink);
