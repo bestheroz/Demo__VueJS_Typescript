@@ -34,7 +34,7 @@
             </v-icon>
             <v-icon v-else small> mdi-circle-outline </v-icon>
           </template>
-          <template v-if="AUTHORITY" #[`item.authority`]="{ item }">
+          <template v-if="AUTHORITY" #[`item.authorities`]="{ item }">
             <v-chip
               v-text="getTextOfSelectItem(AUTHORITY, authority.authorityId)"
               v-for="authority in item.authorities"
@@ -132,9 +132,8 @@ export default class extends Vue {
       {
         text: "권한",
         align: "center",
-        value: "authority",
-        filterType: "select",
-        filterSelectItem: this.AUTHORITY.filter((a) => a.value !== 1),
+        value: "authorities",
+        filterable: false,
       },
       {
         text: "작업 일시",

@@ -121,7 +121,7 @@ export default class extends Vue {
     this.filtersMap = this.headers.map((header) => {
       let condition;
       if (header.filterType === "select") {
-        condition = "set";
+        condition = "equals";
       } else if (header.filterType === "switch") {
         condition = "booleanEquals";
       } else {
@@ -137,16 +137,9 @@ export default class extends Vue {
       this.filtersMap[index] = { ...this.filtersMap[index], value: filter };
     });
     return Object.fromEntries(
-      Object.entries(
-        this.filtersMap.filter(
-          (filter) =>
-            (filter.condition !== "set" && filter.value) ||
-            (filter.condition === "set" && (filter.value || []).length > 0),
-        ),
-      ).map(([, v]) => [
-        `${v.key}:${v.condition || "contains"}`,
-        v.value || "",
-      ]),
+      Object.entries(this.filtersMap.filter((filter) => filter.value)).map(
+        ([, v]) => [`${v.key}:${v.condition || "contains"}`, v.value || ""],
+      ),
     );
   }
 }
