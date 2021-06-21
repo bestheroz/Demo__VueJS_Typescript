@@ -186,13 +186,6 @@ const config1 = {
       commit("setToolbarTheme", toolbarTheme);
       uploadConfig(getters.config);
     },
-    setToolbarDetached: async (
-      { commit, getters }: ActionContext<any, any>,
-      isToolbarDetached: boolean,
-    ) => {
-      commit("setToolbarDetached", isToolbarDetached);
-      uploadConfig(getters.config);
-    },
     setPrimaryColor: async (
       { commit, getters }: ActionContext<any, any>,
       primaryColor: string,
