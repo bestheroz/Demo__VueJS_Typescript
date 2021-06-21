@@ -182,6 +182,6 @@ export default class extends Vue {
 </script>
 <style lang="scss" scoped>
 .bottom-dotted {
-  border-bottom: 1px dotted var(--v-secondary-base);
+  border-bottom: 1px solid var(--v-secondary-base);
 }
 </style>
