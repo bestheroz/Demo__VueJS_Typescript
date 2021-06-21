@@ -16,7 +16,7 @@
                   <v-list-item
                     :key="item.displayOrder"
                     v-for="item in vModel.items"
-                    class="elevation-1 bottom-dotted"
+                    class="elevation-1 bottom-solid"
                   >
                     <v-list-item-icon>
                       <v-icon v-text="item.menu.icon" />
@@ -181,7 +181,7 @@ export default class extends Vue {
 }
 </script>
 <style lang="scss" scoped>
-.bottom-dotted {
+.bottom-solid {
   border-bottom: 1px solid var(--v-secondary-base);
 }
 </style>
