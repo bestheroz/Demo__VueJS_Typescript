@@ -5,7 +5,6 @@ import Swal from "sweetalert2/src/sweetalert2.js";
 
 const Toast = Swal.mixin({
   toast: true,
-  backdrop: false,
   position: "top",
   showCloseButton: true,
   showConfirmButton: false,
@@ -79,8 +78,27 @@ export async function confirmDelete(
     text: text,
     icon: "question",
     showConfirmButton: true,
-    showCancelButton: false,
+    showCancelButton: true,
     confirmButtonColor: "var(--v-primary-base)",
     confirmButtonText: "삭제 하겠습니다",
+    cancelButtonColor: "var(--v-secondary-base)",
+    cancelButtonText: "취소",
+  });
+}
+
+export async function cancelAward(
+  title = "취소하시겠습니까?",
+  text = "",
+): Promise<SweetAlertResult> {
+  return await Toast.fire({
+    title: title,
+    text: text,
+    icon: "question",
+    showConfirmButton: true,
+    showCancelButton: true,
+    confirmButtonColor: "var(--v-primary-base)",
+    confirmButtonText: "시상을 취소하겠습니다",
+    cancelButtonColor: "var(--v-secondary-base)",
+    cancelButtonText: "취소",
   });
 }
