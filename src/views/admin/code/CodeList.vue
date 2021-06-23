@@ -206,7 +206,7 @@ export default class extends Vue {
   }
 
   protected async remove(value: Code): Promise<void> {
-    const result = await confirmDelete(undefined, `코드: ${value.value}`);
+    const result = await confirmDelete(`코드: ${value.value}`);
     if (result.value) {
       this.saving = true;
       const response = await deleteApi<Code>(`admin/codes/${value.id}/`);

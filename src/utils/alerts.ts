@@ -55,50 +55,38 @@ export function toastCloseAll(): void {
 
 export async function confirm(
   title: string,
-  text = "",
+  text?: string,
   confirmButtonText = "확인",
+  cancelButtonText = "취소",
 ): Promise<SweetAlertResult> {
   return await Toast.fire({
     title: title,
     text: text,
     icon: "question",
     showConfirmButton: true,
-    showCancelButton: false,
     confirmButtonColor: "var(--v-primary-base)",
     confirmButtonText: confirmButtonText,
+    showCancelButton: true,
+    cancelButtonColor: "var(--v-secondary-base)",
+    cancelButtonText: cancelButtonText,
   });
 }
 
 export async function confirmDelete(
+  text?: string,
   title = "삭제 하시겠습니까?",
-  text = "",
+  confirmButtonText = "삭제 하겠습니다",
+  cancelButtonText = "취소",
 ): Promise<SweetAlertResult> {
   return await Toast.fire({
     title: title,
     text: text,
     icon: "question",
     showConfirmButton: true,
+    confirmButtonColor: "var(--v-error-base)",
+    confirmButtonText: confirmButtonText,
     showCancelButton: true,
-    confirmButtonColor: "var(--v-primary-base)",
-    confirmButtonText: "삭제 하겠습니다",
     cancelButtonColor: "var(--v-secondary-base)",
-    cancelButtonText: "취소",
-  });
-}
-
-export async function cancelAward(
-  title = "취소하시겠습니까?",
-  text = "",
-): Promise<SweetAlertResult> {
-  return await Toast.fire({
-    title: title,
-    text: text,
-    icon: "question",
-    showConfirmButton: true,
-    showCancelButton: true,
-    confirmButtonColor: "var(--v-primary-base)",
-    confirmButtonText: "시상을 취소하겠습니다",
-    cancelButtonColor: "var(--v-secondary-base)",
-    cancelButtonText: "취소",
+    cancelButtonText: cancelButtonText,
   });
 }

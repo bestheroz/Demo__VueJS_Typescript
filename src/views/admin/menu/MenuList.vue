@@ -141,7 +141,7 @@ export default class extends Vue {
   }
 
   protected async onDelete(value: Menu): Promise<void> {
-    const result = await confirmDelete(undefined, `메뉴명: ${value.name}`);
+    const result = await confirmDelete(`메뉴명: ${value.name}`);
     if (result.value) {
       this.saving = true;
       const response = await deleteApi<Menu>(`admin/menus/${value.id}/`);

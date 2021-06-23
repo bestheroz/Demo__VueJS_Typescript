@@ -244,10 +244,7 @@ export default class extends Vue {
   }
 
   protected async remove(value: Member): Promise<void> {
-    const result = await confirmDelete(
-      undefined,
-      `사용자아이디: ${value.userId}`,
-    );
+    const result = await confirmDelete(`사용자아이디: ${value.userId}`);
     if (result.value) {
       this.saving = true;
       const response = await deleteApi<Member>(`admin/members/${value.id}/`);
