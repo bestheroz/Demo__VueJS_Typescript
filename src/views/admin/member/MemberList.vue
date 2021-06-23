@@ -37,6 +37,16 @@
             </v-icon>
             <v-icon v-else small> mdi-circle-outline </v-icon>
           </template>
+          <template #[`item.loginable`]="{ item }">
+            <v-icon
+              v-if="item.available && dayjs(item.expired).isAfter(dayjs())"
+              small
+              color="success"
+            >
+              mdi-check-circle
+            </v-icon>
+            <v-icon v-else small> mdi-circle-outline </v-icon>
+          </template>
           <template v-if="AUTHORITY" #[`item.authorityId`]="{ item }">
             <v-chip
               v-text="getTextOfSelectItem(AUTHORITY, item.authorityId)"
@@ -90,6 +100,7 @@ import type { Member } from "@/definitions/models";
 import { cloneDeep } from "lodash-es";
 import { getTextOfSelectItem } from "@/utils/codes";
 import PageTitle from "@/components/title/PageTitle.vue";
+import dayjs from "dayjs";
 
 @Component({
   components: {
@@ -101,6 +112,7 @@ import PageTitle from "@/components/title/PageTitle.vue";
 export default class extends Vue {
   @Prop() readonly height!: number | string;
 
+  readonly dayjs = dayjs;
   readonly envs: typeof envs = envs;
   readonly getTextOfSelectItem = getTextOfSelectItem;
   selected: Member[] = [];
@@ -150,6 +162,12 @@ export default class extends Vue {
         align: "center",
         value: "available",
         filterType: "switch",
+        width: "6rem",
+      },
+      {
+        text: "로그인 가능",
+        align: "center",
+        value: "loginable",
         width: "6rem",
       },
       {
