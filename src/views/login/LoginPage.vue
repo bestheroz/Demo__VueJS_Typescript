@@ -1,22 +1,13 @@
 <template>
-  <v-container class="fill-height" tag="section">
-    <v-row justify="center">
-      <v-card min-width="25vw" width="25vw" class="elevation-12">
-        <v-toolbar color="primary" dark flat>
-          <v-toolbar-title>Login at demo</v-toolbar-title>
-          <v-spacer />
-          <template #heading>
-            <div class="text-center">
-              <h1 class="display-2 font-weight-bold">
-                <v-icon>mdi-lock-outline</v-icon>
-                Login
-              </h1>
-            </div>
-          </template>
-        </v-toolbar>
+  <div>
+    <v-card class="text-center pa-1">
+      <v-card-title class="justify-center display-1 mb-2">Welcome</v-card-title>
+      <v-card-subtitle>Sign in to your account</v-card-subtitle>
 
-        <ValidationObserver ref="observer">
-          <v-card-text class="text-center">
+      <!-- sign in form -->
+      <v-card-text>
+        <v-form ref="form">
+          <ValidationObserver ref="observer">
             <ValidationProvider
               v-slot="{ errors, valid }"
               name="ID"
@@ -24,10 +15,14 @@
             >
               <v-text-field
                 v-model="userId"
-                label="ID..."
+                :validate-on-blur="false"
+                label="ID"
+                name="userId"
+                outlined
                 :error-messages="errors"
                 :success="valid"
-                @keyup.enter="login"
+                @keyup.enter="submit"
+                @change="resetErrors"
               />
             </ValidationProvider>
             <ValidationProvider
@@ -37,59 +32,64 @@
             >
               <v-text-field
                 v-model="password"
-                label="Password..."
+                :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+                :type="showPassword ? 'text' : 'password'"
+                label="Password"
+                name="password"
+                outlined
                 :error-messages="errors"
                 :success="valid"
-                :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
-                :type="show1 ? 'text' : 'password'"
-                @keyup.enter="login"
-                @click:append="show1 = !show1"
+                @change="resetErrors"
+                @keyup.enter="submit"
+                @click:append="showPassword = !showPassword"
               />
             </ValidationProvider>
+
             <v-btn
-              large
-              color="primary"
-              outlined
               :loading="loading"
-              @click="login"
+              block
+              x-large
+              color="primary"
+              @click="submit"
             >
-              <v-icon class="pr-2">mdi-login</v-icon>
-              Let's Go
+              Sign In
             </v-btn>
-          </v-card-text>
-          <v-system-bar color="secondary" class="text-center d-block" dark>
-            테스트 계정 ==> 1 / 1
-          </v-system-bar>
-        </ValidationObserver>
-      </v-card>
-    </v-row>
-    <new-password-dialog
-      :user-id="userId"
-      :dialog.sync="dialog"
-      v-if="dialog"
-    />
-  </v-container>
+            <div v-if="errorProvider" class="error--text">
+              {{ errorProviderMessages }}
+            </div>
+          </ValidationObserver>
+        </v-form>
+      </v-card-text>
+    </v-card>
+  </div>
 </template>
 
 <script lang="ts">
 import { Component, Ref, Vue } from "vue-property-decorator";
-import { alertAxiosError, ApiDataResult, axiosInstance } from "@/utils/apis";
-import NewPasswordDialog from "@/views/login/NewPasswordDialog.vue";
 import { ValidationObserver } from "vee-validate";
 import pbkdf2 from "pbkdf2";
-import { toastCloseAll, toastError } from "@/utils/alerts";
-import { defaultAuthority, defaultUser } from "@/definitions/defaults";
+import { alertAxiosError, ApiDataResult, axiosInstance } from "@/utils/apis";
+import { toastCloseAll } from "@/utils/alerts";
+import { defaultMemberConfig, defaultUser } from "@/definitions/defaults";
 import { getYourConfig } from "@/utils/commands";
 
-@Component({ components: { NewPasswordDialog } })
+@Component({
+  components: {},
+})
 export default class extends Vue {
   @Ref("observer") readonly observer!: InstanceType<typeof ValidationObserver>;
 
   userId = "";
   password = "";
-  show1 = false;
-  loading = false;
+
   dialog = false;
+  loading = false;
+
+  errorProvider = false;
+  errorProviderMessages = "";
+
+  // show password field
+  showPassword = false;
 
   protected async created(): Promise<void> {
     this.$vuetify.theme.dark = false;
@@ -98,12 +98,12 @@ export default class extends Vue {
   protected async mounted(): Promise<void> {
     await this.$store.commit("setUser", defaultUser());
     await this.$store.dispatch("resetConfig");
-    await this.$store.commit("setAuthority", defaultAuthority());
+    await this.$store.commit("setAuthority", null);
     await this.$store.commit("setMemberCodes", null);
     window.localStorage.clear();
   }
 
-  protected async login(): Promise<void> {
+  protected async submit(): Promise<void> {
     const inValid = await this.observer.validate();
     if (!inValid) {
       return;
@@ -135,16 +135,24 @@ export default class extends Vue {
           refreshToken: response.data.data.refreshToken,
         });
         await this.$store.dispatch("resetAuthority");
-        await this.$store.commit("setConfig", await getYourConfig());
+        await this.$store.commit(
+          "setConfig",
+          (await getYourConfig()) || defaultMemberConfig(),
+        );
         await this.$store.dispatch("resetMemberCodes");
         toastCloseAll();
         await this.$router.push("/");
       } else {
-        toastError(response?.data?.message);
+        this.errorProvider = true;
+        this.errorProviderMessages = response?.data?.message;
       }
     } catch (e) {
       alertAxiosError(e);
     }
+  }
+  protected resetErrors(): void {
+    this.errorProvider = false;
+    this.errorProviderMessages = "";
   }
 }
 </script>

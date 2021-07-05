@@ -36,6 +36,9 @@ export function getEllipseText(
   });
 }
 
-export function getSwitchLabel(yn: boolean, prefix?: string): string {
-  return (prefix?.trim() || "") + (yn ? " 사용" : " 사용안함");
+export function getSwitchLabel(
+  yn: boolean,
+  text = ["사용", "사용안함"],
+): string {
+  return yn ? text[0] : text[1];
 }

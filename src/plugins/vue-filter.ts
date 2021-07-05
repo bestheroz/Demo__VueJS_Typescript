@@ -36,6 +36,6 @@ Vue.filter(
 Vue.filter("getEllipseText", function (text: string, length: number): string {
   return getEllipseText(text, length);
 });
-Vue.filter("getSwitchLabel", function (yn: boolean, prefix?: string): string {
-  return getSwitchLabel(yn, prefix);
+Vue.filter("getSwitchLabel", function (yn: boolean, text?: string[]): string {
+  return getSwitchLabel(yn, text);
 });

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-bottom-sheet v-model="syncedDialog" inset scrollable>
+    <v-bottom-sheet v-model="syncedDialog" inset scrollable max-width="35vw">
       <v-card class="pb-4">
         <dialog-title text="내 정보 변경" @click:close="syncedDialog = false" />
         <v-card-text>

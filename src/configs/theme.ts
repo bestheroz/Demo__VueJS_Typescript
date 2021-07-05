@@ -11,9 +11,6 @@ export default {
   // wrap pages content with a max-width
   isContentBoxed: false,
 
-  // application is right to left
-  isRTL: false,
-
   // dark theme colors
   dark: {
     background: "#05090c",

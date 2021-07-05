@@ -24,7 +24,7 @@ export interface Member {
   loginFailCnt: number;
   expired: DateTime;
   available: boolean;
-  authorityId: number;
+  authority: number | null;
   token: string;
   config: MemberConfig | null;
 }
@@ -37,7 +37,7 @@ export interface Menu {
   updated?: DateTime;
   name: string;
   type: string;
-  parentId: number;
+  parentId: number | null;
   displayOrder: number;
   icon: string | null;
   url: string | null;
@@ -45,28 +45,10 @@ export interface Menu {
 
 export interface AuthorityItem {
   id?: number | null;
+  authority: string;
   displayOrder: number;
   menu: Menu;
   typesJson: string[];
-}
-export interface Authority {
-  id?: number;
-  createdBy?: string;
-  created?: DateTime;
-  updatedBy?: string;
-  updated?: DateTime;
-  code: string;
-  name: string;
-  items: AuthorityItem[];
-}
-
-export interface CodeAuthority {
-  id?: number;
-  createdBy?: string;
-  created?: DateTime;
-  updatedBy?: string;
-  updated?: DateTime;
-  authorityId: number;
 }
 
 export interface Code {
@@ -79,6 +61,5 @@ export interface Code {
   value: string;
   name: string;
   available: boolean;
-  displayOrder: number;
-  authorities: CodeAuthority[];
+  displayOrder: number | null;
 }

@@ -3,10 +3,11 @@ import axios from "axios";
 import envs from "@/constants/envs";
 import { goErrorPage } from "@/utils/errors";
 import { deleteApi, getApi, postApi } from "@/utils/apis";
-import { MemberConfig } from "@/definitions/models";
+import { AuthorityItem, MemberConfig } from "@/definitions/models";
 import { SelectItem } from "@/definitions/types";
 import { debounce } from "lodash-es";
 import { defaultMemberConfig } from "@/definitions/defaults";
+import store from "@/store";
 
 export async function goLoginPage(): Promise<void> {
   if (router.currentRoute.path !== "/login") {
@@ -69,4 +70,17 @@ export function logout(): void {
     console.error(e);
   }
   router.replace("/login").then();
+}
+
+export function hasAuthority(
+  type: string,
+  path = router.currentRoute.fullPath,
+): boolean {
+  if (store.getters.isSuperUser) {
+    return true;
+  }
+  const find = store.getters.authority.find(
+    (item: AuthorityItem) => item.menu.url === path,
+  );
+  return (find?.typesJson || []).includes(type);
 }

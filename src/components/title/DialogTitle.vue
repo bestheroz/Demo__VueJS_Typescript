@@ -12,7 +12,7 @@
       <v-spacer />
       <v-switch
         v-model="available"
-        :label="available | getSwitchLabel"
+        :label="getSwitchLabel(available, switchText)"
         inset
         color="primary"
         :disabled="disabledSwitch"
@@ -47,6 +47,7 @@ import { Component, Prop, VModel, Vue } from "vue-property-decorator";
 export default class extends Vue {
   @VModel({ type: Boolean }) available!: boolean;
   @Prop({ type: Boolean }) readonly withSwitch!: boolean;
+  @Prop({ type: Array }) readonly switchText!: string[];
   @Prop({ type: Boolean }) readonly disabledSwitch!: boolean;
   @Prop({}) readonly prefix!: string;
   @Prop({}) readonly text!: string;
@@ -58,7 +59,13 @@ export default class extends Vue {
     if (this.text) {
       return this.text;
     } else if (this.prefix) {
-      return `${this.prefix} ${this.isNew ? "추가" : "수정"} `;
+      return `${this.prefix} ${
+        this.$store.getters.writeAuthority
+          ? this.isNew
+            ? "등록"
+            : "수정"
+          : "보기"
+      } `;
     } else {
       return "";
     }

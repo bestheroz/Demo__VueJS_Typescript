@@ -35,12 +35,9 @@
       :color="toolbarTheme === 'light' ? 'white' : 'dark'"
       :light="toolbarTheme === 'light'"
       :dark="toolbarTheme === 'dark'"
-      height="30"
+      height="35"
     >
-      <v-subheader>
-        <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-        {{ title || "" }}
-      </v-subheader>
+      <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
       <button-icon-tooltip
         icon-style
         text="홈으로"
@@ -49,7 +46,7 @@
       />
       <button-icon-tooltip
         icon-style
-        text="Theme"
+        text="테마"
         icon="mdi-palette"
         @click="toolbarThemeDialog = true"
       />
@@ -59,18 +56,19 @@
         icon="mdi-account-edit-outline"
         @click="editMeDialog = true"
       />
-      <button-icon-tooltip
-        icon-style
-        text="Logout"
-        icon="mdi-logout"
-        @click="logout"
-      />
       <v-spacer />
-      <v-subheader class="pl-0">
+      <v-subheader v-text="now" />
+      <v-spacer />
+      <v-subheader>
         <v-icon> mdi-account-outline</v-icon>
         {{ $store.getters.user.name }}
       </v-subheader>
-      <v-subheader class="pl-0" v-text="now" />
+      <button-icon-tooltip
+        icon-style
+        text="로그아웃"
+        icon="mdi-logout"
+        @click="logout"
+      />
     </v-system-bar>
     <edit-me-dialog :dialog.sync="editMeDialog" v-if="editMeDialog" />
     <toolbar-theme v-model="toolbarThemeDialog" />

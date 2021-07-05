@@ -4,13 +4,19 @@ import createPersistedState from "vuex-persistedstate";
 import { Drawer, SelectItem } from "@/definitions/types";
 // eslint-disable-next-line camelcase
 import jwt_decode from "jwt-decode";
-import type { Authority, MemberConfig, Menu } from "@/definitions/models";
+import type { MemberConfig, Menu } from "@/definitions/models";
 import { AuthorityItem } from "@/definitions/models";
 import { drop, take } from "lodash-es";
 import Vuetify from "./plugins/vuetify";
-import { MENU_TYPE } from "@/definitions/selections";
+import { AUTHORITY_ITEM_TYPE, MENU_TYPE } from "@/definitions/selections";
 import config from "./configs";
-import { getAccessToken, getMemberCodes, uploadConfig } from "@/utils/commands";
+import {
+  getAccessToken,
+  getMemberCodes,
+  hasAuthority,
+  logout,
+  uploadConfig,
+} from "@/utils/commands";
 import { defaultMemberConfig } from "@/definitions/defaults";
 import { getApi } from "@/utils/apis";
 
@@ -22,7 +28,7 @@ const user = {
     id: 0,
     userId: "",
     name: "",
-    authorityId: 0,
+    authority: 0,
     accessToken: null,
     refreshToken: null,
   },
@@ -32,7 +38,7 @@ const user = {
         id: state.id,
         userId: state.userId,
         name: state.name,
-        authorityId: state.authorityId,
+        authority: state.authority,
       };
     },
     loggedIn: (state: any): boolean => {
@@ -47,17 +53,22 @@ const user = {
   },
   mutations: {
     setAccessToken(state: any, accessToken: string): void {
-      const jwt = jwt_decode<{
-        exp: number;
-        userId: string;
-        userVO: string;
-      }>(accessToken);
-      const user = JSON.parse(jwt.userVO);
-      state.id = user.id;
-      state.userId = user.userId;
-      state.name = user.name;
-      state.authorityId = user.authorityId;
-      state.accessToken = accessToken;
+      try {
+        const jwt =
+          jwt_decode<{
+            exp: number;
+            userId: string;
+            userVO: string;
+          }>(accessToken);
+        const user = JSON.parse(jwt.userVO);
+        state.id = user.id;
+        state.userId = user.userId;
+        state.name = user.name;
+        state.authority = user.authority;
+        state.accessToken = accessToken;
+      } catch (e: unknown) {
+        logout();
+      }
     },
     setRefreshToken(state: any, refreshToken: string): void {
       state.refreshToken = refreshToken;
@@ -68,13 +79,13 @@ const user = {
         id: number;
         userId: string;
         name: string;
-        authorityId: number;
+        authority: number;
       },
     ) => {
       state.id = member.id;
       state.userId = member.userId;
       state.name = member.name;
-      state.authorityId = member.authorityId;
+      state.authority = member.authority;
       state.accessToken = null;
       state.refreshToken = null;
     },
@@ -153,7 +164,6 @@ const config1 = {
       state.globalTheme = config.globalTheme;
       state.contentBoxed = config.contentBoxed;
       state.menuTheme = config.menuTheme;
-      state.toolbarTheme = config.toolbarTheme;
       state.primaryColor = config.primaryColor;
     },
   },
@@ -186,6 +196,13 @@ const config1 = {
       commit("setToolbarTheme", toolbarTheme);
       uploadConfig(getters.config);
     },
+    setToolbarDetached: async (
+      { commit, getters }: ActionContext<any, any>,
+      isToolbarDetached: boolean,
+    ) => {
+      commit("setToolbarDetached", isToolbarDetached);
+      uploadConfig(getters.config);
+    },
     setPrimaryColor: async (
       { commit, getters }: ActionContext<any, any>,
       primaryColor: string,
@@ -204,8 +221,9 @@ const config1 = {
 const authority = {
   state: {
     code: "",
-    name: "",
     items: [],
+    writeAuthority: false,
+    deleteAuthority: false,
   },
   getters: {
     drawers: (state: any): Drawer[] => {
@@ -263,17 +281,32 @@ const authority = {
         ];
       }
     },
+    isSuperUser: (state: any): boolean => {
+      return state.code === "SUPER";
+    },
+    authority: (state: any): void => {
+      return state.items;
+    },
+    writeAuthority: (state: any): boolean => {
+      return state.writeAuthority;
+    },
+    deleteAuthority: (state: any): boolean => {
+      return state.deleteAuthority;
+    },
   },
   mutations: {
-    setAuthority(state: any, authority: Authority): void {
-      state.code = authority.code;
-      state.name = authority.name;
-      state.items = authority.items;
+    setAuthority(state: any, items: AuthorityItem[]): void {
+      state.code = items?.[0]?.authority;
+      state.items = items || [];
+    },
+    resetMenuAuthority(state: any, path: string): void {
+      state.writeAuthority = hasAuthority(AUTHORITY_ITEM_TYPE.WRITE, path);
+      state.deleteAuthority = hasAuthority(AUTHORITY_ITEM_TYPE.DELETE, path);
     },
   },
   actions: {
     async resetAuthority({ commit }: ActionContext<any, any>): Promise<void> {
-      const response = await getApi("members/mine/authority").then();
+      const response = await getApi<AuthorityItem[]>("members/mine/authority");
       commit("setAuthority", response.data);
     },
   },

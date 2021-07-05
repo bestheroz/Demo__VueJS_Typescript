@@ -4,16 +4,14 @@
     <v-card>
       <v-card-text>
         <v-data-table
-          v-model="selected"
           must-sort
           fixed-header
           :loading="loading"
           :headers="headers"
           :items="items"
+          :server-items-length="numberOfItems"
           :options.sync="pagination"
           item-key="id"
-          single-select
-          show-select
           :height="height"
           :footer-props="envs.FOOTER_PROPS_MAX_100"
         >
@@ -21,6 +19,7 @@
             <data-table-filter
               :headers="headers"
               :filter.sync="datatableFilter"
+              filter-first-column
             />
           </template>
           <template #[`item.userId`]="{ item }">
@@ -32,26 +31,23 @@
             </a>
           </template>
           <template #[`item.available`]="{ item }">
-            <v-icon v-if="item.available" small color="success">
+            <v-icon v-if="item.available" color="success">
               mdi-check-circle
             </v-icon>
-            <v-icon v-else small> mdi-circle-outline </v-icon>
+            <v-icon v-else> mdi-circle-outline </v-icon>
           </template>
           <template #[`item.loginable`]="{ item }">
             <v-icon
               v-if="item.available && dayjs(item.expired).isAfter(dayjs())"
-              small
               color="success"
             >
               mdi-check-circle
             </v-icon>
-            <v-icon v-else small> mdi-circle-outline </v-icon>
+            <v-icon v-else> mdi-circle-outline </v-icon>
           </template>
-          <template v-if="AUTHORITY" #[`item.authorityId`]="{ item }">
-            <v-chip
-              v-text="getTextOfSelectItem(AUTHORITY, item.authorityId)"
-              color="primary"
-              small
+          <template v-if="AuthorityTypes" #[`item.authority`]="{ item }">
+            <span
+              v-text="getTextOfSelectItem(AuthorityTypes, item.authority)"
             />
           </template>
           <template #[`item.expired`]="{ item }">
@@ -87,9 +83,8 @@ import type {
   DataTableHeader,
   PageResult,
   Pagination,
-  SelectItem,
 } from "@/definitions/types";
-import { deleteApi, getApi, getFileApi } from "@/utils/apis";
+import { deleteApi, downloadExcelApi, getApi } from "@/utils/apis";
 import envs from "@/constants/envs";
 import MemberEditDialog from "@/views/admin/member/MemberEditDialog.vue";
 import { confirmDelete } from "@/utils/alerts";
@@ -101,6 +96,7 @@ import { cloneDeep } from "lodash-es";
 import { getTextOfSelectItem } from "@/utils/codes";
 import PageTitle from "@/components/title/PageTitle.vue";
 import dayjs from "dayjs";
+import { AuthorityTypes } from "@/definitions/selections";
 
 @Component({
   components: {
@@ -112,27 +108,27 @@ import dayjs from "dayjs";
 export default class extends Vue {
   @Prop() readonly height!: number | string;
 
-  readonly dayjs = dayjs;
   readonly envs: typeof envs = envs;
+  readonly dayjs = dayjs;
   readonly getTextOfSelectItem = getTextOfSelectItem;
-  selected: Member[] = [];
   pagination: Pagination = {
     page: 1,
-    sortBy: ["authorityId"],
+    sortBy: ["authority"],
     sortDesc: [true],
-    itemsPerPage: 20,
+    itemsPerPage: 10,
   };
 
   items: Member[] = [];
+  numberOfItems = 0;
   loading = false;
   saving = false;
   editItem: Member = defaultMember();
-  AUTHORITY: SelectItem<number>[] = [];
+  readonly AuthorityTypes = AuthorityTypes;
   dialog = false;
   datatableFilter: { [p: string]: string | number } = {};
 
   get headers(): DataTableHeader[] {
-    return [
+    let headers: DataTableHeader[] = [
       {
         text: "사용자아이디",
         align: "start",
@@ -146,9 +142,9 @@ export default class extends Vue {
       {
         text: "권한",
         align: "center",
-        value: "authorityId",
+        value: "authority",
         filterType: "select",
-        filterSelectItem: this.AUTHORITY,
+        filterSelectItem: this.AuthorityTypes,
       },
       {
         text: "만료일",
@@ -169,6 +165,7 @@ export default class extends Vue {
         align: "center",
         value: "loginable",
         width: "6rem",
+        filterable: false,
       },
       {
         text: "작업 일시",
@@ -184,15 +181,21 @@ export default class extends Vue {
         filterable: false,
         width: "8rem",
       },
-      {
-        text: "",
-        align: "center",
-        value: "actions",
-        width: "5rem",
-        filterable: false,
-        sortable: false,
-      },
     ];
+    if (this.$store.getters.writeAuthority) {
+      headers = [
+        ...headers,
+        {
+          text: "Action",
+          align: "center",
+          value: "actions",
+          width: "5rem",
+          filterable: false,
+          sortable: false,
+        },
+      ];
+    }
+    return headers;
   }
 
   get queryString(): string {
@@ -202,21 +205,17 @@ export default class extends Vue {
     });
   }
 
-  protected async created(): Promise<void> {
-    const response = await getApi<SelectItem<number>[]>("auth/codes");
-    this.AUTHORITY = response.data || [];
-  }
-
   @Watch("queryString")
   public async getList(): Promise<void> {
-    this.selected = [];
     this.items = [];
+    this.numberOfItems = 0;
     this.loading = true;
     const response = await getApi<PageResult<Member>>(
       `admin/members/?${this.queryString}`,
     );
     this.loading = false;
     this.items = response?.data?.content || [];
+    this.numberOfItems = response.data.totalElements;
   }
 
   protected onCreated(value: Member): void {
@@ -260,7 +259,7 @@ export default class extends Vue {
 
   protected async excel(): Promise<void> {
     this.saving = true;
-    await getFileApi("admin/members/download/excel/");
+    await downloadExcelApi("admin/members/download/excel/");
     this.saving = false;
   }
 }

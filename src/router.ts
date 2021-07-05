@@ -1,5 +1,5 @@
 import Vue from "vue";
-import Router, { Route } from "vue-router";
+import Router, { RawLocation, Route } from "vue-router";
 import { NavigationGuardNext } from "vue-router/types/router";
 import store from "@/store";
 import { goLoginPage } from "@/utils/commands";
@@ -98,7 +98,7 @@ const routes = () => {
   ];
 };
 
-export default new Router({
+const router = new Router({
   mode: "history",
   base: process.env.BASE_URL,
   scrollBehavior(_to: Route, _from: Route, savedPosition) {
@@ -106,3 +106,45 @@ export default new Router({
   },
   routes: routes(),
 });
+
+const originalPush = router.push;
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+router.push = function push(location: RawLocation, onResolve, onReject) {
+  if (onResolve || onReject) {
+    return originalPush.call(this, location, onResolve, onReject);
+  }
+  return originalPush
+    .call<Router, [RawLocation], Promise<Route>>(this, location)
+    .catch((err: unknown) => {
+      console.log("-> err", err);
+      if (Router.isNavigationFailure(err)) {
+        // resolve err
+        return err;
+      }
+      // rethrow error
+      return Promise.reject(err);
+    });
+};
+
+const originalReplace = router.replace;
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+router.push = function push(location: RawLocation, onResolve, onReject) {
+  if (onResolve || onReject) {
+    return originalReplace.call(this, location, onResolve, onReject);
+  }
+  return originalReplace
+    .call<Router, [RawLocation], Promise<Route>>(this, location)
+    .catch((err: unknown) => {
+      console.log("-> err", err);
+      if (Router.isNavigationFailure(err)) {
+        // resolve err
+        return err;
+      }
+      // rethrow error
+      return Promise.reject(err);
+    });
+};
+
+export default router;

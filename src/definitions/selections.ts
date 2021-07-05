@@ -1,14 +1,20 @@
 import { SelectItem } from "@/definitions/types";
 
-export const AUTHORITY_TYPE = {
-  VIEW: "VIEW",
+export const AUTHORITY_ITEM_TYPE = {
   WRITE: "WRITE",
   DELETE: "DELETE",
+  VIEW: "VIEW",
 };
-export const AuthorityTypeItems: SelectItem[] = [
-  { value: "VIEW", text: "보기" },
-  { value: "WRITE", text: "쓰기" },
-  { value: "DELETE", text: "삭제" },
+export const AUTHORITY_TYPE = {
+  SUPER: "SUPER",
+  ADMIN: "ADMIN",
+  WRITER: "WRITER",
+  VIEWER: "VIEWER",
+};
+export const AuthorityTypes: SelectItem[] = [
+  { value: AUTHORITY_TYPE.ADMIN, text: "관리자 권한" },
+  { value: AUTHORITY_TYPE.WRITER, text: "쓰기 권한" },
+  { value: AUTHORITY_TYPE.VIEWER, text: "보기 권한" },
 ];
 export const MenuTypeItems: SelectItem[] = [
   { value: "G", text: "페이지 그룹" },

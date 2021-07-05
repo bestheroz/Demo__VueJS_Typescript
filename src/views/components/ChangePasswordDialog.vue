@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-bottom-sheet v-model="syncedDialog" inset scrollable>
+    <v-bottom-sheet v-model="syncedDialog" inset scrollable max-width="25vw">
       <v-card class="pb-4">
         <dialog-title
           text="비밀번호 변경"

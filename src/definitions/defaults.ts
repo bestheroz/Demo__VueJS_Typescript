@@ -1,34 +1,31 @@
 import {
-  Authority,
   AuthorityItem,
   Code,
-  CodeAuthority,
   Member,
   MemberConfig,
   Menu,
 } from "@/definitions/models";
 import dayjs from "dayjs";
-import { AUTHORITY_TYPE } from "@/definitions/selections";
-import config from "@/configs";
+import { AUTHORITY_ITEM_TYPE } from "@/definitions/selections";
+import config from "../configs";
 
 export function defaultUser(): {
   id: number;
   userId: string;
   name: string;
-  authorityId: number;
+  authority: number;
 } {
   return {
     id: 0,
     userId: "",
     name: "",
-    authorityId: 0,
+    authority: 0,
   };
 }
 
 export function defaultMemberConfig(): MemberConfig {
   return {
     globalTheme: config.theme.globalTheme as "light" | "dark",
-    toolbarTheme: config.theme.toolbarTheme as "global" | "light" | "dark",
     menuTheme: config.theme.menuTheme as "global" | "light" | "dark",
     contentBoxed: config.theme.isContentBoxed,
     primaryColor: config.theme.light.primary,
@@ -43,7 +40,7 @@ export function defaultMember(): Member {
     expired: dayjs().add(1, "years").endOf("day"),
     available: false,
     config: null,
-    authorityId: 0,
+    authority: null,
     token: "",
   };
 }
@@ -52,8 +49,8 @@ export function defaultMenu(): Menu {
   return {
     name: "",
     type: "G",
-    parentId: 99999,
-    displayOrder: 99999,
+    parentId: null,
+    displayOrder: 0,
     icon: null,
     url: null,
   };
@@ -64,26 +61,14 @@ export function defaultCode(): Code {
     value: "",
     name: "",
     available: false,
-    displayOrder: 0,
-    authorities: [],
+    displayOrder: null,
   };
 }
 export function defaultAuthorityItem(): AuthorityItem {
   return {
     menu: defaultMenu(),
+    authority: "",
     displayOrder: 0,
-    typesJson: [AUTHORITY_TYPE.VIEW],
-  };
-}
-export function defaultAuthority(): Authority {
-  return {
-    code: "",
-    name: "",
-    items: [],
-  };
-}
-export function defaultCodeAuthority(): CodeAuthority {
-  return {
-    authorityId: 0,
+    typesJson: [AUTHORITY_ITEM_TYPE.VIEW],
   };
 }

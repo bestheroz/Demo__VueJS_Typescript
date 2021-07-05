@@ -48,13 +48,9 @@
                   rules="required"
                 >
                   <v-select
-                    v-if="AUTHORITY"
-                    v-model.number="vModel.authorityId"
-                    :items="
-                      AUTHORITY.map((code) => {
-                        return { value: parseInt(code.value), text: code.text };
-                      })
-                    "
+                    v-if="AuthorityTypes"
+                    v-model="vModel.authority"
+                    :items="AuthorityTypes"
                     label="*권한"
                     :error-messages="errors"
                   />
@@ -85,7 +81,7 @@
                   />
                 </ValidationProvider>
               </v-col>
-              <v-col cols="12" md="3">
+              <v-col cols="12" md="3" v-if="$store.getters.writeAuthority">
                 <ValidationProvider
                   v-if="isNew"
                   v-slot="{ errors }"
@@ -115,6 +111,7 @@
             icon="mdi-content-save"
             :loading="loading"
             @click="save"
+            v-if="$store.getters.writeAuthority"
           />
         </v-card-text>
         <created-updated-bar
@@ -128,8 +125,7 @@
 
 <script lang="ts">
 import { Component, PropSync, Ref, VModel, Vue } from "vue-property-decorator";
-import type { SelectItem } from "@/definitions/types";
-import { getApi, patchApi, postApi } from "@/utils/apis";
+import { patchApi, postApi } from "@/utils/apis";
 import DatetimePicker from "@/components/picker/DatetimePicker.vue";
 import { ValidationObserver } from "vee-validate";
 import pbkdf2 from "pbkdf2";
@@ -137,6 +133,7 @@ import DialogTitle from "@/components/title/DialogTitle.vue";
 import type { Member } from "@/definitions/models";
 import CreatedUpdatedBar from "@/components/history/CreatedUpdatedBar.vue";
 import ButtonWithIcon from "@/components/button/ButtonWithIcon.vue";
+import { AuthorityTypes } from "@/definitions/selections";
 
 @Component({
   components: {
@@ -152,15 +149,10 @@ export default class extends Vue {
   @Ref("observer") readonly observer!: InstanceType<typeof ValidationObserver>;
 
   loading = false;
-  AUTHORITY: SelectItem<number>[] = [];
   password2 = "";
   show1 = false;
   show2 = false;
-
-  protected async created(): Promise<void> {
-    const response = await getApi<SelectItem<number>[]>("auth/codes");
-    this.AUTHORITY = response.data || [];
-  }
+  readonly AuthorityTypes = AuthorityTypes;
 
   get isNew(): boolean {
     return !this.vModel.id;

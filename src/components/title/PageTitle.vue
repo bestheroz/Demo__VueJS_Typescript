@@ -4,7 +4,14 @@
     <v-spacer />
     <v-menu bottom left v-if="moreActions">
       <template #activator="{ on, attrs }">
-        <v-btn icon v-bind="attrs" v-on="on" class="mr-1" color="secondary">
+        <v-btn
+          icon
+          large
+          v-bind="attrs"
+          v-on="on"
+          class="mr-1"
+          color="secondary"
+        >
           <v-icon>mdi-dots-vertical</v-icon>
         </v-btn>
       </template>
@@ -14,8 +21,9 @@
     <button-icon-tooltip
       :text="buttonText"
       :icon="buttonIcon"
+      large
       @click="$emit('click')"
-      v-if="!hideButton"
+      v-if="!hideButton && $store.getters.writeAuthority"
     />
   </div>
 </template>

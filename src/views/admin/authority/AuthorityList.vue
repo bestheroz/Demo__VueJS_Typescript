@@ -7,7 +7,7 @@
             <v-list dense>
               <draggable
                 tag="div"
-                v-model="vModel.items"
+                v-model="items"
                 v-bind="dragOptions"
                 handle=".drag-handle"
                 @end="onDraggableEnd"
@@ -15,7 +15,7 @@
                 <transition-group type="transition" name="flip-list">
                   <v-list-item
                     :key="item.displayOrder"
-                    v-for="item in vModel.items"
+                    v-for="item in items"
                     class="elevation-1 bottom-solid"
                   >
                     <v-list-item-icon>
@@ -25,7 +25,7 @@
                       style="display: inline-block"
                       class="py-0"
                     >
-                      <v-btn icon>
+                      <v-btn icon v-if="$store.getters.writeAuthority">
                         <v-icon class="drag-handle"> mdi-sort </v-icon>
                       </v-btn>
                       {{ item.menu.name }}
@@ -33,31 +33,29 @@
                     <br />
                     <v-chip-group multiple v-model="item.typesJson">
                       <v-chip
-                        :value="AUTHORITY_TYPE.VIEW"
+                        :value="AUTHORITY_ITEM_TYPE.VIEW"
                         color="primary"
                         disabled
                       >
-                        <v-icon>mdi-eye</v-icon>
+                        <v-icon size="24">mdi-eye</v-icon>
                       </v-chip>
                       <v-chip
                         :outlined="
-                          !item.typesJson.includes(AUTHORITY_TYPE.WRITE)
+                          !item.typesJson.includes(AUTHORITY_ITEM_TYPE.WRITE)
                         "
                         color="primary"
-                        :value="AUTHORITY_TYPE.WRITE"
-                        :disabled="vModel.code === 'SUPER'"
+                        :value="AUTHORITY_ITEM_TYPE.WRITE"
                       >
-                        <v-icon>mdi-content-save-outline</v-icon>
+                        <v-icon size="24">mdi-content-save-outline</v-icon>
                       </v-chip>
                       <v-chip
                         :outlined="
-                          !item.typesJson.includes(AUTHORITY_TYPE.DELETE)
+                          !item.typesJson.includes(AUTHORITY_ITEM_TYPE.DELETE)
                         "
                         color="primary"
-                        :value="AUTHORITY_TYPE.DELETE"
-                        :disabled="vModel.code === 'SUPER'"
+                        :value="AUTHORITY_ITEM_TYPE.DELETE"
                       >
-                        <v-icon>mdi-delete-outline</v-icon>
+                        <v-icon size="24">mdi-delete-outline</v-icon>
                       </v-chip>
                     </v-chip-group>
                   </v-list-item>
@@ -68,18 +66,18 @@
           <v-col cols="7">
             <v-card-text class="py-0 elevation-1">
               <v-chip-group
-                v-model="selectedChips"
-                column
+                v-model="selected"
                 multiple
+                column
                 @change="onChangeSelectedChip"
               >
                 <v-chip
                   v-for="item in menus"
-                  :value="item"
+                  :value="item.id"
                   :key="item.id"
-                  :outlined="!selectedChips.includes(item)"
+                  :outlined="!selected.includes(item.id)"
                   color="primary"
-                  :disabled="vModel.code === 'SUPER'"
+                  large
                 >
                   <v-icon v-text="item.icon" v-if="item.icon" />
                   {{ item.name }}
@@ -97,23 +95,24 @@
 import { Component, VModel, Vue, Watch } from "vue-property-decorator";
 import { getApi, postApi } from "@/utils/apis";
 import draggable from "vuedraggable";
-import { defaultAuthorityItem, defaultMenu } from "@/definitions/defaults";
-import type { Authority, Menu } from "@/definitions/models";
-import { AUTHORITY_TYPE } from "@/definitions/selections";
+import type { AuthorityItem, Menu } from "@/definitions/models";
+import { AUTHORITY_ITEM_TYPE, MENU_TYPE } from "@/definitions/selections";
+import { defaultAuthorityItem } from "@/definitions/defaults";
 
 @Component({
   components: { draggable },
 })
 export default class extends Vue {
-  @VModel({ required: true }) vModel!: Authority;
+  @VModel({ required: true }) vModel!: string;
 
+  items: AuthorityItem[] = [];
   menus: Menu[] = [];
-  selectedChips: Menu[] = [];
+  selected: number[] = [];
   loading = false;
   saving = false;
   drag = false;
 
-  readonly AUTHORITY_TYPE = AUTHORITY_TYPE;
+  readonly AUTHORITY_ITEM_TYPE = AUTHORITY_ITEM_TYPE;
 
   get dragOptions(): { animation: number } {
     return {
@@ -124,58 +123,59 @@ export default class extends Vue {
   protected async created(): Promise<void> {
     const response = await getApi<Menu[]>("admin/menus/");
     this.menus = response?.data || [];
-    this.watchItem(this.vModel);
   }
 
   @Watch("vModel")
-  protected watchItem(val: Authority): void {
-    if (val.code === "SUPER") {
-      this.selectedChips = this.menus;
-    } else {
-      this.selectedChips = val.items.map(
-        (item) =>
-          this.menus.find((menu) => menu.id === item.menu?.id) || defaultMenu(),
-      );
-    }
-    this.onChangeSelectedChip(this.selectedChips);
+  protected async watchItem(val: string): Promise<void> {
+    this.loading = true;
+    const response = await getApi<AuthorityItem[]>(`admin/authorities/${val}`);
+    this.loading = false;
+    this.items = response.data;
+    this.selected =
+      this.items
+        .filter((item) => this.menus.find((menu) => menu.id === item.menu.id))
+        .map((item) => item.menu.id || 0) || [];
   }
 
   protected onDraggableEnd(): void {
-    this.vModel.items = this.vModel.items.map((item, index) => {
+    this.items = this.items.map((item, index) => {
       return { ...item, displayOrder: index + 1 };
     });
   }
 
-  protected onChangeSelectedChip(selectedChips: Menu[]): void {
-    this.vModel.items = selectedChips.map((select, index) => {
+  protected onChangeSelectedChip(selected: number[]): void {
+    this.items = selected.map((selectedId, index) => {
+      const foundMenu = this.menus.find((m) => m.id === selectedId) || {
+        type: "",
+      };
       return {
-        ...(this.vModel.items.find((item) => item.menu.id === select.id) || {
+        ...(this.items.find((item) => item.menu.id === selectedId) || {
           ...defaultAuthorityItem(),
-          menu: select,
+          menu: foundMenu,
           typesJson:
-            this.vModel.code === "SUPER"
+            foundMenu.type === MENU_TYPE.G
               ? [
-                  AUTHORITY_TYPE.VIEW,
-                  AUTHORITY_TYPE.WRITE,
-                  AUTHORITY_TYPE.DELETE,
+                  AUTHORITY_ITEM_TYPE.VIEW,
+                  AUTHORITY_ITEM_TYPE.WRITE,
+                  AUTHORITY_ITEM_TYPE.DELETE,
                 ]
-              : [AUTHORITY_TYPE.VIEW],
+              : [AUTHORITY_ITEM_TYPE.VIEW],
         }),
         displayOrder: index + 1,
-      };
+      } as AuthorityItem;
     });
   }
 
   public async saveItems(): Promise<void> {
     this.saving = true;
-    const response = await postApi<Authority>(
-      `admin/authorities/${this.vModel.code}`,
-      this.vModel,
+    const response = await postApi<AuthorityItem[]>(
+      `admin/authorities/${this.vModel}`,
+      this.items,
     );
     this.saving = false;
     if (response?.code?.startsWith("S") && response.data) {
       await this.$store.dispatch("resetAuthority");
-      this.vModel = response.data;
+      this.items = response.data;
     }
   }
 }

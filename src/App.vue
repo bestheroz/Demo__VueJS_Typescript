@@ -12,11 +12,15 @@
 <script lang="ts">
 import "@/scss/common.scss";
 import { Component, Vue, Watch } from "vue-property-decorator";
-import Vuetify from "@/plugins/vuetify";
+
 import DefaultLayout from "@/layouts/DefaultLayout.vue";
 import SimpleLayout from "@/layouts/SimpleLayout.vue";
+import Vuetify from "@/plugins/vuetify";
 import envs from "@/constants/envs";
-import { cloneDeep } from "lodash-es";
+// eslint-disable-next-line camelcase
+import jwt_decode from "jwt-decode";
+import dayjs from "dayjs";
+import { logout } from "@/utils/commands";
 
 @Component({
   components: {
@@ -25,19 +29,38 @@ import { cloneDeep } from "lodash-es";
   },
 })
 export default class extends Vue {
-  title: string | null = null;
-
   get isRouterLoaded(): boolean {
     return this.$route.name !== null;
   }
 
   get currentLayout(): string {
-    return (this.$route.meta.layout || "default") + "Layout";
+    return (this.$route.meta?.layout || "default") + "Layout";
   }
 
   protected async mounted(): Promise<void> {
-    cloneDeep("");
     document.title = envs.PRODUCT_TITLE;
+  }
+
+  @Watch("$route.fullPath")
+  protected watchRouteFullPath(val: string): void {
+    this.$store.commit("resetMenuAuthority", val);
+  }
+
+  @Watch("$store.getters.accessToken", { immediate: true })
+  watchAccessToken(val: string): void {
+    if (!val) {
+      logout();
+      return;
+    }
+    try {
+      if (
+        dayjs((jwt_decode(val) as { exp: number }).exp * 1000).isBefore(dayjs())
+      ) {
+        this.$store.dispatch("reIssueAccessToken");
+      }
+    } catch (e: unknown) {
+      logout();
+    }
   }
 
   @Watch("$store.getters.primaryColor", { immediate: true })

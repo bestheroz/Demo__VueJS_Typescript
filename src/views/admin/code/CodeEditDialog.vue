@@ -57,15 +57,6 @@
                 </ValidationProvider>
               </v-col>
               <v-col cols="12" md="4">
-                <v-autocomplete
-                  v-model="authorities"
-                  :items="AUTHORITY"
-                  label="*권한"
-                  multiple
-                  @change="onChangeAuthorities"
-                />
-              </v-col>
-              <v-col cols="12" md="4">
                 <ValidationProvider
                   v-slot="{ errors }"
                   name="정렬순서"
@@ -86,6 +77,7 @@
             icon="mdi-content-save"
             :loading="loading"
             @click="save"
+            v-if="$store.getters.writeAuthority"
           />
         </v-card-text>
         <created-updated-bar
@@ -99,8 +91,7 @@
 
 <script lang="ts">
 import { Component, PropSync, Ref, VModel, Vue } from "vue-property-decorator";
-import type { SelectItem } from "@/definitions/types";
-import { getApi, postApi, putApi } from "@/utils/apis";
+import { postApi, putApi } from "@/utils/apis";
 import { ValidationObserver } from "vee-validate";
 import DialogTitle from "@/components/title/DialogTitle.vue";
 import type { Code } from "@/definitions/models";
@@ -119,28 +110,10 @@ export default class extends Vue {
   @PropSync("dialog", { required: true, type: Boolean }) syncedDialog!: boolean;
   @Ref("observer") readonly observer!: InstanceType<typeof ValidationObserver>;
 
-  AUTHORITY: SelectItem<number>[] = [];
-  authorities: number[] = [];
   loading = false;
 
   get isNew(): boolean {
     return !this.vModel.id;
-  }
-
-  protected async created(): Promise<void> {
-    const response = await getApi<SelectItem<number>[]>("auth/codes");
-    this.AUTHORITY = (response.data || []).filter((a) => a.value !== 1);
-    this.authorities = this.vModel.authorities.map((a) => a.authorityId);
-  }
-
-  protected onChangeAuthorities(): void {
-    this.vModel.authorities = this.authorities.map((a) => {
-      return (
-        this.vModel.authorities.find((v) => v.authorityId === a) || {
-          authorityId: a,
-        }
-      );
-    });
   }
 
   protected async save(): Promise<void> {

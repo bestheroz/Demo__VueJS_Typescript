@@ -3,7 +3,6 @@
     <v-card>
       <v-card-text>
         <v-data-table
-          v-model="selected"
           must-sort
           fixed-header
           :loading="loading"
@@ -12,8 +11,6 @@
           :sort-by="sortBy"
           :sort-desc="sortDesc"
           item-key="value"
-          single-select
-          show-select
           :footer-props="envs.FOOTER_PROPS_MAX_100"
         >
           <template #header>
@@ -21,6 +18,7 @@
               :headers="headers"
               :output.sync="filteredItems"
               :input="items"
+              filter-first-column
             />
           </template>
           <template #[`item.value`]="{ item }">
@@ -29,19 +27,10 @@
             </span>
           </template>
           <template #[`item.available`]="{ item }">
-            <v-icon v-if="item.available" small color="success">
+            <v-icon v-if="item.available" color="success">
               mdi-check-circle
             </v-icon>
-            <v-icon v-else small> mdi-circle-outline </v-icon>
-          </template>
-          <template v-if="AUTHORITY" #[`item.authorities`]="{ item }">
-            <v-chip
-              v-text="getTextOfSelectItem(AUTHORITY, authority.authorityId)"
-              v-for="authority in item.authorities"
-              :key="authority.id"
-              color="primary"
-              small
-            />
+            <v-icon v-else> mdi-circle-outline </v-icon>
           </template>
           <template #[`item.updatedBy`]="{ item }">
             {{ item.updatedBy | formatMemberNm }}
@@ -69,7 +58,7 @@
 
 <script lang="ts">
 import { Component, Emit, Prop, Vue, Watch } from "vue-property-decorator";
-import type { DataTableHeader, SelectItem } from "@/definitions/types";
+import type { DataTableHeader } from "@/definitions/types";
 import { deleteApi, getApi } from "@/utils/apis";
 import envs from "@/constants/envs";
 import DataTableClientSideFilter from "@/components/datatable/DataTableClientSideFilter.vue";
@@ -93,8 +82,6 @@ export default class extends Vue {
   readonly envs: typeof envs = envs;
   readonly getTextOfSelectItem = getTextOfSelectItem;
 
-  selected: Code[] = [];
-  AUTHORITY: SelectItem<number>[] = [];
   saving = false;
   loading = false;
   sortBy: string[] = ["displayOrder"];
@@ -105,7 +92,7 @@ export default class extends Vue {
   editItem: Code = defaultCode();
 
   get headers(): DataTableHeader[] {
-    return [
+    let headers: DataTableHeader[] = [
       {
         text: "코드",
         align: "start",
@@ -130,12 +117,6 @@ export default class extends Vue {
         width: "6rem",
       },
       {
-        text: "권한",
-        align: "center",
-        value: "authorities",
-        filterable: false,
-      },
-      {
         text: "작업 일시",
         align: "center",
         value: "updated",
@@ -149,25 +130,25 @@ export default class extends Vue {
         filterable: false,
         width: "8rem",
       },
-      {
-        text: "",
-        align: "center",
-        value: "actions",
-        width: "5rem",
-        filterable: false,
-        sortable: false,
-      },
     ];
-  }
-
-  protected async created(): Promise<void> {
-    const response = await getApi<SelectItem<number>[]>("auth/codes");
-    this.AUTHORITY = response.data || [];
+    if (this.$store.getters.writeAuthority) {
+      headers = [
+        ...headers,
+        {
+          text: "Action",
+          align: "center",
+          value: "actions",
+          width: "5rem",
+          filterable: false,
+          sortable: false,
+        },
+      ];
+    }
+    return headers;
   }
 
   @Watch("type")
   public async getList(): Promise<void> {
-    this.selected = [];
     this.items = [];
     if (this.type) {
       this.loading = true;
