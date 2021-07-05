@@ -26,6 +26,7 @@ export function defaultUser(): {
 export function defaultMemberConfig(): MemberConfig {
   return {
     globalTheme: config.theme.globalTheme as "light" | "dark",
+    toolbarTheme: config.theme.toolbarTheme as "global" | "light" | "dark",
     menuTheme: config.theme.menuTheme as "global" | "light" | "dark",
     contentBoxed: config.theme.isContentBoxed,
     primaryColor: config.theme.light.primary,
