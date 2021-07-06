@@ -77,7 +77,7 @@
                   :key="item.id"
                   :outlined="!selected.includes(item.id)"
                   color="primary"
-                  large
+                  class="px-4"
                 >
                   <v-icon v-text="item.icon" v-if="item.icon" />
                   {{ item.name }}
