@@ -79,7 +79,12 @@
                   color="primary"
                   class="px-4"
                 >
-                  <v-icon v-text="item.icon" v-if="item.icon" />
+                  <v-icon
+                    v-text="item.icon"
+                    v-if="item.icon"
+                    class="pr-2"
+                    size="24"
+                  />
                   {{ item.name }}
                 </v-chip>
               </v-chip-group>
