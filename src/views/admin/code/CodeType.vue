@@ -10,7 +10,8 @@
             :key="item"
             :outlined="selected !== item"
             color="primary"
-            v-text="item"
+            v-text="`# ${item}`"
+            class="px-3"
           />
         </v-chip-group>
       </v-card-text>
