@@ -32,7 +32,7 @@
                 >
                   <v-select
                     v-model="vModel.type"
-                    :items="MenuTypeItems"
+                    :items="MenuTypes"
                     label="*타입"
                     :error-messages="errors"
                   />
@@ -72,6 +72,7 @@
             icon="mdi-content-save"
             :loading="loading"
             @click="save"
+            v-if="$store.getters.writeAuthority"
           />
         </v-card-text>
         <created-updated-bar
@@ -90,7 +91,7 @@ import { ValidationObserver } from "vee-validate";
 import DialogTitle from "@/components/title/DialogTitle.vue";
 import type { Menu } from "@/definitions/models";
 import CreatedUpdatedBar from "@/components/history/CreatedUpdatedBar.vue";
-import { MenuTypeItems } from "@/definitions/selections";
+import { MenuTypes } from "@/definitions/selections";
 import ButtonWithIcon from "@/components/button/ButtonWithIcon.vue";
 
 @Component({
@@ -107,7 +108,7 @@ export default class extends Vue {
 
   readonly ENDPOINT_URL = "admin/menus/";
   loading = false;
-  MenuTypeItems = MenuTypeItems;
+  MenuTypes = MenuTypes;
 
   get isNew(): boolean {
     return !this.vModel.id;

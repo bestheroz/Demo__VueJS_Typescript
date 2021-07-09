@@ -68,7 +68,7 @@
 
 <script lang="ts">
 import { Component, Prop, PropSync, Ref, Vue } from "vue-property-decorator";
-import { alertAxiosError, postApi } from "@/utils/apis";
+import { alertAxiosError, ApiDataResult, axiosInstance } from "@/utils/apis";
 import { ValidationObserver } from "vee-validate";
 import pbkdf2 from "pbkdf2";
 import { toastError, toastInfo } from "@/utils/alerts";
@@ -99,15 +99,20 @@ export default class extends Vue {
       const pbkdf2Password: string = pbkdf2
         .pbkdf2Sync(this.password || "", "salt", 1, 32, "sha512")
         .toString();
-      const response = await postApi("auth/initPassword", {
+      const response = await axiosInstance.post<
+        ApiDataResult<{
+          accessToken: string;
+          refreshToken: string;
+        }>
+      >("api/auth/initPassword", {
         userId: this.userId,
         password: pbkdf2Password,
       });
-      if (response.code.startsWith("S")) {
+      if (response?.data?.code?.startsWith("S")) {
         toastInfo("패스워드 설정 완료, 재 로그인 해주세요.");
         this.syncedDialog = false;
       } else {
-        toastError(response.message);
+        toastError(response?.data?.message);
       }
     } catch (e) {
       alertAxiosError(e);

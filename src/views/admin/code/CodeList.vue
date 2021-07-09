@@ -1,49 +1,77 @@
 <template>
   <div>
+    <page-title
+      @click="showAddDialog"
+      :more-actions="$store.getters.writeAuthority"
+    >
+      <template #list>
+        <v-list>
+          <v-list-item @click="saveItems">
+            <v-btn @click="saveItems" :loading="saving">
+              <v-icon class="drag-handle"> mdi-sort </v-icon> 순서저장
+            </v-btn>
+          </v-list-item>
+        </v-list>
+      </template>
+    </page-title>
     <v-card>
       <v-card-text>
-        <v-data-table
-          must-sort
-          fixed-header
-          :loading="loading"
-          :headers="headers"
-          :items="filteredItems"
-          :sort-by="sortBy"
-          :sort-desc="sortDesc"
-          item-key="value"
-          :footer-props="envs.FOOTER_PROPS_MAX_100"
-        >
-          <template #header>
-            <data-table-client-side-filter
-              :headers="headers"
-              :output.sync="filteredItems"
-              :input="items"
-              filter-first-column
-            />
-          </template>
-          <template #[`item.value`]="{ item }">
-            <span class="text--anchor" @click="showEditDialog(item)">
-              {{ item.value }}
-            </span>
-          </template>
-          <template #[`item.available`]="{ item }">
-            <v-icon v-if="item.available" color="success">
-              mdi-check-circle
-            </v-icon>
-            <v-icon v-else> mdi-circle-outline </v-icon>
-          </template>
-          <template #[`item.updatedBy`]="{ item }">
-            {{ item.updatedBy | formatMemberNm }}
-          </template>
-          <template #[`item.updated`]="{ item }">
-            {{ item.updated | formatDatetime }}
-          </template>
-          <template #[`item.actions`]="{ item }">
-            <v-btn icon @click="remove(item)">
-              <v-icon color="error"> mdi-delete-outline </v-icon>
-            </v-btn>
-          </template>
-        </v-data-table>
+        <code-type ref="refCodeType" @selected="(value) => (type = value)" />
+        <v-list>
+          <draggable
+            tag="div"
+            v-model="items"
+            v-bind="dragOptions"
+            handle=".drag-handle"
+          >
+            <transition-group type="transition" name="flip-list">
+              <v-list-item
+                dense
+                :key="item.value"
+                v-for="item in items"
+                class="elevation-1 bottom-solid"
+              >
+                <v-list-item-content style="display: inline-block">
+                  <v-btn icon v-if="$store.getters.writeAuthority">
+                    <v-icon class="drag-handle"> mdi-sort </v-icon>
+                  </v-btn>
+                  <a
+                    class="text--anchor"
+                    @click="showEditDialog(item)"
+                    v-text="item.value"
+                  />
+                </v-list-item-content>
+                <v-list-item-content
+                  style="display: inline-block"
+                  v-text="item.name"
+                />
+                <v-list-item-content style="display: inline-block">
+                  <v-icon v-if="item.available" color="success">
+                    mdi-check-circle
+                  </v-icon>
+                  <v-icon v-else> mdi-circle-outline </v-icon>
+                </v-list-item-content>
+                <v-list-item-content style="display: inline-block">
+                  {{ item.updated | formatDatetime }}
+                </v-list-item-content>
+                <v-list-item-content style="display: inline-block">
+                  {{ item.updatedBy | formatMemberNm }}
+                </v-list-item-content>
+                <v-list-item-action
+                  style="display: inline-block"
+                  class="my-0"
+                  v-if="$store.getters.deleteAuthority"
+                >
+                  <div class="actions">
+                    <v-btn icon @click="remove(item)">
+                      <v-icon color="error"> mdi-delete-outline </v-icon>
+                    </v-btn>
+                  </div>
+                </v-list-item-action>
+              </v-list-item>
+            </transition-group>
+          </draggable>
+        </v-list>
       </v-card-text>
       <code-edit-dialog
         v-model="editItem"
@@ -57,108 +85,56 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop, Vue, Watch } from "vue-property-decorator";
-import type { DataTableHeader } from "@/definitions/types";
-import { deleteApi, getApi } from "@/utils/apis";
+import { Component, Emit, Vue, Watch } from "vue-property-decorator";
+import { deleteApi, getApi, postApi } from "@/utils/apis";
 import envs from "@/constants/envs";
-import DataTableClientSideFilter from "@/components/datatable/DataTableClientSideFilter.vue";
-import qs from "querystring";
 import CodeEditDialog from "@/views/admin/code/CodeEditDialog.vue";
 import { confirmDelete } from "@/utils/alerts";
 import { defaultCode } from "@/definitions/defaults";
 import type { Code } from "@/definitions/models";
-import { cloneDeep } from "lodash-es";
-import { getTextOfSelectItem } from "@/utils/codes";
+import { cloneDeep, debounce } from "lodash-es";
+import draggable from "vuedraggable";
+import PageTitle from "@/components/title/PageTitle.vue";
+import CodeType from "@/views/admin/code/CodeType.vue";
 
 @Component({
   components: {
+    CodeType,
+    PageTitle,
     CodeEditDialog,
-    DataTableClientSideFilter,
+    draggable,
   },
 })
-export default class extends Vue {
-  @Prop({ required: true }) readonly type!: string;
-
+export default class CodeList extends Vue {
   readonly envs: typeof envs = envs;
-  readonly getTextOfSelectItem = getTextOfSelectItem;
 
+  type = "";
   saving = false;
   loading = false;
-  sortBy: string[] = ["displayOrder"];
-  sortDesc: boolean[] = [false];
   items: Code[] = [];
-  filteredItems: Code[] = [];
   dialog = false;
   editItem: Code = defaultCode();
 
-  get headers(): DataTableHeader[] {
-    let headers: DataTableHeader[] = [
-      {
-        text: "코드",
-        align: "start",
-        value: "value",
-      },
-      {
-        text: "코드명",
-        align: "start",
-        value: "name",
-      },
-      {
-        text: "사용 가능",
-        align: "center",
-        value: "available",
-        filterType: "switch",
-        width: "6rem",
-      },
-      {
-        text: "출력 순서",
-        align: "end",
-        value: "displayOrder",
-        width: "6rem",
-      },
-      {
-        text: "작업 일시",
-        align: "center",
-        value: "updated",
-        filterable: false,
-        width: "11.5rem",
-      },
-      {
-        text: "작업자",
-        align: "start",
-        value: "updatedBy",
-        filterable: false,
-        width: "8rem",
-      },
-    ];
-    if (this.$store.getters.writeAuthority) {
-      headers = [
-        ...headers,
-        {
-          text: "Action",
-          align: "center",
-          value: "actions",
-          width: "5rem",
-          filterable: false,
-          sortable: false,
-        },
-      ];
-    }
-    return headers;
+  get dragOptions(): { animation: number } {
+    return {
+      animation: 200,
+    };
   }
 
-  @Watch("type")
+  @Watch("type", { immediate: true })
   public async getList(): Promise<void> {
+    this.fetchList();
+  }
+
+  protected fetchList = debounce(async function (this: CodeList) {
     this.items = [];
     if (this.type) {
       this.loading = true;
-      const response = await getApi<Code[]>(
-        `admin/codes/?${qs.stringify({ type: this.type })}`,
-      );
+      const response = await getApi<Code[]>(`admin/codes/?type=${this.type}`);
       this.loading = false;
       this.items = response?.data || [];
     }
-  }
+  }, 300);
 
   @Emit("created")
   protected onCreated(value: Code): Code {
@@ -177,7 +153,11 @@ export default class extends Vue {
     ];
   }
   public showAddDialog(): void {
-    this.editItem = { ...defaultCode(), type: this.type };
+    this.editItem = {
+      ...defaultCode(),
+      type: this.type,
+      displayOrder: this.items.length + 1,
+    };
     this.dialog = true;
   }
 
@@ -193,11 +173,29 @@ export default class extends Vue {
       const response = await deleteApi<Code>(`admin/codes/${value.id}/`);
       this.saving = false;
       if (response?.code?.startsWith("S")) {
-        window.localStorage.removeItem(`code__${value.id}`);
+        window.localStorage.removeItem(`code__${value.type}`);
         this.items = this.items.filter(
           (item) => item.id !== (response.data?.id || 0),
         );
       }
+    }
+  }
+
+  public async saveItems(): Promise<void> {
+    this.saving = true;
+    const response = await postApi<Code[]>(
+      "admin/codes/save",
+      this.items.map((item, index) => {
+        return {
+          ...item,
+          displayOrder: index + 1,
+        };
+      }),
+    );
+    this.saving = false;
+    if (response?.code?.startsWith("S")) {
+      window.localStorage.removeItem(`code__${this.type}`);
+      this.items = response.data || [];
     }
   }
 }

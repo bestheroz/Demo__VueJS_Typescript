@@ -13,7 +13,6 @@
           :key="level2Index"
           :menu-item="level2Item"
           subgroup
-          small
         >
           <template v-if="level2Item.items">
             <!-- menu level 3 -->
@@ -21,7 +20,6 @@
               v-for="(level3Item, level3Index) in level2Item.items"
               :key="level3Index"
               :menu-item="level3Item"
-              small
             />
           </template>
         </nav-menu-item>

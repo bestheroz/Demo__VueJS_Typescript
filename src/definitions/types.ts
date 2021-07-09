@@ -6,24 +6,6 @@ export interface SelectItem<T = string> {
   value: T;
   text: string;
 }
-/* eslint-disable @typescript-eslint/no-explicit-any */
-export interface DataTableHeader {
-  text: string;
-  value: string;
-  align?: "start" | "center" | "end";
-  sortable?: boolean;
-  filterable?: boolean;
-  divider?: boolean;
-  class?: string | string[];
-  width?: string | number;
-  filter?: (value: any, search: string, item: any) => boolean;
-  sort?: (a: any, b: any) => number;
-  // 아래는 filter 를 위한 property 추가
-  filterType?: "input" | "select" | "switch";
-  filterSelectItem?: SelectItem<string | number>[];
-  filterDefaultValue?: string;
-}
-/* eslint-enable @typescript-eslint/no-explicit-any */
 
 export interface Pagination {
   page: number;
@@ -63,4 +45,21 @@ export interface Drawer {
   regex?: RegExp;
   disabled?: boolean;
   items?: Drawer[];
+}
+
+export interface FilterItem {
+  text: string;
+  chipText?: string | number | boolean | null;
+  value: string | number | boolean;
+  checked: boolean;
+}
+
+export interface Filter {
+  type: "checkbox" | "text" | "dateStartEndPicker";
+  text: string;
+  key: string;
+  items: FilterItem[];
+  disabled?: boolean;
+  single?: boolean;
+  required?: boolean;
 }

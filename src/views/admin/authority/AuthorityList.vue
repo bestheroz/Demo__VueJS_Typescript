@@ -185,8 +185,3 @@ export default class extends Vue {
   }
 }
 </script>
-<style lang="scss" scoped>
-.bottom-solid {
-  border-bottom: 1px solid var(--v-secondary-base);
-}
-</style>

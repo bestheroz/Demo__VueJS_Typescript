@@ -117,7 +117,6 @@ router.push = function push(location: RawLocation, onResolve, onReject) {
   return originalPush
     .call<Router, [RawLocation], Promise<Route>>(this, location)
     .catch((err: unknown) => {
-      console.log("-> err", err);
       if (Router.isNavigationFailure(err)) {
         // resolve err
         return err;
@@ -130,14 +129,13 @@ router.push = function push(location: RawLocation, onResolve, onReject) {
 const originalReplace = router.replace;
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-router.push = function push(location: RawLocation, onResolve, onReject) {
+router.replace = function replace(location: RawLocation, onResolve, onReject) {
   if (onResolve || onReject) {
     return originalReplace.call(this, location, onResolve, onReject);
   }
   return originalReplace
     .call<Router, [RawLocation], Promise<Route>>(this, location)
     .catch((err: unknown) => {
-      console.log("-> err", err);
       if (Router.isNavigationFailure(err)) {
         // resolve err
         return err;

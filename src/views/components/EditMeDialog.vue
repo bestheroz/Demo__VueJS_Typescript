@@ -31,12 +31,12 @@
               <v-col cols="7">
                 <ValidationProvider
                   v-slot="{ errors }"
-                  name="비빌번호"
+                  name="비밀번호"
                   rules="required|max:20"
                 >
                   <v-text-field
                     v-model="item.password"
-                    label="*비빌번호"
+                    label="*비밀번호"
                     :counter="20"
                     :error-messages="errors"
                     :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
@@ -49,7 +49,6 @@
                 <v-btn
                   color="primary"
                   outlined
-                  small
                   @click="newPasswordDialog = true"
                 >
                   비밀번호 변경

@@ -10,24 +10,18 @@
       @click="
         menuItem.type === MENU_TYPE.W
           ? popupWindow(menuItem.link)
-          : $store.commit(
-              'setSelectedMenu',
-              menuItem.key ? $t(menuItem.key) : menuItem.text,
-            )
+          : $store.commit('setSelectedMenu', menuItem.text)
       "
       active-class="primary--text"
     >
       <v-list-item-icon>
         <v-icon
-          :small="small"
           :class="{ 'grey--text': menuItem.disabled }"
           v-text="menuItem.icon || 'mdi-circle-medium'"
         />
       </v-list-item-icon>
       <v-list-item-content>
-        <v-list-item-title
-          v-text="menuItem.key ? $t(menuItem.key) : menuItem.text"
-        />
+        <v-list-item-title v-text="menuItem.text" />
       </v-list-item-content>
     </v-list-item>
 
@@ -44,15 +38,10 @@
     >
       <template #activator>
         <v-list-item-icon v-if="!subgroup">
-          <v-icon
-            :small="small"
-            v-text="menuItem.icon || 'mdi-circle-medium'"
-          />
+          <v-icon v-text="menuItem.icon || 'mdi-circle-medium'" />
         </v-list-item-icon>
         <v-list-item-content>
-          <v-list-item-title
-            v-text="menuItem.key ? $t(menuItem.key) : menuItem.text"
-          />
+          <v-list-item-title v-text="menuItem.text" />
         </v-list-item-content>
       </template>
       <slot />
@@ -69,7 +58,6 @@ import { MENU_TYPE } from "@/definitions/selections";
 export default class extends Vue {
   @Prop({ default: () => Object.create(null) }) readonly menuItem!: Drawer;
   @Prop({ type: Boolean }) readonly subgroup!: boolean;
-  @Prop({ type: Boolean }) readonly small!: boolean;
 
   readonly MENU_TYPE = MENU_TYPE;
 

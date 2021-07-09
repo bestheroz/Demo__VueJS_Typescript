@@ -3,6 +3,24 @@
     <page-title @click="showAddDialog" />
     <v-card>
       <v-card-text>
+        <v-row no-gutters>
+          <v-col cols="12" sm="7">
+            <data-table-filter v-model="filters" :output.sync="filterOutput" />
+          </v-col>
+          <v-spacer />
+          <v-col cols="12" sm="3">
+            <v-text-field
+              v-model="search"
+              solo
+              label="검색 (사용자아이디, 사용자명)"
+              prepend-inner-icon="mdi-magnify"
+              clearable
+              outlined
+              hide-details="auto"
+              dense
+            />
+          </v-col>
+        </v-row>
         <v-data-table
           must-sort
           fixed-header
@@ -15,13 +33,6 @@
           :height="height"
           :footer-props="envs.FOOTER_PROPS_MAX_100"
         >
-          <template #header>
-            <data-table-filter
-              :headers="headers"
-              :filter.sync="datatableFilter"
-              filter-first-column
-            />
-          </template>
           <template #[`item.userId`]="{ item }">
             <a
               class="text--anchor"
@@ -79,33 +90,30 @@
 
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
-import type {
-  DataTableHeader,
-  PageResult,
-  Pagination,
-} from "@/definitions/types";
+import type { Filter, PageResult, Pagination } from "@/definitions/types";
 import { deleteApi, downloadExcelApi, getApi } from "@/utils/apis";
 import envs from "@/constants/envs";
 import MemberEditDialog from "@/views/admin/member/MemberEditDialog.vue";
 import { confirmDelete } from "@/utils/alerts";
-import DataTableFilter from "@/components/datatable/DataTableFilter.vue";
 import qs from "qs";
 import { defaultMember } from "@/definitions/defaults";
 import type { Member } from "@/definitions/models";
-import { cloneDeep } from "lodash-es";
+import { cloneDeep, debounce } from "lodash-es";
 import { getTextOfSelectItem } from "@/utils/codes";
 import PageTitle from "@/components/title/PageTitle.vue";
 import dayjs from "dayjs";
-import { AuthorityTypes } from "@/definitions/selections";
+import { AuthorityTypes, BooleanTypes } from "@/definitions/selections";
+import DataTableFilter from "@/components/datatable/DataTableFilter.vue";
+import { DataTableHeader } from "vuetify";
 
 @Component({
   components: {
-    PageTitle,
     DataTableFilter,
+    PageTitle,
     MemberEditDialog,
   },
 })
-export default class extends Vue {
+export default class MemberList extends Vue {
   @Prop() readonly height!: number | string;
 
   readonly envs: typeof envs = envs;
@@ -125,7 +133,28 @@ export default class extends Vue {
   editItem: Member = defaultMember();
   readonly AuthorityTypes = AuthorityTypes;
   dialog = false;
-  datatableFilter: { [p: string]: string | number } = {};
+
+  search = "";
+  filterOutput: Record<string, string | number | boolean[]> = {};
+  filters: Filter[] = [
+    {
+      type: "checkbox",
+      text: "권한",
+      key: "authorityList",
+      items: AuthorityTypes.map((v) => {
+        return { ...v, checked: false };
+      }),
+    },
+    {
+      type: "checkbox",
+      text: "사용 가능",
+      key: "availableList",
+      items: BooleanTypes.map((v) => {
+        return { ...v, checked: false };
+      }),
+      single: true,
+    },
+  ];
 
   get headers(): DataTableHeader[] {
     let headers: DataTableHeader[] = [
@@ -143,21 +172,17 @@ export default class extends Vue {
         text: "권한",
         align: "center",
         value: "authority",
-        filterType: "select",
-        filterSelectItem: this.AuthorityTypes,
       },
       {
         text: "만료일",
         align: "center",
         value: "expired",
         width: "11.5rem",
-        filterable: false,
       },
       {
         text: "사용 가능",
         align: "center",
         value: "available",
-        filterType: "switch",
         width: "6rem",
       },
       {
@@ -165,20 +190,17 @@ export default class extends Vue {
         align: "center",
         value: "loginable",
         width: "6rem",
-        filterable: false,
       },
       {
         text: "작업 일시",
         align: "center",
         value: "updated",
-        filterable: false,
         width: "11.5rem",
       },
       {
         text: "작업자",
         align: "start",
         value: "updatedBy",
-        filterable: false,
         width: "8rem",
       },
     ];
@@ -190,7 +212,6 @@ export default class extends Vue {
           align: "center",
           value: "actions",
           width: "5rem",
-          filterable: false,
           sortable: false,
         },
       ];
@@ -200,13 +221,18 @@ export default class extends Vue {
 
   get queryString(): string {
     return qs.stringify({
-      filter: this.datatableFilter,
+      search: this.search,
+      ...this.filterOutput,
       ...this.pagination,
     });
   }
 
-  @Watch("queryString")
+  @Watch("queryString", { immediate: true })
   public async getList(): Promise<void> {
+    this.fetchList();
+  }
+
+  protected fetchList = debounce(async function (this: MemberList) {
     this.items = [];
     this.numberOfItems = 0;
     this.loading = true;
@@ -216,7 +242,7 @@ export default class extends Vue {
     this.loading = false;
     this.items = response?.data?.content || [];
     this.numberOfItems = response.data.totalElements;
-  }
+  }, 300);
 
   protected onCreated(value: Member): void {
     this.items = [value, ...this.items];

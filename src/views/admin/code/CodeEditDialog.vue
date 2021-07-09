@@ -21,7 +21,7 @@
                   <v-text-field
                     v-model="vModel.type"
                     label="*그룹 코드"
-                    :disabled="!isNew"
+                    disabled
                     :error-messages="errors"
                   />
                 </ValidationProvider>
@@ -53,19 +53,6 @@
                     :counter="100"
                     :error-messages="errors"
                     clearable
-                  />
-                </ValidationProvider>
-              </v-col>
-              <v-col cols="12" md="4">
-                <ValidationProvider
-                  v-slot="{ errors }"
-                  name="정렬순서"
-                  rules="required|numeric"
-                >
-                  <v-text-field
-                    v-model="vModel.displayOrder"
-                    label="*정렬순서"
-                    :error-messages="errors"
                   />
                 </ValidationProvider>
               </v-col>
@@ -143,7 +130,7 @@ export default class extends Vue {
     this.loading = false;
     if (response?.code?.startsWith("S")) {
       this.syncedDialog = false;
-      window.localStorage.removeItem(`code__${this.vModel.id}`);
+      window.localStorage.removeItem(`code__${this.vModel.type}`);
       this.$emit("updated", response.data);
     }
   }

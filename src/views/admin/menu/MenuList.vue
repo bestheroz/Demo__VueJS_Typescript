@@ -1,12 +1,15 @@
 <template>
   <div>
-    <page-title @click="showAddDialog" more-actions>
+    <page-title
+      @click="showAddDialog"
+      :more-actions="$store.getters.writeAuthority"
+    >
       <template #list>
         <v-list>
-          <v-list-item @click="saveItems">
-            <v-list-item-title>
+          <v-list-item>
+            <v-btn @click="saveItems">
               <v-icon class="drag-handle"> mdi-sort </v-icon> 순서저장
-            </v-list-item-title>
+            </v-btn>
           </v-list-item>
         </v-list>
       </template>
@@ -31,17 +34,25 @@
                   <v-icon v-text="item.icon" />
                 </v-list-item-icon>
                 <v-list-item-content style="display: inline-block" class="py-0">
-                  <v-btn icon>
+                  <v-btn icon v-if="$store.getters.writeAuthority">
                     <v-icon class="drag-handle"> mdi-sort </v-icon>
                   </v-btn>
-                  <a class="text--anchor" @click="showEditDialog(item)">
-                    {{ item.name }}
-                  </a>
+                  <a
+                    class="text--anchor"
+                    @click="showEditDialog(item)"
+                    v-text="item.name"
+                  />
                 </v-list-item-content>
-                <v-list-item-content style="display: inline-block" class="py-0">
-                  {{ item.url }}
-                </v-list-item-content>
-                <v-list-item-action style="display: inline-block" class="my-0">
+                <v-list-item-content
+                  style="display: inline-block"
+                  class="py-0"
+                  v-text="item.url"
+                />
+                <v-list-item-action
+                  style="display: inline-block"
+                  class="my-0"
+                  v-if="$store.getters.deleteAuthority"
+                >
                   <div class="actions">
                     <v-btn icon @click="onDelete(item)">
                       <v-icon color="error"> mdi-delete-outline </v-icon>
@@ -131,7 +142,7 @@ export default class extends Vue {
     ];
   }
 
-  protected showAddDialog(): void {
+  public showAddDialog(): void {
     this.editItem = defaultMenu();
     this.dialog = true;
   }
@@ -155,7 +166,7 @@ export default class extends Vue {
     }
   }
 
-  protected async saveItems(): Promise<void> {
+  public async saveItems(): Promise<void> {
     let parentId = 0;
     this.saving = true;
     const response = await postApi<Menu[]>(
@@ -179,8 +190,3 @@ export default class extends Vue {
   }
 }
 </script>
-<style lang="scss" scoped>
-.bottom-solid {
-  border-bottom: 1px solid var(--v-secondary-base);
-}
-</style>
