@@ -11,7 +11,7 @@
             :outlined="selected !== item"
             color="primary"
             v-text="`# ${item}`"
-            class="px-2"
+            class="px-3"
           />
         </v-chip-group>
       </v-card-text>
