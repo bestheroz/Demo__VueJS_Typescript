@@ -123,16 +123,16 @@ export default class CodeList extends Vue {
 
   @Watch("type", { immediate: true })
   public async getList(): Promise<void> {
+    this.items = [];
+    this.loading = true;
     this.fetchList();
   }
 
   protected fetchList = debounce(async function (this: CodeList) {
-    this.items = [];
     if (this.type) {
-      this.loading = true;
       const response = await getApi<Code[]>(`admin/codes/?type=${this.type}`);
-      this.loading = false;
       this.items = response?.data || [];
+      this.loading = false;
     }
   }, 300);
 

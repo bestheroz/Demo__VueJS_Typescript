@@ -229,13 +229,13 @@ export default class MemberList extends Vue {
 
   @Watch("queryString", { immediate: true })
   public async getList(): Promise<void> {
+    this.items = [];
+    this.numberOfItems = 0;
+    this.loading = true;
     this.fetchList();
   }
 
   protected fetchList = debounce(async function (this: MemberList) {
-    this.items = [];
-    this.numberOfItems = 0;
-    this.loading = true;
     const response = await getApi<PageResult<Member>>(
       `admin/members/?${this.queryString}`,
     );
