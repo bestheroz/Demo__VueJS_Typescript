@@ -14,9 +14,10 @@
         </v-list>
       </template>
     </page-title>
-    <v-card :loading="loading || saving">
+    <v-card :loading=" saving">
       <v-card-text>
         <code-type ref="refCodeType" @selected="(value) => (type = value)" />
+        <v-card :loading="loading">
         <v-list>
           <draggable
             tag="div"
