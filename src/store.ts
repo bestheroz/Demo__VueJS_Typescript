@@ -54,12 +54,11 @@ const user = {
   mutations: {
     setAccessToken(state: any, accessToken: string): void {
       try {
-        const jwt =
-          jwt_decode<{
-            exp: number;
-            userId: string;
-            userVO: string;
-          }>(accessToken);
+        const jwt = jwt_decode<{
+          exp: number;
+          userId: string;
+          userVO: string;
+        }>(accessToken);
         const user = JSON.parse(jwt.userVO);
         state.id = user.id;
         state.userId = user.userId;
@@ -241,7 +240,9 @@ const authority = {
             exact: true,
           };
         });
-      const groupItems: Drawer[] = drawers.filter((item: Drawer) => item.icon);
+      const groupItems: Drawer[] = drawers.filter(
+        (item: Drawer) => item.type === MENU_TYPE.G,
+      );
       const groupIndex = groupItems.map((group: Drawer) =>
         drawers.indexOf(group),
       );

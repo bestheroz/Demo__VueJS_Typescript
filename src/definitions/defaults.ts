@@ -50,7 +50,7 @@ export function defaultMenu(): Menu {
   return {
     name: "",
     type: "G",
-    parentId: null,
+    parentId: 0,
     displayOrder: 0,
     icon: null,
     url: null,
