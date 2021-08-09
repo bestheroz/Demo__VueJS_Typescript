@@ -27,6 +27,7 @@
     "@mdi/font": "5.9.55",
     "@sentry/tracing": "^6.11.0",
     "@sentry/vue": "^6.11.0",
+    "@sentry/webpack-plugin": "^1.17.1",
     "@types/dotenv-parse-variables": "^2.0.1",
     "@types/lodash-es": "^4.17.4",
     "@types/pbkdf2": "3.1.0",
