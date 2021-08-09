@@ -1,6 +1,16 @@
 <template>
   <div>
-    <page-title @click="showAddDialog" />
+    <page-title @click="showAddDialog" more-actions>
+      <template #list>
+        <v-list>
+          <v-list-item>
+            <v-btn @click="excel">
+              <v-icon> mdi-file-excel </v-icon> 엑셀다운로드
+            </v-btn>
+          </v-list-item>
+        </v-list>
+      </template>
+    </page-title>
     <v-card>
       <v-card-text>
         <v-row no-gutters>
@@ -285,7 +295,7 @@ export default class MemberList extends Vue {
 
   protected async excel(): Promise<void> {
     this.saving = true;
-    await downloadExcelApi("admin/members/download/excel/");
+    await downloadExcelApi("excel/members");
     this.saving = false;
   }
 }
