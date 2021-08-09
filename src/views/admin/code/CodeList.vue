@@ -14,65 +14,66 @@
         </v-list>
       </template>
     </page-title>
-    <v-card :loading=" saving">
+    <v-card :loading="saving">
       <v-card-text>
         <code-type ref="refCodeType" @selected="(value) => (type = value)" />
         <v-card :loading="loading">
-        <v-list>
-          <draggable
-            tag="div"
-            v-model="items"
-            v-bind="dragOptions"
-            handle=".drag-handle"
-          >
-            <transition-group type="transition" name="flip-list">
-              <v-list-item
-                dense
-                :key="item.value"
-                v-for="item in items"
-                class="elevation-1 bottom-solid"
-              >
-                <v-list-item-content style="display: inline-block">
-                  <v-btn icon v-if="$store.getters.writeAuthority">
-                    <v-icon class="drag-handle"> mdi-sort </v-icon>
-                  </v-btn>
-                  <a
-                    class="text--anchor"
-                    @click="showEditDialog(item)"
-                    v-text="item.value"
-                  />
-                </v-list-item-content>
-                <v-list-item-content
-                  style="display: inline-block"
-                  v-text="item.name"
-                />
-                <v-list-item-content style="display: inline-block">
-                  <v-icon v-if="item.available" color="success">
-                    mdi-check-circle
-                  </v-icon>
-                  <v-icon v-else> mdi-circle-outline </v-icon>
-                </v-list-item-content>
-                <v-list-item-content style="display: inline-block">
-                  {{ item.updated | formatDatetime }}
-                </v-list-item-content>
-                <v-list-item-content style="display: inline-block">
-                  {{ item.updatedBy | formatMemberNm }}
-                </v-list-item-content>
-                <v-list-item-action
-                  style="display: inline-block"
-                  class="my-0"
-                  v-if="$store.getters.deleteAuthority"
+          <v-list>
+            <draggable
+              tag="div"
+              v-model="items"
+              v-bind="dragOptions"
+              handle=".drag-handle"
+            >
+              <transition-group type="transition" name="flip-list">
+                <v-list-item
+                  dense
+                  :key="item.value"
+                  v-for="item in items"
+                  class="elevation-1 bottom-solid"
                 >
-                  <div class="actions">
-                    <v-btn icon @click="remove(item)">
-                      <v-icon color="error"> mdi-delete-outline </v-icon>
+                  <v-list-item-content style="display: inline-block">
+                    <v-btn icon v-if="$store.getters.writeAuthority">
+                      <v-icon class="drag-handle"> mdi-sort </v-icon>
                     </v-btn>
-                  </div>
-                </v-list-item-action>
-              </v-list-item>
-            </transition-group>
-          </draggable>
-        </v-list>
+                    <a
+                      class="text--anchor"
+                      @click="showEditDialog(item)"
+                      v-text="item.value"
+                    />
+                  </v-list-item-content>
+                  <v-list-item-content
+                    style="display: inline-block"
+                    v-text="item.name"
+                  />
+                  <v-list-item-content style="display: inline-block">
+                    <v-icon v-if="item.available" color="success">
+                      mdi-check-circle
+                    </v-icon>
+                    <v-icon v-else> mdi-circle-outline </v-icon>
+                  </v-list-item-content>
+                  <v-list-item-content style="display: inline-block">
+                    {{ item.updated | formatDatetime }}
+                  </v-list-item-content>
+                  <v-list-item-content style="display: inline-block">
+                    {{ item.updatedBy | formatMemberNm }}
+                  </v-list-item-content>
+                  <v-list-item-action
+                    style="display: inline-block"
+                    class="my-0"
+                    v-if="$store.getters.deleteAuthority"
+                  >
+                    <div class="actions">
+                      <v-btn icon @click="remove(item)">
+                        <v-icon color="error"> mdi-delete-outline </v-icon>
+                      </v-btn>
+                    </div>
+                  </v-list-item-action>
+                </v-list-item>
+              </transition-group>
+            </draggable>
+          </v-list>
+        </v-card>
       </v-card-text>
       <code-edit-dialog
         v-model="editItem"

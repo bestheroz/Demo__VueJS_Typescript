@@ -1,7 +1,6 @@
 import "sweetalert2/dist/sweetalert2.css";
 import "@/scss/sweetalert.scss";
-import { SweetAlertResult } from "sweetalert2";
-import Swal from "sweetalert2/src/sweetalert2.js";
+import Swal, { SweetAlertResult } from "sweetalert2";
 
 const Toast = Swal.mixin({
   toast: true,

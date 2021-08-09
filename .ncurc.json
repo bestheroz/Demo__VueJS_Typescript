@@ -1,0 +1,5 @@
+{
+  "upgrade": true,
+  "filter": "express",
+  "reject": ["sass", "sass-loader", "vuex-persistedstate"]
+}
