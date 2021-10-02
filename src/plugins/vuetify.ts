@@ -14,6 +14,7 @@ export default new Vuetify({
     locales: { ko },
     current: "ko",
   },
+  rtl: config.theme.isRTL,
   theme: {
     dark: config.theme.globalTheme === "dark",
     themes: {

@@ -9,7 +9,11 @@
 
         {{ createdDateTimeString }}
       </span>
-      <span class="px-2 grey--text text--darken-1">|</span>
+      <span
+        class="px-2 grey--text text--darken-1"
+        v-if="createdDateTimeString && updatedDateTimeString"
+        >|</span
+      >
       <span v-if="updatedDateTimeString">
         Updated
         <v-icon size="16" style="vertical-align: initial">

@@ -1,5 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const SentryWebpackPlugin = require("@sentry/webpack-plugin");
+
 module.exports = {
   transpileDependencies: ["vuetify"],
   css: {
@@ -20,14 +21,8 @@ module.exports = {
       },
     },
   },
-  chainWebpack: (config) => {
-    // Remove the following lines to add Vue Prefetch and Preload on index.html
-    // https://cli.vuejs.org/guide/html-and-static-assets.html#disable-index-generation
-    config.plugins.delete("preload");
-    config.plugins.delete("prefetch");
-  },
   configureWebpack:
-    process.env.NODE_ENV === "production"
+    process.env.VUE_APP_ENVIRONMENT !== "local"
       ? {
           devtool: "source-map",
           plugins: [

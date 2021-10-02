@@ -35,22 +35,20 @@ export interface PageResult<T> {
 }
 
 export interface Drawer {
-  text: string;
+  id: number;
+  name: string;
   type: string;
-  key?: string;
-  icon?: string;
-  link?: string;
-  value?: string;
-  exact?: boolean;
-  regex?: RegExp;
-  disabled?: boolean;
-  items?: Drawer[];
+  icon: string | null;
+  url: string | null;
+  children: Drawer[] | null;
 }
 
-export interface FilterItem {
+export type FilterItemType = string | number | boolean;
+
+export interface FilterItem<T> {
   text: string;
   chipText?: string | number | boolean | null;
-  value: string | number | boolean;
+  value: T;
   checked: boolean;
 }
 
@@ -58,7 +56,7 @@ export interface Filter {
   type: "checkbox" | "text" | "dateStartEndPicker";
   text: string;
   key: string;
-  items: FilterItem[];
+  items: FilterItem<FilterItemType>[];
   disabled?: boolean;
   single?: boolean;
   required?: boolean;

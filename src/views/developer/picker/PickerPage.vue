@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <v-card flat>
+  <div class="w-full">
+    <v-card>
       <v-card-title> DatePicker.vue </v-card-title>
       <v-card-text>
         <v-row>

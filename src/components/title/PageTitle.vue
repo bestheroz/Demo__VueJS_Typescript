@@ -43,7 +43,7 @@ export default class extends Vue {
   @Prop({ type: Boolean }) readonly hideButton!: boolean;
 
   get _title(): string {
-    return this.title || this.$store.getters.selectedMenuName;
+    return this.title || this.$store.getters.currentPageTitle;
   }
 }
 </script>

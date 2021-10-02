@@ -7,7 +7,7 @@
       hide-overlay
       temporary
       app
-      width="310"
+      width="330"
     >
       <div class="d-flex align-center pa-2">
         <div class="title">Settings</div>
@@ -103,6 +103,29 @@
           </v-btn>
         </v-btn-toggle>
 
+        <div class="font-weight-bold my-1">Toolbar Style</div>
+        <v-btn-toggle
+          :value="$store.getters.isToolbarDetached"
+          color="primary"
+          mandatory
+          class="mb-2"
+        >
+          <v-btn
+            x-large
+            @click="$store.dispatch('setToolbarDetached', false)"
+            :value="false"
+          >
+            Full
+          </v-btn>
+          <v-btn
+            x-large
+            @click="$store.dispatch('setToolbarDetached', true)"
+            :value="true"
+          >
+            Solo
+          </v-btn>
+        </v-btn-toggle>
+
         <div class="font-weight-bold my-1">Content Layout</div>
         <v-btn-toggle
           :value="$store.getters.isContentBoxed"
@@ -140,7 +163,7 @@
           large
           color="primary"
           class="my-4"
-          @click="$store.dispatch('resetConfig')"
+          @click="$store.dispatch('reloadConfig')"
         />
       </div>
     </v-navigation-drawer>

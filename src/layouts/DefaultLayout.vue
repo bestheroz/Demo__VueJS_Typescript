@@ -26,52 +26,38 @@
       </template>
 
       <!-- Navigation menu -->
-      <main-menu />
+      <nav-menu :drawers="$store.getters.drawers" />
     </v-navigation-drawer>
 
     <!-- Toolbar -->
-    <v-system-bar
+    <v-app-bar
       app
-      :color="toolbarTheme === 'light' ? 'white' : 'dark'"
-      :light="toolbarTheme === 'light'"
-      :dark="toolbarTheme === 'dark'"
-      height="35"
+      :color="$store.getters.isToolbarDetached ? 'surface' : undefined"
+      :flat="$store.getters.isToolbarDetached"
+      :light="$store.getters.toolbarTheme === 'light'"
+      :dark="$store.getters.toolbarTheme === 'dark'"
     >
-      <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-      <button-icon-tooltip
-        icon-style
-        text="홈으로"
-        icon="mdi-home-outline"
-        @click="goHome"
-      />
-      <button-icon-tooltip
-        icon-style
-        text="테마"
-        icon="mdi-palette"
-        @click="toolbarThemeDialog = true"
-      />
-      <button-icon-tooltip
-        icon-style
-        text="내 정보수정"
-        icon="mdi-account-edit-outline"
-        @click="editMeDialog = true"
-      />
-      <v-spacer />
-      <v-subheader v-text="now" />
-      <v-spacer />
-      <v-subheader>
-        <v-icon> mdi-account-outline</v-icon>
-        {{ $store.getters.user.name }}
-      </v-subheader>
-      <button-icon-tooltip
-        icon-style
-        text="로그아웃"
-        icon="mdi-logout"
-        @click="logout"
-      />
-    </v-system-bar>
-    <edit-me-dialog :dialog.sync="editMeDialog" v-if="editMeDialog" />
-    <toolbar-theme v-model="toolbarThemeDialog" />
+      <v-card
+        class="flex-grow-1 d-flex"
+        :class="[
+          $store.getters.isToolbarDetached ? 'pa-1 mt-3 mx-1' : 'pa-0 ma-0',
+        ]"
+        :flat="!$store.getters.isToolbarDetached"
+      >
+        <div class="d-flex flex-grow-1 align-center">
+          <div class="d-flex flex-grow-1 align-center">
+            <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
+
+            <v-spacer class="d-none d-lg-block" />
+
+            <v-spacer class="d-block d-sm-none" />
+
+            <toolbar-admin />
+            <h4 class="primary--text mt-1" v-text="$store.getters.admin.name" />
+          </div>
+        </div>
+      </v-card>
+    </v-app-bar>
 
     <v-main>
       <v-container class="fill-height" :fluid="!$store.getters.isContentBoxed">
@@ -98,65 +84,19 @@
 </template>
 
 <script lang="ts">
-import MainMenu from "../components/navigation/MainMenu.vue";
-import { Component, Vue, Watch } from "vue-property-decorator";
+import ToolbarAdmin from "../components/toolbar/ToolbarAdmin.vue";
+import { Component, Vue } from "vue-property-decorator";
 import envs from "@/constants/envs";
-import ButtonIconTooltip from "@/components/button/ButtonIconTooltip.vue";
-import dayjs from "dayjs";
-import { logout } from "@/utils/commands";
-import EditMeDialog from "@/views/components/EditMeDialog.vue";
-import ToolbarTheme from "@/components/config/ToolbarTheme.vue";
+import NavMenu from "@/components/navigation/NavMenu.vue";
 
 @Component({
   components: {
-    ToolbarTheme,
-    EditMeDialog,
-    ButtonIconTooltip,
-    MainMenu,
+    NavMenu,
+    ToolbarAdmin,
   },
 })
 export default class extends Vue {
   drawer = null;
-
-  title = "";
-  editMeDialog = false;
-  toolbarThemeDialog = false;
-  interval: number | null = null;
-  now = "";
-
   readonly envs = envs;
-  readonly logout = logout;
-
-  get toolbarTheme(): string {
-    if (this.$store.getters.toolbarTheme === "global") {
-      return this.$store.getters.globalTheme;
-    }
-    return this.$store.getters.toolbarTheme;
-  }
-
-  protected beforeDestroy(): void {
-    this.interval && clearInterval(this.interval);
-    this.interval = null;
-    this.$nextTick(() => {
-      this.interval && clearInterval(this.interval);
-      this.interval = null;
-    });
-  }
-  protected async created(): Promise<void> {
-    this.title = envs.PRODUCT_TITLE;
-    this.now = dayjs().format("YYYY년 MM월 DD일 HH시 mm분 ss초");
-    this.interval = window.setInterval(() => {
-      this.now = dayjs().format("YYYY년 MM월 DD일 HH시 mm분 ss초");
-    }, 1000);
-  }
-
-  @Watch("$store.getters.selectedMenuName")
-  protected async watchTitle(val: string): Promise<void> {
-    document.title = this.title + `:: ${val}`;
-  }
-
-  protected goHome(): void {
-    this.$router.currentRoute.path !== "/" && this.$router.push("/");
-  }
 }
 </script>

@@ -61,7 +61,14 @@
 </template>
 
 <script lang="ts">
-import { Component, Model, Prop, Vue, Watch } from "vue-property-decorator";
+import {
+  Component,
+  Model,
+  Prop,
+  Ref,
+  Vue,
+  Watch,
+} from "vue-property-decorator";
 import envs from "@/constants/envs";
 import dayjs from "dayjs";
 import { ValidationObserver } from "vee-validate";
@@ -87,10 +94,11 @@ export default class extends Vue {
   @Prop({ type: Boolean, default: false }) readonly hideHint!: boolean;
   @Prop({ type: String }) readonly max!: string;
   @Prop({ type: String }) readonly min!: string;
+  @Ref("observer") readonly observer!: InstanceType<typeof ValidationObserver>;
 
   readonly envs: typeof envs = envs;
   readonly DATEPICKER_FORMAT = "YYYY-MM-DD";
-  pickerString = "";
+  pickerString: string | null = null;
   dialog = false;
   valid = false;
   errors: string[] | null = null;
@@ -172,9 +180,7 @@ export default class extends Vue {
   }
 
   async validate(): Promise<boolean> {
-    return await (this.$refs.observer as InstanceType<
-      typeof ValidationObserver
-    >).validate();
+    return await this.observer.validate();
   }
 }
 </script>

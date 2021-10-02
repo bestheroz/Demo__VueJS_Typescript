@@ -2,16 +2,16 @@ import router from "@/router";
 import axios from "axios";
 import envs from "@/constants/envs";
 import { goErrorPage } from "@/utils/errors";
-import { deleteApi, getApi, postApi } from "@/utils/apis";
-import { AuthorityItem, MemberConfig } from "@/definitions/models";
-import { SelectItem } from "@/definitions/types";
-import { debounce } from "lodash-es";
-import { defaultMemberConfig } from "@/definitions/defaults";
+import { ApiDataResult, axiosInstance, deleteApi, getApi } from "@/utils/apis";
+import { AdminConfig, RoleMenuMap } from "@/definitions/models";
+import { Drawer, SelectItem } from "@/definitions/types";
+import { defaultAdminConfig } from "@/definitions/defaults";
+import { cloneDeep, debounce } from "lodash-es";
 import store from "@/store";
 
-export async function goLoginPage(): Promise<void> {
-  if (router.currentRoute.path !== "/login") {
-    await router.replace("/login");
+export async function goSignInPage(): Promise<void> {
+  if (router.currentRoute.path !== "/sign-in") {
+    await router.replace("/sign-in");
   }
 }
 
@@ -29,58 +29,96 @@ export async function getAccessToken(
           AuthorizationR: refreshToken,
         },
       })
-      .get("api/auth/refreshToken");
+      .get<ApiDataResult<string>>("api/sign-in/refresh-token");
     return response.data.data;
-  } catch (e) {
-    if (e.response?.status === 401 || e.message === "Invalid token specified") {
-      await goLoginPage();
-    } else if ([403, 404, 500].includes(e.response?.status)) {
-      await goErrorPage(e.response?.status);
+  } catch (e: unknown) {
+    if (axios.isAxiosError(e)) {
+      const statusCode = e.response?.status || 500;
+      if (statusCode === 401 || e.message === "Invalid token specified!") {
+        await goSignInPage();
+      } else if ([403, 404, 500].includes(statusCode)) {
+        await goErrorPage(statusCode);
+      } else {
+        console.warn(`Missing Status Code: ${statusCode}`);
+        await goErrorPage(500);
+      }
     } else {
-      await goErrorPage(500);
+      console.error(e);
     }
   }
 }
 
-const uploadConfigHandler = debounce((config: MemberConfig) => {
+const uploadConfigHandler = debounce((config: AdminConfig) => {
   try {
-    postApi<MemberConfig>("members/mine/config/", config, false).then();
+    axiosInstance
+      .post<AdminConfig, ApiDataResult<AdminConfig>>(
+        "/api/mine/config/",
+        config,
+      )
+      .then();
   } catch (e) {
     console.error(e);
   }
 }, 1000);
-export function uploadConfig(config: MemberConfig): void {
+export function uploadConfig(config: AdminConfig): void {
   uploadConfigHandler(config);
 }
 
-export async function getYourConfig(): Promise<MemberConfig> {
-  const response = await getApi<MemberConfig>("members/mine/config");
-  return response.data || defaultMemberConfig();
+export async function getYourConfig(): Promise<AdminConfig> {
+  const response = await getApi<AdminConfig>("mine/config");
+  return response.data.primaryColor ? response.data : defaultAdminConfig();
 }
 
-export async function getMemberCodes(): Promise<SelectItem[]> {
-  const response = await getApi<SelectItem[]>("members/codes");
+export async function getAdminCodes(): Promise<SelectItem<number>[]> {
+  const response = await getApi<SelectItem<number>[]>("admins/codes");
   return response.data || [];
 }
 
-export function logout(): void {
+export function signOut(): void {
   try {
-    deleteApi("auth/logout", false).then();
+    deleteApi("sign-out", false).then();
   } catch (e) {
     console.error(e);
   }
-  router.replace("/login").then();
+  router.replace("/sign-in").then();
 }
 
-export function hasAuthority(
-  type: string,
+export function getCurrentAuthority(
   path = router.currentRoute.fullPath,
-): boolean {
-  if (store.getters.isSuperUser) {
-    return true;
-  }
-  const find = store.getters.authority.find(
-    (item: AuthorityItem) => item.menu.url === path,
+): RoleMenuMap {
+  return store.getters.flatAuthorities.find(
+    (roleMenuMap: RoleMenuMap) => roleMenuMap.menu.url === path,
   );
-  return (find?.typesJson || []).includes(type);
+}
+
+export function getDrawersFromRoleMenuMaps(
+  roleMenuMaps: RoleMenuMap[],
+): Drawer[] {
+  return (roleMenuMaps || []).map((roleMenuMap) => {
+    return {
+      id: roleMenuMap.menu.id || 0,
+      name: roleMenuMap.menu.name,
+      type: roleMenuMap.menu.type,
+      icon: roleMenuMap.menu.icon,
+      url: roleMenuMap.menu.url,
+      children: getDrawersFromRoleMenuMaps(roleMenuMap.children || []),
+    };
+  });
+}
+export function getFlatRoleMenuMaps(
+  roleMenuMaps: RoleMenuMap[],
+): RoleMenuMap[] {
+  if (!roleMenuMaps || roleMenuMaps.length === 0) {
+    return [];
+  }
+  const cloneRoleMenuMaps = cloneDeep(roleMenuMaps);
+  let result: RoleMenuMap[] = [];
+  for (const roleMenuMap of cloneRoleMenuMaps) {
+    if ((roleMenuMap.children || []).length > 0) {
+      result = [...result, ...getFlatRoleMenuMaps(roleMenuMap.children || [])];
+      roleMenuMap.children = [];
+    }
+    result = [...result, roleMenuMap];
+  }
+  return result;
 }

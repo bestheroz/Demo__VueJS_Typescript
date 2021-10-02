@@ -8,6 +8,7 @@
         :width="470"
         @keydown.esc="dialog = false"
         @keydown.enter="$refs.refDialog.save(textFieldString)"
+        :disabled="!$store.getters.writeAuthority"
       >
         <template #activator="{ on }">
           <ValidationProvider
@@ -56,12 +57,7 @@
           :max="maxTime"
           :min="minTime"
         >
-          <v-btn
-            outlined
-            @click="setNow"
-            :disabled="disableToday"
-            v-if="disabledNow"
-          >
+          <v-btn outlined @click="setNow" :disabled="disableToday">
             지금
           </v-btn>
           <div class="flex-grow-1"></div>
@@ -101,8 +97,6 @@ export default class extends Vue {
   @Prop({ type: Boolean, default: false }) readonly endType!: boolean;
   @Prop({ type: Boolean, default: false }) readonly fullWidth!: boolean;
   @Prop({ type: Boolean, default: false }) readonly hideHint!: boolean;
-  @Prop({ type: Boolean }) readonly disabledNow!: boolean;
-  @Prop({ type: Boolean }) readonly disabledBeforeNow!: boolean;
   @Prop() readonly max!: string[];
   @Prop() readonly min!: string[];
 
@@ -112,9 +106,9 @@ export default class extends Vue {
   readonly DATETIMEPICKER_FORMAT = "YYYY-MM-DD HH:mm:ss";
   readonly TIMEPICKER_MINUTE_FORMAT = "HH:mm";
   readonly TIMEPICKER_FORMAT = "HH:mm:ss";
-  textFieldString = "";
-  datePickerString = "";
-  timePickerString = "";
+  textFieldString: string | null = null;
+  datePickerString: string | null = null;
+  timePickerString: string | null = null;
   dialog = false;
   errors: string[] | null = null;
   valid = false;
@@ -128,39 +122,15 @@ export default class extends Vue {
   }
 
   get maxTime(): string | undefined {
-    return this.max?.length > 1 && this.max[1] ? this.max[1] : undefined;
+    return this.max?.length > 1 ? this.max[1] : undefined;
   }
 
   get minDate(): string | undefined {
-    if (this.min?.length > 0) {
-      if (this.disabledBeforeNow) {
-        return dayjs(this.min[0]).isBefore(dayjs())
-          ? this.min[0]
-          : dayjs().format(this.DATEPICKER_FORMAT);
-      }
-      return this.min[0];
-    }
-    return this.disabledBeforeNow
-      ? dayjs().format(this.DATEPICKER_FORMAT)
-      : undefined;
+    return this.min?.length > 0 ? this.min[0] : undefined;
   }
 
   get minTime(): string | undefined {
-    if (this.min?.length > 1 && this.min[1]) {
-      if (this.disabledBeforeNow) {
-        return dayjs(this.min[1]).isBefore(dayjs())
-          ? this.min[1]
-          : this.useSeconds
-          ? dayjs().format(this.TIMEPICKER_FORMAT)
-          : dayjs().format(this.TIMEPICKER_MINUTE_FORMAT);
-      }
-      return this.min[1];
-    }
-    return this.disabledBeforeNow
-      ? this.useSeconds
-        ? dayjs().format(this.TIMEPICKER_FORMAT)
-        : dayjs().format(this.TIMEPICKER_MINUTE_FORMAT)
-      : undefined;
+    return this.min?.length > 1 ? this.min[1] : undefined;
   }
 
   get style(): string | undefined {
@@ -237,7 +207,7 @@ export default class extends Vue {
           : this.DATETIMEPICKER_MINUTE_FORMAT,
       ).isValid()
     ) {
-      this.textFieldString = "";
+      this.textFieldString = null;
       return;
     }
     const _dayjs = dayjs(
@@ -257,7 +227,7 @@ export default class extends Vue {
             envs.DATETIME_MINUTE_FORMAT_STRING,
           ).format(this.DATETIMEPICKER_MINUTE_FORMAT);
     } else {
-      this.textFieldString = "";
+      this.textFieldString = null;
     }
   }
   @Watch("textFieldString", { immediate: true })
@@ -294,14 +264,14 @@ export default class extends Vue {
   }
 
   onClear(): void {
-    this.datePickerString = "";
-    this.timePickerString = "";
+    this.datePickerString = null;
+    this.timePickerString = null;
   }
 
   async validate(): Promise<boolean> {
-    return await (this.$refs.observer as InstanceType<
-      typeof ValidationObserver
-    >).validate();
+    return await (
+      this.$refs.observer as InstanceType<typeof ValidationObserver>
+    ).validate();
   }
 }
 </script>

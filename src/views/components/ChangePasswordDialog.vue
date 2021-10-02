@@ -111,7 +111,7 @@ export default class extends Vue {
     const response = await patchApi<{
       oldPassword: string;
       newPassword: string;
-    }>("members/mine/password/", {
+    }>("mine/password/", {
       oldPassword: pbkdf2
         .pbkdf2Sync(this.oldPassword, "salt", 1, 32, "sha512")
         .toString(),
@@ -120,7 +120,7 @@ export default class extends Vue {
         .toString(),
     });
     this.loading = false;
-    if (response?.code?.startsWith("S")) {
+    if (response.code.startsWith("S")) {
       this.syncedDialog = false;
     }
   }

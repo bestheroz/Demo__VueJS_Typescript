@@ -17,7 +17,6 @@
           :max="maxDate"
           full-width
           start-type
-          :disabled-before-now="disabledStartBeforeNow"
         />
       </v-col>
       <v-col cols="6">
@@ -55,7 +54,6 @@
           :use-seconds="useSeconds"
           :max="maxDate"
           start-type
-          :disabled-before-now="disabledStartBeforeNow"
         />
         <datetime-picker
           ref="refEnd"
@@ -83,7 +81,6 @@ import DatetimePicker from "@/components/picker/DatetimePicker.vue";
 import dayjs from "dayjs";
 
 @Component({
-  name: "DatetimeStartEndPicker",
   components: { DatetimePicker },
 })
 export default class extends Vue {
@@ -115,7 +112,6 @@ export default class extends Vue {
   @Prop({ type: Boolean, default: false }) readonly useSeconds!: boolean;
   @Prop({ type: Boolean, default: false }) readonly fullWidth!: boolean;
   @Prop({ type: Boolean, default: false }) readonly hideHint!: boolean;
-  @Prop({ type: Boolean }) readonly disabledStartBeforeNow!: boolean;
 
   @Ref("refStart") readonly refStart!: DatetimePicker;
   @Ref("refEnd") readonly refEnd!: DatetimePicker;
@@ -125,25 +121,16 @@ export default class extends Vue {
   readonly TIMEPICKER_FORMAT = "HH:mm:ss";
 
   get defaultLabelForStart(): string {
-    return this.startLabel || "시작 날짜";
+    return this.startLabel || "시작 시각";
   }
 
   get defaultLabelForEnd(): string {
-    return this.endLabel || "종료 날짜";
+    return this.endLabel || "종료 시각";
   }
 
   get minDate(): string[] | undefined {
     if (!this.syncedStart) {
       return undefined;
-    }
-    if (
-      this.syncedEnd &&
-      dayjs(this.syncedStart).diff(dayjs(this.syncedEnd), "days") !== 0
-    ) {
-      return [
-        dayjs(this.syncedStart).format(this.DATE_FORMAT),
-        this.useSeconds ? "00:00:00" : "00:00",
-      ];
     }
     return [
       dayjs(this.syncedStart).format(this.DATE_FORMAT),
@@ -156,15 +143,6 @@ export default class extends Vue {
   get maxDate(): string[] | undefined {
     if (!this.syncedEnd) {
       return undefined;
-    }
-    if (
-      this.syncedStart &&
-      dayjs(this.syncedStart).diff(dayjs(this.syncedEnd), "days") !== 0
-    ) {
-      return [
-        dayjs(this.syncedEnd).format(this.DATE_FORMAT),
-        this.useSeconds ? "23:59:59" : "23:59",
-      ];
     }
     return [
       dayjs(this.syncedEnd).format(this.DATE_FORMAT),

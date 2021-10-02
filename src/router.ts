@@ -1,8 +1,8 @@
 import Vue from "vue";
-import Router, { RawLocation, Route } from "vue-router";
-import { NavigationGuardNext } from "vue-router/types/router";
+import Router, { Route } from "vue-router";
+import { NavigationGuardNext, RouteConfig } from "vue-router/types/router";
 import store from "@/store";
-import { goLoginPage } from "@/utils/commands";
+import { goSignInPage } from "@/utils/commands";
 
 Vue.use(Router);
 
@@ -11,84 +11,91 @@ const requireAuth =
     if (store.getters.loggedIn) {
       return next();
     }
-    return goLoginPage();
+    return goSignInPage();
   };
 
-const routes = () => {
-  const admin = [
+const routes = (): RouteConfig[] => {
+  const management: RouteConfig[] = [
     {
-      path: "/admin/code",
+      path: "/management/code",
       beforeEnter: requireAuth(),
-      component: () => import("@/views/admin/code/CodePage.vue"),
+      component: () => import("@/views/management/code/CodePage.vue"),
     },
     {
-      path: "/admin/menu",
+      path: "/management/menu",
       beforeEnter: requireAuth(),
-      component: () => import("@/views/admin/menu/MenuPage.vue"),
+      component: () => import("@/views/management/menu/MenuPage.vue"),
     },
     {
-      path: "/admin/authority",
+      path: "/management/role",
       beforeEnter: requireAuth(),
-      component: () => import("@/views/admin/authority/AuthorityPage.vue"),
+      component: () => import("@/views/management/role/RolePage.vue"),
     },
     {
-      path: "/admin/member",
+      path: "/management/role-menu",
       beforeEnter: requireAuth(),
-      component: () => import("@/views/admin/member/MemberPage.vue"),
+      component: () => import("@/views/management/role/menu/RoleMenuPage.vue"),
+    },
+    {
+      path: "/management/admin",
+      beforeEnter: requireAuth(),
+      component: () => import("@/views/management/admin/AdminPage.vue"),
     },
   ];
-  const developer = [
+  const developer: RouteConfig[] = [
     {
       path: "/developer/picker",
       beforeEnter: requireAuth(),
       component: () => import("@/views/developer/picker/PickerPage.vue"),
     },
+    {
+      path: "/developer/file-uploader",
+      beforeEnter: requireAuth(),
+      component: () =>
+        import("@/views/developer/file/upload/FileUploaderPage.vue"),
+    },
+    {
+      path: "/developer/text-editor",
+      beforeEnter: requireAuth(),
+      component: () => import("@/views/developer/editor/TextEditorPage.vue"),
+    },
   ];
-  const error = [
+  const error: RouteConfig[] = [
     {
       path: "/error",
-      component: () => import("@/views/error/Error500.vue"),
+      component: () => import("@/views/error/UnexpectedPage.vue"),
       meta: {
-        layout: "simple",
+        layout: "error",
       },
     },
     {
-      name: "403 Forbidden",
-      path: "/error/403",
-      component: () => import("@/views/error/Error403.vue"),
-      meta: {
-        layout: "simple",
-      },
-    },
-    {
-      name: "404 Page not found",
       path: "/error/404",
-      component: () => import("@/views/error/Error404.vue"),
+      component: () => import("@/views/error/NotFoundPage.vue"),
       meta: {
-        layout: "simple",
+        layout: "error",
       },
     },
   ];
 
   return [
     {
-      path: "/login",
-      component: () => import("@/views/login/LoginPage.vue"),
-      meta: {
-        layout: "simple",
-      },
-    },
-    {
-      path: "/blank",
-      beforeEnter: requireAuth(),
-      component: () => import("@/views/BlankPage.vue"),
-    },
-    {
       path: "/",
       beforeEnter: requireAuth(),
       redirect: "/blank",
     },
-    ...admin,
+    {
+      path: "/blank",
+      beforeEnter: requireAuth(),
+      component: () => import("@/views/Home.vue"),
+    },
+    {
+      path: "/sign-in",
+      component: () => import("@/views/sign/in/SignIn.vue"),
+      meta: {
+        layout: "auth",
+      },
+    },
+    ...management,
     ...developer,
     ...error,
     {
@@ -98,7 +105,7 @@ const routes = () => {
   ];
 };
 
-const router = new Router({
+export default new Router({
   mode: "history",
   base: process.env.BASE_URL,
   scrollBehavior(_to: Route, _from: Route, savedPosition) {
@@ -106,43 +113,3 @@ const router = new Router({
   },
   routes: routes(),
 });
-
-const originalPush = router.push;
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-router.push = function push(location: RawLocation, onResolve, onReject) {
-  if (onResolve || onReject) {
-    return originalPush.call(this, location, onResolve, onReject);
-  }
-  return originalPush
-    .call<Router, [RawLocation], Promise<Route>>(this, location)
-    .catch((err: unknown) => {
-      if (Router.isNavigationFailure(err)) {
-        // resolve err
-        return err;
-      }
-      // rethrow error
-      return Promise.reject(err);
-    });
-};
-
-const originalReplace = router.replace;
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-router.replace = function replace(location: RawLocation, onResolve, onReject) {
-  if (onResolve || onReject) {
-    return originalReplace.call(this, location, onResolve, onReject);
-  }
-  return originalReplace
-    .call<Router, [RawLocation], Promise<Route>>(this, location)
-    .catch((err: unknown) => {
-      if (Router.isNavigationFailure(err)) {
-        // resolve err
-        return err;
-      }
-      // rethrow error
-      return Promise.reject(err);
-    });
-};
-
-export default router;

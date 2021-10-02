@@ -1,75 +1,81 @@
 import {
-  AuthorityItem,
+  Admin,
+  AdminConfig,
   Code,
-  Member,
-  MemberConfig,
   Menu,
+  Role,
+  RoleMenuMap,
 } from "@/definitions/models";
 import dayjs from "dayjs";
-import { AUTHORITY_ITEM_TYPE } from "@/definitions/selections";
+import { MENU_TYPE, ROLE_AUTHORITY_TYPE } from "@/definitions/selections";
 import config from "../configs";
 
-export function defaultUser(): {
+export function defaultSignedAdmin(): {
   id: number;
-  userId: string;
+  adminId: string;
   name: string;
-  authority: number;
+  roleId: number;
 } {
   return {
     id: 0,
-    userId: "",
+    adminId: "",
     name: "",
-    authority: 0,
+    roleId: 0,
   };
 }
 
-export function defaultMemberConfig(): MemberConfig {
+export function defaultAdminConfig(): AdminConfig {
   return {
     globalTheme: config.theme.globalTheme as "light" | "dark",
     toolbarTheme: config.theme.toolbarTheme as "global" | "light" | "dark",
     menuTheme: config.theme.menuTheme as "global" | "light" | "dark",
+    toolbarDetached: config.theme.isToolbarDetached,
     contentBoxed: config.theme.isContentBoxed,
     primaryColor: config.theme.light.primary,
   };
 }
 
-export function defaultMember(): Member {
+export function defaultAdmin(): Admin {
   return {
-    userId: "",
+    adminId: "",
     name: "",
-    loginFailCnt: 0,
     expired: dayjs().add(1, "years").endOf("day"),
     available: false,
-    config: null,
-    authority: null,
-    token: "",
+    role: defaultRole(),
   };
 }
 
 export function defaultMenu(): Menu {
   return {
     name: "",
-    type: "G",
-    parentId: 0,
-    displayOrder: 0,
+    type: MENU_TYPE.GROUP,
     icon: null,
     url: null,
+    children: [],
   };
 }
 export function defaultCode(): Code {
   return {
     type: "",
     value: "",
-    name: "",
+    text: "",
     available: false,
     displayOrder: null,
   };
 }
-export function defaultAuthorityItem(): AuthorityItem {
+export function defaultRole(): Role {
+  return {
+    name: "",
+    available: false,
+    children: [],
+    maps: [],
+  };
+}
+
+export function defaultRoleMenuMap(): RoleMenuMap {
   return {
     menu: defaultMenu(),
-    authority: "",
-    displayOrder: 0,
-    typesJson: [AUTHORITY_ITEM_TYPE.VIEW],
+    authoritiesJson: [ROLE_AUTHORITY_TYPE.VIEW],
+    children: [],
   };
 }

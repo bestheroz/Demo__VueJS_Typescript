@@ -5,7 +5,7 @@ import {
   formatDate,
   formatDatetime,
   getEllipseText,
-  getMemberNm,
+  getAdminNm,
   getSwitchLabel,
 } from "@/utils/formatter";
 
@@ -19,9 +19,9 @@ Vue.filter("formatDate", function (value: DateTime | undefined | null): string {
   return formatDate(value);
 });
 Vue.filter(
-  "formatMemberNm",
+  "formatAdminNm",
   function (value: string | undefined | null): string {
-    return getMemberNm(value);
+    return getAdminNm(value);
   },
 );
 Vue.filter(

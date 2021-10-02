@@ -1,47 +1,42 @@
 <template>
   <div>
     <v-list-item
-      v-if="!menuItem.items"
-      :input-value="menuItem.value"
-      :to="menuItem.type === MENU_TYPE.P ? menuItem.link : undefined"
-      :exact="menuItem.exact"
-      :disabled="menuItem.disabled"
-      :link="menuItem.type === MENU_TYPE.P"
-      @click="
-        menuItem.type === MENU_TYPE.W
-          ? popupWindow(menuItem.link)
-          : $store.commit('setSelectedMenu', menuItem.text)
-      "
+      v-if="drawer.type !== MENU_TYPE.GROUP"
+      :to="drawer.url"
+      :link="drawer.type === MENU_TYPE.PAGE"
+      :target="drawer.type === MENU_TYPE.NEW_TAB ? '_blank' : undefined"
       active-class="primary--text"
+      :style="{
+        'margin-left': `24px`,
+      }"
     >
-      <v-list-item-icon>
-        <v-icon
-          :class="{ 'grey--text': menuItem.disabled }"
-          v-text="menuItem.icon || 'mdi-circle-medium'"
-        />
+      <v-list-item-icon v-if="drawer.icon">
+        <v-icon v-text="drawer.icon" />
       </v-list-item-icon>
       <v-list-item-content>
-        <v-list-item-title v-text="menuItem.text" />
+        <v-list-item-title v-text="drawer.name" />
       </v-list-item-content>
     </v-list-item>
 
     <v-list-group
       v-else
-      :value="menuItem.regex ? menuItem.regex.test($route.path) : false"
-      :disabled="menuItem.disabled"
-      :sub-group="subgroup"
-      :to="menuItem.type === MENU_TYPE.P ? menuItem.link : undefined"
-      @click="
-        menuItem.type === MENU_TYPE.W ? popupWindow(menuItem.link) : undefined
-      "
-      :link="menuItem.type === MENU_TYPE.P"
+      :style="{
+        'margin-left': depth === 0 ? undefined : `24px`,
+      }"
     >
       <template #activator>
-        <v-list-item-icon v-if="!subgroup">
-          <v-icon v-text="menuItem.icon || 'mdi-circle-medium'" />
+        <v-list-item-icon
+          v-if="drawer.type === MENU_TYPE.GROUP"
+          :style="
+            depth !== 0
+              ? 'margin-right: 4px !important;'
+              : 'margin-right: 8px !important'
+          "
+        >
+          <v-icon v-text="drawer.icon" />
         </v-list-item-icon>
         <v-list-item-content>
-          <v-list-item-title v-text="menuItem.text" />
+          <v-list-item-title v-text="drawer.name" />
         </v-list-item-content>
       </template>
       <slot />
@@ -56,17 +51,9 @@ import { MENU_TYPE } from "@/definitions/selections";
 
 @Component({})
 export default class extends Vue {
-  @Prop({ default: () => Object.create(null) }) readonly menuItem!: Drawer;
-  @Prop({ type: Boolean }) readonly subgroup!: boolean;
+  @Prop({ required: true }) readonly drawer!: Drawer;
+  @Prop({ required: true }) readonly depth!: number;
 
   readonly MENU_TYPE = MENU_TYPE;
-
-  protected popupWindow(url: string): void {
-    window.open(
-      url,
-      "_blank",
-      // 'location=false,menubar=false,scrollbars=true,status=false,toolbar=false',
-    );
-  }
 }
 </script>

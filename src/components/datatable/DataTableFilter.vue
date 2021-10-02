@@ -7,11 +7,12 @@
     >
       <template #activator="{ on, attrs }">
         <v-chip
-          color="secondary"
+          color="primary"
           outlined
           v-bind="attrs"
           v-on="on"
           class="px-3"
+          label
         >
           <v-icon> mdi-filter-variant </v-icon>
           필터

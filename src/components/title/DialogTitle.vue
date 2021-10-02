@@ -15,7 +15,7 @@
         :label="getSwitchLabel(available, switchText)"
         inset
         color="primary"
-        :disabled="disabledSwitch"
+        :disabled="disabledSwitch || !$store.getters.writeAuthority"
         class="pr-4"
         v-if="withSwitch"
       />

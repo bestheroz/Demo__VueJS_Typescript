@@ -2,12 +2,13 @@ import store from "@/store";
 import { DateTime, SelectItem } from "@/definitions/types";
 import dayjs from "dayjs";
 import { truncate } from "lodash-es";
+import envs from "@/constants/envs";
 
-export function getMemberNm(value: string | undefined | null): string {
-  const find: SelectItem = store.getters.memberCodes.find(
+export function getAdminNm(value: string | undefined | null): string {
+  const find: SelectItem = store.getters.adminCodes.find(
     (value1: SelectItem) => value1.value === value,
   );
-  return find?.text || value || "-";
+  return find?.text ?? value ?? "-";
 }
 
 export function formatDatetime(value: DateTime | undefined | null): string {
@@ -41,4 +42,10 @@ export function getSwitchLabel(
   text = ["사용", "사용안함"],
 ): string {
   return yn ? text[0] : text[1];
+}
+export function getImageUrl(path: string): string {
+  return `${envs.FILE_API_HOST.substring(
+    0,
+    envs.FILE_API_HOST.length - 1,
+  )}${path}`;
 }
