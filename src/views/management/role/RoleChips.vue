@@ -37,7 +37,7 @@ export default class extends Vue {
   protected async created(): Promise<void> {
     this.loading = true;
     const response = await getApi<Role[]>("mine/roles/selections/");
-    this.roles = response.data || [];
+    this.roles = (response.data || []).filter((r) => r.id !== 1);
     this.loading = false;
   }
 }
