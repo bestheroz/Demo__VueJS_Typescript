@@ -80,8 +80,8 @@ import { AxiosResponse } from "axios";
 export default class extends Vue {
   @Ref("observer") readonly observer!: InstanceType<typeof ValidationObserver>;
 
-  adminId = "";
-  password = "";
+  adminId = "1";
+  password = "1";
 
   dialog = false;
   loading = false;
