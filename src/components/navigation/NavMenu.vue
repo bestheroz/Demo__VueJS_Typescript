@@ -1,31 +1,17 @@
 <template>
-  <div>
+  <v-list nav dense class="py-0">
     <!-- menu level 1 -->
     <nav-menu-item
-      v-for="(level1Item, level1Index) in menu"
-      :key="level1Index"
-      :menu-item="level1Item"
+      v-for="drawer in drawers"
+      :key="drawer.id"
+      :drawer="drawer"
+      :depth="depth"
     >
-      <template v-if="level1Item.items">
-        <!-- menu level 2 -->
-        <nav-menu-item
-          v-for="(level2Item, level2Index) in level1Item.items"
-          :key="level2Index"
-          :menu-item="level2Item"
-          subgroup
-        >
-          <template v-if="level2Item.items">
-            <!-- menu level 3 -->
-            <nav-menu-item
-              v-for="(level3Item, level3Index) in level2Item.items"
-              :key="level3Index"
-              :menu-item="level3Item"
-            />
-          </template>
-        </nav-menu-item>
+      <template v-if="drawer.children && drawer.children.length > 0">
+        <nav-menu :drawers="drawer.children" :depth="depth + 1" />
       </template>
     </nav-menu-item>
-  </div>
+  </v-list>
 </template>
 
 <script lang="ts">
@@ -34,9 +20,13 @@ import NavMenuItem from "@/components/navigation/NavMenuItem.vue";
 import { Drawer } from "@/definitions/types";
 
 @Component({
-  components: { NavMenuItem },
+  components: {
+    NavMenuItem,
+    NavMenu: () => import("@/components/navigation/NavMenu.vue"),
+  },
 })
 export default class extends Vue {
-  @Prop({ default: () => [] }) readonly menu!: Drawer[];
+  @Prop({ default: () => [] }) readonly drawers!: Drawer[];
+  @Prop({ default: 0 }) readonly depth!: number;
 }
 </script>

@@ -8,8 +8,14 @@ export default {
   // toolbar theme, use global theme or custom
   toolbarTheme: "global", // global | light | dark
 
+  // show toolbar detached from top
+  isToolbarDetached: false,
+
   // wrap pages content with a max-width
   isContentBoxed: false,
+
+  // application is right to left
+  isRTL: false,
 
   // dark theme colors
   dark: {

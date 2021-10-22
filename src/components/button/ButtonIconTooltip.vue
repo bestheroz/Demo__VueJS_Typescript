@@ -8,7 +8,6 @@
     >
       <template #activator="{ on, attrs }">
         <v-btn
-          :icon="iconStyle"
           :color="color"
           @click="$emit('click')"
           v-bind="attrs"
@@ -57,7 +56,6 @@ export default class extends Vue {
   @Prop({ type: Boolean }) readonly large!: boolean;
   @Prop({ type: Boolean }) readonly xLarge!: boolean;
   @Prop({ type: Boolean }) readonly block!: boolean;
-  @Prop({ type: Boolean }) readonly iconStyle!: boolean;
   @Prop({}) readonly size!: number | string;
 
   get defaultPosition(): boolean {
@@ -65,8 +63,3 @@ export default class extends Vue {
   }
 }
 </script>
-<style scoped lang="scss">
-.theme--dark.v-btn:not(.v-btn--flat):not(.v-btn--text):not(.v-btn--outlined) {
-  background-color: initial;
-}
-</style>

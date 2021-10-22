@@ -10,12 +10,13 @@
       />
       {{ title }}
       <v-spacer />
+      <v-switch class="d-none" />
       <v-switch
         v-model="available"
         :label="getSwitchLabel(available, switchText)"
         inset
         color="primary"
-        :disabled="disabledSwitch"
+        :disabled="disabledSwitch || !$store.getters.writeAuthority"
         class="pr-4"
         v-if="withSwitch"
       />
@@ -52,6 +53,7 @@ export default class extends Vue {
   @Prop({}) readonly prefix!: string;
   @Prop({}) readonly text!: string;
   @Prop({}) readonly isNew!: string;
+  @Prop({}) readonly suffix!: string;
 
   readonly getSwitchLabel = getSwitchLabel;
 
@@ -60,7 +62,9 @@ export default class extends Vue {
       return this.text;
     } else if (this.prefix) {
       return `${this.prefix} ${
-        this.$store.getters.writeAuthority
+        this.suffix
+          ? this.suffix
+          : this.$store.getters.writeAuthority
           ? this.isNew
             ? "등록"
             : "수정"

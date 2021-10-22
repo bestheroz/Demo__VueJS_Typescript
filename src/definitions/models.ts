@@ -1,65 +1,55 @@
 import { DateTime } from "@/definitions/types";
 
-export interface MemberConfig {
+export interface IdCreatedUpdated {
   id?: number;
-  createdBy?: string;
+  createdBy?: number;
   created?: DateTime;
-  updatedBy?: string;
+  updatedBy?: number;
   updated?: DateTime;
+}
+
+export interface AdminConfig {
   globalTheme: "light" | "dark";
   toolbarTheme: "global" | "light" | "dark";
   menuTheme: "global" | "light" | "dark";
+  toolbarDetached: boolean;
   contentBoxed: boolean;
   primaryColor: string;
 }
-export interface Member {
-  id?: number;
-  createdBy?: string;
-  created?: DateTime;
-  updatedBy?: string;
-  updated?: DateTime;
-  userId: string;
-  password?: string;
-  name: string;
-  loginFailCnt: number;
-  expired: DateTime;
-  available: boolean;
-  authority: number | null;
-  token: string;
-  config: MemberConfig | null;
-}
 
-export interface Menu {
-  id?: number;
-  createdBy?: string;
-  created?: DateTime;
-  updatedBy?: string;
-  updated?: DateTime;
+export interface Menu extends IdCreatedUpdated {
   name: string;
   type: string;
-  parentId: number | null;
-  displayOrder: number;
   icon: string | null;
   url: string | null;
+  children: Menu[];
 }
 
-export interface AuthorityItem {
-  id?: number | null;
-  authority: string;
-  displayOrder: number;
-  menu: Menu;
-  typesJson: string[];
-}
-
-export interface Code {
-  id?: number;
-  createdBy?: string;
-  created?: DateTime;
-  updatedBy?: string;
-  updated?: DateTime;
+export interface Code extends IdCreatedUpdated {
   type: string;
   value: string;
-  name: string;
+  text: string;
   available: boolean;
   displayOrder: number | null;
+}
+
+export interface RoleMenuMap {
+  id?: number;
+  menu: Menu;
+  authoritiesJson: string[];
+  children: RoleMenuMap[];
+}
+export interface Role extends IdCreatedUpdated {
+  name: string;
+  available: boolean;
+  children: Role[];
+  maps: RoleMenuMap[];
+}
+
+export interface Admin extends IdCreatedUpdated {
+  adminId: string;
+  name: string;
+  expired: DateTime;
+  available: boolean;
+  role: Role;
 }

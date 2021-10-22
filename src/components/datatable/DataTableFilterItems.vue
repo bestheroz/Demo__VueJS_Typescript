@@ -49,6 +49,7 @@ import {
 } from "vue-property-decorator";
 import { debounce } from "lodash-es";
 import type { Filter, FilterItem } from "@/definitions/types";
+import { FilterItemType } from "@/definitions/types";
 
 @Component({
   components: {},
@@ -77,19 +78,22 @@ export default class extends Vue {
   }
 
   @Emit("change")
-  protected onClickCheckbox(filterItem: FilterItem): void {
+  protected onClickCheckbox(filterItem: FilterItem<FilterItemType>): void {
     this.filter.single &&
       this.filter.items
         .filter((item) => item.value !== filterItem.value)
         .forEach((item) => (item.checked = false));
   }
 
-  protected onUpdateTextField(value: string, item: FilterItem): void {
+  protected onUpdateTextField(
+    value: string,
+    item: FilterItem<FilterItemType>,
+  ): void {
     this.fetchComments(value, item);
   }
 
   protected fetchComments = debounce(
-    (value: string, item: FilterItem): void => {
+    (value: string, item: FilterItem<FilterItemType>): void => {
       item.value = value;
       item.checked = false;
       // chip 에 바로 적용안되는 이슈가 있어서 추가함

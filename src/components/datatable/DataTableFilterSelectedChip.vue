@@ -10,6 +10,8 @@
           v-on="on"
           class="px-2"
           v-show="chipLabel"
+          style="z-index: 9"
+          label
         >
           {{ chipLabel }}
         </v-chip>

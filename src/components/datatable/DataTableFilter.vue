@@ -7,11 +7,12 @@
     >
       <template #activator="{ on, attrs }">
         <v-chip
-          color="secondary"
+          color="primary"
           outlined
           v-bind="attrs"
           v-on="on"
           class="px-3"
+          label
         >
           <v-icon> mdi-filter-variant </v-icon>
           필터
@@ -60,7 +61,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, VModel, Vue, Watch } from "vue-property-decorator";
+import { Component, Emit, Prop, Vue, Watch } from "vue-property-decorator";
 import { Filter } from "@/definitions/types";
 import DataTableFilterItems from "@/components/datatable/DataTableFilterItems.vue";
 import DataTableFilterSelectedChip from "@/components/datatable/DataTableFilterSelectedChip.vue";
@@ -69,7 +70,7 @@ import DataTableFilterSelectedChip from "@/components/datatable/DataTableFilterS
   components: { DataTableFilterSelectedChip, DataTableFilterItems },
 })
 export default class extends Vue {
-  @VModel({ required: true }) filters!: Filter[];
+  @Prop({ required: true }) readonly filters!: Filter[];
 
   index = 0;
 
@@ -89,7 +90,7 @@ export default class extends Vue {
   }
 
   protected onChangeFilter(): void {
-    this.filters = [...this.filters];
+    this.watchFilters(this.filters);
   }
 
   @Watch("filters", { deep: true })

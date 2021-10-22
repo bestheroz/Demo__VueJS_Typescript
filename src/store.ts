@@ -4,41 +4,44 @@ import createPersistedState from "vuex-persistedstate";
 import { Drawer, SelectItem } from "@/definitions/types";
 // eslint-disable-next-line camelcase
 import jwt_decode from "jwt-decode";
-import type { MemberConfig, Menu } from "@/definitions/models";
-import { AuthorityItem } from "@/definitions/models";
-import { drop, take } from "lodash-es";
+import type { AdminConfig, Role, RoleMenuMap } from "@/definitions/models";
 import Vuetify from "./plugins/vuetify";
-import { AUTHORITY_ITEM_TYPE, MENU_TYPE } from "@/definitions/selections";
+import { ROLE_AUTHORITY_TYPE } from "@/definitions/selections";
 import config from "./configs";
 import {
   getAccessToken,
-  getMemberCodes,
-  hasAuthority,
-  logout,
+  getAdminCodes,
+  getCurrentAuthority,
+  getDrawersFromRoleMenuMaps,
+  getFlatRoleMenuMaps,
+  signOut,
   uploadConfig,
 } from "@/utils/commands";
-import { defaultMemberConfig } from "@/definitions/defaults";
+import { defaultAdminConfig } from "@/definitions/defaults";
 import { getApi } from "@/utils/apis";
 
 Vue.use(Vuex);
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-const user = {
+const admin = {
   state: {
     id: 0,
-    userId: "",
+    adminId: "",
     name: "",
-    authority: 0,
+    roleId: 0,
     accessToken: null,
     refreshToken: null,
   },
   getters: {
-    user: (state: any) => {
+    roleId: (state: any) => {
+      return state.roleId;
+    },
+    admin: (state: any) => {
       return {
         id: state.id,
-        userId: state.userId,
+        adminId: state.adminId,
         name: state.name,
-        authority: state.authority,
+        roleId: state.roleId,
       };
     },
     loggedIn: (state: any): boolean => {
@@ -56,35 +59,35 @@ const user = {
       try {
         const jwt = jwt_decode<{
           exp: number;
-          userId: string;
-          userVO: string;
+          adminId: string;
+          admin: string;
         }>(accessToken);
-        const user = JSON.parse(jwt.userVO);
-        state.id = user.id;
-        state.userId = user.userId;
-        state.name = user.name;
-        state.authority = user.authority;
+        const admin = JSON.parse(jwt.admin);
+        state.id = admin.id;
+        state.adminId = admin.adminId;
+        state.name = admin.name;
+        state.roleId = admin.roleId;
         state.accessToken = accessToken;
       } catch (e: unknown) {
-        logout();
+        signOut();
       }
     },
     setRefreshToken(state: any, refreshToken: string): void {
       state.refreshToken = refreshToken;
     },
-    setUser: (
+    setAdmin: (
       state: any,
-      member: {
+      admin: {
         id: number;
-        userId: string;
+        adminId: string;
         name: string;
-        authority: number;
+        roleId: number;
       },
     ) => {
-      state.id = member.id;
-      state.userId = member.userId;
-      state.name = member.name;
-      state.authority = member.authority;
+      state.id = admin.id;
+      state.adminId = admin.adminId;
+      state.name = admin.name;
+      state.roleId = admin.roleId;
       state.accessToken = null;
       state.refreshToken = null;
     },
@@ -114,55 +117,64 @@ const config1 = {
     globalTheme: config.theme.globalTheme as "light" | "dark",
     toolbarTheme: config.theme.toolbarTheme as "global" | "light" | "dark",
     menuTheme: config.theme.menuTheme as "global" | "light" | "dark",
+    toolbarDetached: config.theme.isToolbarDetached,
     contentBoxed: config.theme.isContentBoxed,
     primaryColor: config.theme.light.primary,
   },
   getters: {
-    config: (state: MemberConfig): MemberConfig => {
+    config: (state: AdminConfig): AdminConfig => {
       return {
         ...state,
       };
     },
-    globalTheme: (state: MemberConfig): "light" | "dark" => {
+    globalTheme: (state: AdminConfig): "light" | "dark" => {
       Vuetify.framework.theme.dark = state.globalTheme === "dark";
       return state.globalTheme;
     },
-    menuTheme: (state: MemberConfig): "global" | "light" | "dark" => {
+    menuTheme: (state: AdminConfig): "global" | "light" | "dark" => {
       return state.menuTheme;
     },
-    toolbarTheme: (state: MemberConfig): "global" | "light" | "dark" => {
+    toolbarTheme: (state: AdminConfig): "global" | "light" | "dark" => {
       return state.toolbarTheme;
     },
-    isContentBoxed: (state: MemberConfig): boolean => {
+    isToolbarDetached: (state: AdminConfig): boolean => {
+      return state.toolbarDetached;
+    },
+    isContentBoxed: (state: AdminConfig): boolean => {
       return state.contentBoxed;
     },
-    primaryColor: (state: MemberConfig): string => {
+    primaryColor: (state: AdminConfig): string => {
       return state.primaryColor;
     },
   },
   mutations: {
-    setGlobalTheme: (state: MemberConfig, globalTheme: "light" | "dark") => {
+    setGlobalTheme: (state: AdminConfig, globalTheme: "light" | "dark") => {
       state.globalTheme = globalTheme;
     },
-    setContentBoxed: (state: MemberConfig, isContentBoxed: boolean) => {
+    setContentBoxed: (state: AdminConfig, isContentBoxed: boolean) => {
       state.contentBoxed = isContentBoxed;
     },
     setMenuTheme: (state: any, menuTheme: "global" | "light" | "dark") => {
       state.menuTheme = menuTheme;
     },
     setToolbarTheme: (
-      state: MemberConfig,
+      state: AdminConfig,
       toolbarTheme: "global" | "light" | "dark",
     ) => {
       state.toolbarTheme = toolbarTheme;
     },
-    setPrimaryColor: (state: MemberConfig, primaryColor: string) => {
+    setToolbarDetached: (state: AdminConfig, isToolbarDetached: boolean) => {
+      state.toolbarDetached = isToolbarDetached;
+    },
+    setPrimaryColor: (state: AdminConfig, primaryColor: string) => {
       state.primaryColor = primaryColor;
     },
-    setConfig: (state: MemberConfig, config: MemberConfig) => {
+    setConfig: (state: AdminConfig, config: AdminConfig) => {
       state.globalTheme = config.globalTheme;
       state.contentBoxed = config.contentBoxed;
       state.menuTheme = config.menuTheme;
+      state.toolbarTheme = config.toolbarTheme;
+      state.toolbarDetached = config.toolbarDetached;
       state.primaryColor = config.primaryColor;
     },
   },
@@ -209,8 +221,8 @@ const config1 = {
       commit("setPrimaryColor", primaryColor);
       uploadConfig(getters.config);
     },
-    resetConfig: ({ commit, getters }: ActionContext<any, any>) => {
-      commit("setConfig", defaultMemberConfig());
+    reloadConfig: ({ commit, getters }: ActionContext<any, any>) => {
+      commit("setConfig", defaultAdminConfig());
       if (getters.loggedIn) {
         uploadConfig(getters.config);
       }
@@ -219,131 +231,84 @@ const config1 = {
 };
 const authority = {
   state: {
-    code: "",
-    items: [],
+    superAdminFlag: false,
+    drawers: [],
+    flatAuthorities: [],
+    currentAuthority: null,
     writeAuthority: false,
     deleteAuthority: false,
+    excelAuthority: false,
   },
   getters: {
     drawers: (state: any): Drawer[] => {
-      if (!state.items || state.items.length === 0) {
-        return [];
-      }
-      const drawers: Drawer[] = state.items
-        .map((item: AuthorityItem) => item.menu)
-        .map((m: Menu) => {
-          return {
-            text: m.name,
-            type: m.type,
-            icon: m.icon,
-            link: m.url,
-            exact: true,
-          };
-        });
-      const groupItems: Drawer[] = drawers.filter(
-        (item: Drawer) => item.type === MENU_TYPE.G,
-      );
-      const groupIndex = groupItems.map((group: Drawer) =>
-        drawers.indexOf(group),
-      );
-      if (!groupIndex || groupIndex.length === 0) {
-        return [
-          {
-            text: "",
-            type: MENU_TYPE.G,
-            items: drawers,
-          },
-        ];
-      } else {
-        return [
-          {
-            text: "",
-            type: MENU_TYPE.G,
-            items: [
-              ...take(drawers, groupIndex[0]),
-              ...groupItems.map((group: Drawer, index: number) => {
-                let nextIndex;
-                if (groupIndex.length > index + 1) {
-                  nextIndex = groupIndex[index + 1];
-                } else {
-                  nextIndex = drawers.length;
-                }
-                const numberOfChildren = nextIndex - groupIndex[index] - 1;
-                return {
-                  ...group,
-                  items: take(
-                    drop(drawers, groupIndex[index] + 1),
-                    numberOfChildren,
-                  ),
-                };
-              }),
-            ],
-          },
-        ];
-      }
+      return state.drawers;
     },
-    isSuperUser: (state: any): boolean => {
-      return state.code === "SUPER";
+    currentAuthority: (state: any): RoleMenuMap => {
+      return state.currentAuthority;
     },
-    authority: (state: any): void => {
-      return state.items;
+    flatAuthorities: (state: any): RoleMenuMap[] => {
+      return state.flatAuthorities;
+    },
+    isSuperAdmin: (state: any): boolean => {
+      return state.superAdminFlag;
     },
     writeAuthority: (state: any): boolean => {
-      return state.writeAuthority;
+      return state.writeAuthority || state.superAdminFlag;
     },
     deleteAuthority: (state: any): boolean => {
-      return state.deleteAuthority;
+      return state.deleteAuthority || state.superAdminFlag;
+    },
+    excelAuthority: (state: any): boolean => {
+      return state.excelAuthority || state.superAdminFlag;
     },
   },
   mutations: {
-    setAuthority(state: any, items: AuthorityItem[]): void {
-      state.code = items?.[0]?.authority;
-      state.items = items || [];
+    setRole(state: any, role: Role): void {
+      if (role) {
+        state.superAdminFlag = role.id === 1;
+        state.drawers = getDrawersFromRoleMenuMaps(role.maps);
+        state.flatAuthorities = getFlatRoleMenuMaps(role.maps);
+      }
     },
-    resetMenuAuthority(state: any, path: string): void {
-      state.writeAuthority = hasAuthority(AUTHORITY_ITEM_TYPE.WRITE, path);
-      state.deleteAuthority = hasAuthority(AUTHORITY_ITEM_TYPE.DELETE, path);
+    reloadCurrentAuthority(state: any, path: string): void {
+      state.currentAuthority = getCurrentAuthority(path);
+      const authoritiesJson = state.currentAuthority?.authoritiesJson || [];
+      state.writeAuthority = authoritiesJson.includes(
+        ROLE_AUTHORITY_TYPE.WRITE,
+      );
+      state.deleteAuthority = authoritiesJson.includes(
+        ROLE_AUTHORITY_TYPE.DELETE,
+      );
+      state.excelAuthority = authoritiesJson.includes(
+        ROLE_AUTHORITY_TYPE.EXCEL,
+      );
     },
   },
   actions: {
-    async resetAuthority({ commit }: ActionContext<any, any>): Promise<void> {
-      const response = await getApi<AuthorityItem[]>("members/mine/authority");
-      commit("setAuthority", response.data);
+    async reloadRole({ commit }: ActionContext<any, any>): Promise<void> {
+      // eslint-disable-next-line no-undef
+      const response = await getApi<Role>("mine/role");
+      commit("setRole", response.data);
     },
   },
 };
 const codes = {
   state: {
-    memberCodes: null,
+    adminCodes: null,
   },
   getters: {
-    memberCodes: (state: any): SelectItem[] => {
-      return state.memberCodes || [];
+    adminCodes: (state: any): SelectItem<number>[] => {
+      return state.adminCodes || [];
     },
   },
   mutations: {
-    setMemberCodes(state: any, memberCodes: SelectItem[]): void {
-      state.memberCodes = memberCodes;
+    setAdminCodes(state: any, adminCodes: SelectItem<number>[]): void {
+      state.adminCodes = adminCodes;
     },
   },
   actions: {
-    async resetMemberCodes({ commit }: ActionContext<any, any>): Promise<void> {
-      commit("setMemberCodes", await getMemberCodes());
-    },
-  },
-};
-const etc = {
-  state: {
-    selectedMenuName: null,
-  },
-  getters: {
-    selectedMenuName: (state: any): string => {
-      return state.selectedMenuName?.split("(팝업)").join("") || "";
-    },
-  },
-  mutations: {
-    setSelectedMenu(state: any, menuName: string): void {
-      state.selectedMenuName = menuName;
+    async reloadAdminCodes({ commit }: ActionContext<any, any>): Promise<void> {
+      commit("setAdminCodes", await getAdminCodes());
     },
   },
 };
@@ -351,11 +316,10 @@ const etc = {
 export default new Vuex.Store({
   strict: true,
   modules: {
-    user,
+    admin,
     config1,
     authority,
     codes,
-    etc,
   },
   plugins: [createPersistedState()],
 });

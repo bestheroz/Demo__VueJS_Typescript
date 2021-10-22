@@ -13,19 +13,22 @@
 import "@/scss/common.scss";
 import { Component, Vue, Watch } from "vue-property-decorator";
 
+import AuthLayout from "@/layouts/AuthLayout.vue";
 import DefaultLayout from "@/layouts/DefaultLayout.vue";
-import SimpleLayout from "@/layouts/SimpleLayout.vue";
+import ErrorLayout from "@/layouts/ErrorLayout.vue";
 import Vuetify from "@/plugins/vuetify";
 import envs from "@/constants/envs";
 // eslint-disable-next-line camelcase
 import jwt_decode from "jwt-decode";
 import dayjs from "dayjs";
-import { logout } from "@/utils/commands";
+import { signOut } from "@/utils/commands";
+import type { RoleMenuMap } from "@/definitions/models";
 
 @Component({
   components: {
+    AuthLayout,
     DefaultLayout,
-    SimpleLayout,
+    ErrorLayout,
   },
 })
 export default class extends Vue {
@@ -43,13 +46,21 @@ export default class extends Vue {
 
   @Watch("$route.fullPath")
   protected watchRouteFullPath(val: string): void {
-    this.$store.commit("resetMenuAuthority", val);
+    this.$store.commit("reloadCurrentAuthority", val);
+  }
+
+  @Watch("$store.getters.currentAuthority", { immediate: true })
+  watchCurrentAuthority(val: RoleMenuMap): void {
+    const pageTitle = val?.menu?.name;
+    document.title = pageTitle
+      ? `${envs.PRODUCT_TITLE}::${pageTitle}`
+      : envs.PRODUCT_TITLE;
   }
 
   @Watch("$store.getters.accessToken", { immediate: true })
   watchAccessToken(val: string): void {
     if (!val) {
-      logout();
+      signOut();
       return;
     }
     try {
@@ -59,7 +70,7 @@ export default class extends Vue {
         this.$store.dispatch("reIssueAccessToken");
       }
     } catch (e: unknown) {
-      logout();
+      signOut();
     }
   }
 
