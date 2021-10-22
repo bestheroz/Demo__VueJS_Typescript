@@ -18,12 +18,13 @@
                 >
                   <v-text-field
                     v-model="password"
-                    label="*비밀번호"
+                    label="비밀번호"
                     :counter="20"
                     :error-messages="errors"
                     :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
                     :type="showPassword ? 'text' : 'password'"
                     @click:append="showPassword = !showPassword"
+                    class="required"
                   />
                 </ValidationProvider>
               </v-col>
@@ -35,13 +36,14 @@
                 >
                   <v-text-field
                     v-model="passwordCheck"
-                    label="*비밀번호 확인"
+                    label="비밀번호 확인"
                     :counter="20"
                     :error-messages="errors"
                     :append-icon="showPasswordCheck ? 'mdi-eye' : 'mdi-eye-off'"
                     :type="showPasswordCheck ? 'text' : 'password'"
                     @keyup.enter="resetPassword"
                     @click:append="showPasswordCheck = !showPasswordCheck"
+                    class="required"
                   />
                 </ValidationProvider>
               </v-col>

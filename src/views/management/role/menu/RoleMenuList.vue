@@ -3,10 +3,10 @@
     <v-card flat :loading="loading">
       <v-card-text>
         <v-row dense>
-          <v-col cols="5">
-            <role-menu-nested-draggable v-model="items" />
+          <v-col sm="12" md="6">
+            <role-menu-nested-draggable v-model="items" :role-id="roleId" />
           </v-col>
-          <v-col cols="7">
+          <v-col sm="12" md="6">
             <v-card-text class="py-0 elevation-1">
               <v-chip-group
                 v-model="selected"
@@ -14,7 +14,14 @@
                 column
                 @change="onChangeSelectedChip"
               >
-                <role-menu-menu-item v-model="selected" :menus="menus" />
+                <role-menu-menu-item
+                  v-model="selected"
+                  :menus="menus"
+                  :disabled="
+                    $store.getters.writeAuthority &&
+                    roleId === $store.getters.roleId
+                  "
+                />
               </v-chip-group>
             </v-card-text>
           </v-col>
@@ -38,7 +45,7 @@ import { defaultRoleMenuMap } from "@/definitions/defaults";
   components: { RoleMenuNestedDraggable, RoleMenuMenuItem, draggable },
 })
 export default class extends Vue {
-  @Prop({ required: true }) roleId!: string;
+  @Prop({ required: true }) roleId!: number;
 
   items: RoleMenuMap[] = [];
   menus: Menu[] = [];
@@ -61,21 +68,17 @@ export default class extends Vue {
     return this.getItemsWithChildren(this.items);
   }
 
-  protected async created(): Promise<void> {
-    const response = await getApi<Menu[]>("menus/");
-    this.menus = response.data || [];
-    await this.watchRoleId(this.roleId);
-  }
-
   @Watch("roleId")
-  protected async watchRoleId(val: string): Promise<void> {
+  protected async watchRoleId(val: number): Promise<void> {
+    this.menus = await this.getMenus(val);
+
     if (this.menus.length === 0 || !val) {
       this.items = [];
       this.selected = [];
       return;
     }
     this.loading = true;
-    const response = await getApi<RoleMenuMap[]>(`roles/${val}/menus/`);
+    const response = await getApi<RoleMenuMap[]>(`roles/${val}/maps/`);
     this.loading = false;
     this.items = response.data;
     this.selected =
@@ -86,6 +89,15 @@ export default class extends Vue {
         .map((item) => item.menu.id || 0) || [];
   }
 
+  protected async getMenus(roleId: number): Promise<Menu[]> {
+    if (this.roleId === this.$store.getters.roleId) {
+      const response = await getApi<Menu[]>(`menus/?roleId=${roleId}`);
+      return response.data || [];
+    } else {
+      const response = await getApi<Menu[]>(`menus/?childRoleId=${roleId}`);
+      return response.data || [];
+    }
+  }
   protected onChangeSelectedChip(selected: number[]): void {
     // 삭제!
     this.items = this.removeNotSelectedChildrenItem(selected, this.items);
@@ -129,12 +141,13 @@ export default class extends Vue {
   public async saveItems(): Promise<void> {
     this.saving = true;
     const response = await postApi<RoleMenuMap[]>(
-      `roles/${this.roleId}/menus/save-all`,
+      `roles/${this.roleId}/maps/save-all/`,
       this.items,
     );
     this.saving = false;
     if (response.code.startsWith("S") && response.data) {
       this.items = response.data;
+      await this.$store.dispatch("reloadRole");
     }
   }
 

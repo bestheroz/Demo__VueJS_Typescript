@@ -25,4 +25,9 @@
   .swal2-timer-progress-bar {
     background-color: var(--v-secondary-base);
   }
+
+  .swal2-validation-message {
+    color: var(--v-error-base);
+    background-color: var(--v-background-base);
+  }
 }

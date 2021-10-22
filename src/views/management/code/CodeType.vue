@@ -50,11 +50,9 @@ export default class extends Vue {
     return val;
   }
 
-  public onCreate(value: Code): void {
-    if (value.type && !this.items.includes(value.type)) {
-      this.items = [value.type, ...this.items];
-      this.selected = this.items[0];
-    }
+  public addNewItem(value: Code): void {
+    this.items = [value.type, ...this.items];
+    this.selected = value.type;
   }
 }
 </script>

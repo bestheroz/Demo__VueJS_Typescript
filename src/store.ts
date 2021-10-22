@@ -17,7 +17,7 @@ import {
   signOut,
   uploadConfig,
 } from "@/utils/commands";
-import { defaultSignedAdmin } from "@/definitions/defaults";
+import { defaultAdminConfig } from "@/definitions/defaults";
 import { getApi } from "@/utils/apis";
 
 Vue.use(Vuex);
@@ -33,6 +33,9 @@ const admin = {
     refreshToken: null,
   },
   getters: {
+    roleId: (state: any) => {
+      return state.roleId;
+    },
     admin: (state: any) => {
       return {
         id: state.id,
@@ -219,7 +222,7 @@ const config1 = {
       uploadConfig(getters.config);
     },
     reloadConfig: ({ commit, getters }: ActionContext<any, any>) => {
-      commit("setConfig", defaultSignedAdmin());
+      commit("setConfig", defaultAdminConfig());
       if (getters.loggedIn) {
         uploadConfig(getters.config);
       }
@@ -261,9 +264,11 @@ const authority = {
   },
   mutations: {
     setRole(state: any, role: Role): void {
-      state.superAdminFlag = role.id === 1;
-      state.drawers = getDrawersFromRoleMenuMaps(role.maps);
-      state.flatAuthorities = getFlatRoleMenuMaps(role.maps);
+      if (role) {
+        state.superAdminFlag = role.id === 1;
+        state.drawers = getDrawersFromRoleMenuMaps(role.maps);
+        state.flatAuthorities = getFlatRoleMenuMaps(role.maps);
+      }
     },
     reloadCurrentAuthority(state: any, path: string): void {
       state.currentAuthority = getCurrentAuthority(path);
@@ -292,12 +297,12 @@ const codes = {
     adminCodes: null,
   },
   getters: {
-    adminCodes: (state: any): SelectItem[] => {
+    adminCodes: (state: any): SelectItem<number>[] => {
       return state.adminCodes || [];
     },
   },
   mutations: {
-    setAdminCodes(state: any, adminCodes: SelectItem[]): void {
+    setAdminCodes(state: any, adminCodes: SelectItem<number>[]): void {
       state.adminCodes = adminCodes;
     },
   },

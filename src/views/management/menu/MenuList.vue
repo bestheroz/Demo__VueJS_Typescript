@@ -113,7 +113,7 @@ export default class extends Vue {
     const result = await confirmDelete(`메뉴명: ${value.name}`);
     if (result.value) {
       this.saving = true;
-      const response = await deleteApi<Menu>(`menus/${value.id}/`);
+      const response = await deleteApi<Menu>(`menus/${value.id}`);
       this.saving = false;
       if (response.code.startsWith("S")) {
         await this.$store.dispatch("reloadRole");
@@ -124,7 +124,7 @@ export default class extends Vue {
 
   public async saveAll(): Promise<void> {
     this.saving = true;
-    const response = await postApi<Menu[]>("menus/save-all", this.items);
+    const response = await postApi<Menu[]>("menus/save-all/", this.items);
     this.saving = false;
     if (response.code.startsWith("S")) {
       await this.$store.dispatch("reloadRole");

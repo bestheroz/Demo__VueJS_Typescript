@@ -20,7 +20,7 @@ Vue.filter("formatDate", function (value: DateTime | undefined | null): string {
 });
 Vue.filter(
   "formatAdminNm",
-  function (value: string | undefined | null): string {
+  function (value: number | undefined | null): string {
     return getAdminNm(value);
   },
 );

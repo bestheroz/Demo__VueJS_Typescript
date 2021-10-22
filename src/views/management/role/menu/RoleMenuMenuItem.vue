@@ -12,7 +12,7 @@
         color="primary"
         class="px-4"
         label
-        :disabled="!$store.getters.writeAuthority"
+        :disabled="disabled || !$store.getters.writeAuthority"
       >
         <v-icon
           v-text="menu.icon"
@@ -26,6 +26,7 @@
         v-model="selected"
         :menus="menu.children"
         :depth="depth + 1"
+        :disabled="disabled"
       />
     </div>
   </div>
@@ -46,6 +47,7 @@ export default class extends Vue {
   @VModel({ required: true }) selected!: number[];
   @Prop({ required: true }) readonly menus!: Menu[];
   @Prop({ default: 0 }) readonly depth!: number;
+  @Prop({ type: Boolean }) readonly disabled!: boolean;
 
   readonly MENU_TYPE = MENU_TYPE;
 }

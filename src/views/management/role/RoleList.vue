@@ -16,10 +16,22 @@
     </page-title>
     <v-card :loading="loading || saving">
       <v-card-text>
+        <a
+          class="orange--text"
+          v-text="`${items[0].name}(Yours)`"
+          v-if="!$store.getters.isSuperAdmin"
+        />
         <role-nested-draggable
           v-model="items"
           @click:edit="(item) => showEditDialog(item)"
           @click:delete="(item) => onDelete(item)"
+          v-if="$store.getters.isSuperAdmin"
+        />
+        <role-nested-draggable
+          v-model="items[0].children"
+          @click:edit="(item) => showEditDialog(item)"
+          @click:delete="(item) => onDelete(item)"
+          v-else
         />
       </v-card-text>
     </v-card>
@@ -54,7 +66,7 @@ import RoleNestedDraggable from "@/views/management/role/RoleNestedDraggable.vue
 export default class extends Vue {
   @Prop() readonly height!: number | string;
 
-  items: Role[] = [];
+  items: Role[] = this.$store.getters.isSuperAdmin ? [] : [defaultRole()];
   loading = false;
   saving = false;
   drag = false;
@@ -67,37 +79,24 @@ export default class extends Vue {
   }
 
   public async getList(): Promise<void> {
-    this.items = [];
+    this.items = this.$store.getters.isSuperAdmin ? [] : [defaultRole()];
     this.loading = true;
-    const response = await getApi<Role[]>("roles/");
+    let response;
+    if (this.$store.getters.isSuperAdmin) {
+      response = await getApi<Role[]>("roles/");
+    } else {
+      response = await getApi<Role[]>("mine/roles/");
+    }
     this.loading = false;
     this.items = response.data || [];
   }
 
-  protected onCreated(value: Role): void {
-    this.items = [...this.items, value];
+  protected onCreated(): void {
+    this.getList().then();
   }
 
-  protected onUpdated(value: Role): void {
-    this.changeUpdateItemRecursive(this.items, value);
-  }
-
-  protected changeUpdateItemRecursive(items: Role[], value: Role): boolean {
-    if (items.some((item) => item.id === value.id)) {
-      items.splice(
-        items.findIndex((item) => item.id === value.id),
-        1,
-        value,
-      );
-      return true;
-    } else {
-      for (const item of items) {
-        if (this.changeUpdateItemRecursive(item.children, value)) {
-          return true;
-        }
-      }
-      return false;
-    }
+  protected onUpdated(): void {
+    this.getList().then();
   }
 
   public showAddDialog(): void {
@@ -113,7 +112,7 @@ export default class extends Vue {
     const result = await confirmDelete(`역할명: ${value.name}`);
     if (result.value) {
       this.saving = true;
-      const response = await deleteApi<Role>(`roles/${value.id}/`);
+      const response = await deleteApi<Role>(`roles/${value.id}`);
       this.saving = false;
       if (response.code.startsWith("S")) {
         this.getList().then();
@@ -123,7 +122,7 @@ export default class extends Vue {
 
   public async saveAll(): Promise<void> {
     this.saving = true;
-    const response = await postApi<Role[]>("roles/save-all", this.items);
+    const response = await postApi<Role[]>("roles/save-all/", this.items);
     this.saving = false;
     if (response.code.startsWith("S")) {
       this.items = response.data || [];

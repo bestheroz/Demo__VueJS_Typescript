@@ -17,12 +17,14 @@
                   <ValidationProvider
                     v-slot="{ errors }"
                     name="그룹 코드"
-                    rules="required"
+                    rules="max:50|required"
                   >
                     <v-text-field
                       v-model="vModel.type"
-                      label="*그룹 코드"
+                      label="그룹 코드"
+                      :counter="50"
                       :error-messages="errors"
+                      class="required"
                     />
                   </ValidationProvider>
                 </v-col>
@@ -34,9 +36,10 @@
                   >
                     <v-text-field
                       v-model="vModel.value"
-                      label="*코드"
+                      label="코드"
                       :counter="50"
                       :error-messages="errors"
+                      class="required"
                     />
                   </ValidationProvider>
                 </v-col>
@@ -51,7 +54,7 @@
                       label="코드명"
                       :counter="100"
                       :error-messages="errors"
-                      clearable
+                      class="required"
                     />
                   </ValidationProvider>
                 </v-col>
@@ -123,10 +126,7 @@ export default class extends Vue {
 
   protected async put(): Promise<void> {
     this.loading = true;
-    const response = await putApi<Code>(
-      `codes/${this.vModel.id}/`,
-      this.vModel,
-    );
+    const response = await putApi<Code>(`codes/${this.vModel.id}`, this.vModel);
     this.loading = false;
     if (response.code.startsWith("S")) {
       this.syncedDialog = false;

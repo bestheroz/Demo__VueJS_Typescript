@@ -1,6 +1,9 @@
 <template>
   <div>
-    <page-title @click="showAddDialog" more-actions>
+    <page-title
+      @click="showAddDialog"
+      :more-actions="$store.getters.excelAuthority"
+    >
       <template #list>
         <v-list>
           <v-list-item>
@@ -15,7 +18,7 @@
       <v-card-text>
         <v-row no-gutters>
           <v-col cols="12" sm="7">
-            <data-table-filter v-model="filters" :output.sync="filterOutput" />
+            <data-table-filter :filters="filters" :output.sync="filterOutput" />
           </v-col>
           <v-spacer />
           <v-col cols="12" sm="3">
@@ -65,9 +68,6 @@
             </v-icon>
             <v-icon v-else> mdi-circle-outline </v-icon>
           </template>
-          <template v-if="roles" #[`item.roleId`]="{ item }">
-            <span v-text="getTextOfSelectItem(roles, item.role.id)" />
-          </template>
           <template #[`item.expired`]="{ item }">
             {{ item.expired | formatDatetime }}
           </template>
@@ -105,9 +105,8 @@ import AdminEditDialog from "@/views/management/admin/AdminEditDialog.vue";
 import { confirmDelete } from "@/utils/alerts";
 import qs from "qs";
 import { defaultAdmin } from "@/definitions/defaults";
-import type { Admin } from "@/definitions/models";
+import type { Admin, Role } from "@/definitions/models";
 import { cloneDeep, debounce } from "lodash-es";
-import { getTextOfSelectItem } from "@/utils/codes";
 import PageTitle from "@/components/title/PageTitle.vue";
 import dayjs from "dayjs";
 import { BooleanTypes } from "@/definitions/selections";
@@ -126,7 +125,6 @@ export default class AdminList extends Vue {
 
   readonly envs: typeof envs = envs;
   readonly dayjs = dayjs;
-  readonly getTextOfSelectItem = getTextOfSelectItem;
 
   pagination: Pagination = {
     page: 1,
@@ -145,25 +143,27 @@ export default class AdminList extends Vue {
   search = "";
   roles: SelectItem<number>[] = [];
   filterOutput: Record<string, string | number | boolean[]> = {};
-  filters: Filter[] = [
-    {
-      type: "checkbox",
-      text: "권한",
-      key: "roleList",
-      items: this.roles.map((v) => {
-        return { ...v, checked: false };
-      }),
-    },
-    {
-      type: "checkbox",
-      text: "사용 가능",
-      key: "availableList",
-      items: BooleanTypes.map((v) => {
-        return { ...v, checked: false };
-      }),
-      single: true,
-    },
-  ];
+  get filters(): Filter[] {
+    return [
+      {
+        type: "checkbox",
+        text: "권한",
+        key: "roleList",
+        items: this.roles.map((v) => {
+          return { ...v, checked: false };
+        }),
+      },
+      {
+        type: "checkbox",
+        text: "사용 가능",
+        key: "availableList",
+        items: BooleanTypes.map((v) => {
+          return { ...v, checked: false };
+        }),
+        single: true,
+      },
+    ];
+  }
 
   get headers(): DataTableHeader[] {
     let headers: DataTableHeader[] = [
@@ -185,7 +185,7 @@ export default class AdminList extends Vue {
       {
         text: "권한",
         align: "center",
-        value: "roleId",
+        value: "role.name",
       },
       {
         text: "만료일",
@@ -204,6 +204,7 @@ export default class AdminList extends Vue {
         align: "center",
         value: "availableSignIn",
         width: "6rem",
+        sortable: false,
       },
       {
         text: "작업 일시",
@@ -241,9 +242,21 @@ export default class AdminList extends Vue {
     });
   }
 
+  get queryStringForExcel(): string {
+    return qs.stringify({
+      search: this.search,
+      ...this.filterOutput,
+      ...this.pagination,
+      page: 1,
+      itemsPerPage: 99999999,
+    });
+  }
+
   protected async created(): Promise<void> {
-    const response = await getApi<SelectItem<number>[]>("roles/codes");
-    this.roles = response.data;
+    const response = await getApi<Role[]>("roles/selections/");
+    this.roles = response.data.map((v) => {
+      return { value: v.id || 0, text: v.name };
+    });
   }
 
   @Watch("queryString", { immediate: true })
@@ -289,7 +302,7 @@ export default class AdminList extends Vue {
     const result = await confirmDelete(`관리자 아이디: ${value.adminId}`);
     if (result.value) {
       this.saving = true;
-      const response = await deleteApi<Admin>(`admins/${value.id}/`);
+      const response = await deleteApi<Admin>(`admins/${value.id}`);
       this.saving = false;
       if (response.code.startsWith("S")) {
         await this.$store.dispatch("reloadAdminCodes");
@@ -301,7 +314,7 @@ export default class AdminList extends Vue {
 
   protected async excel(): Promise<void> {
     this.saving = true;
-    await downloadExcelApi("excel/admins");
+    await downloadExcelApi(`excel/admins?${this.queryStringForExcel}`);
     this.saving = false;
   }
 }

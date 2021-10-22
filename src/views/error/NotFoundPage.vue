@@ -6,11 +6,12 @@
       contain
     />
     <div class="display-2 mt-10">How did you get here?</div>
-    <div class="mt-3 mb-6">
+    <div class="my-3">
       Sorry we can't seem to find the page you're looking for.
     </div>
-    <v-text-field solo placeholder="Search website" large></v-text-field>
-    <v-btn to="/" block large color="primary">Send me Back</v-btn>
+    <v-btn block large color="primary" @click="$router.back()"
+      >Send me Back</v-btn
+    >
   </v-card>
 </template>
 

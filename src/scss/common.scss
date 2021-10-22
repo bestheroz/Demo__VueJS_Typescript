@@ -22,4 +22,11 @@
   .bottom-solid {
     border-bottom: 1px solid var(--v-secondary-base);
   }
+  .required {
+    label::after {
+      content: " *";
+      white-space: pre;
+      color: red;
+    }
+  }
 }

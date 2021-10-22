@@ -21,9 +21,10 @@
                   >
                     <v-text-field
                       v-model="vModel.name"
-                      label="*역할명"
+                      label="역할명"
                       :counter="50"
                       :error-messages="errors"
+                      class="required"
                     />
                   </ValidationProvider>
                 </v-col>
@@ -69,7 +70,6 @@ export default class extends Vue {
   @PropSync("dialog", { required: true, type: Boolean }) syncedDialog!: boolean;
   @Ref("observer") readonly observer!: InstanceType<typeof ValidationObserver>;
 
-  readonly ENDPOINT_URL = "roles/";
   loading = false;
 
   get isNew(): boolean {
@@ -86,7 +86,12 @@ export default class extends Vue {
 
   protected async create(): Promise<void> {
     this.loading = true;
-    const response = await postApi<Role>(this.ENDPOINT_URL, this.vModel);
+    const response = await postApi<Role>(
+      `roles/?parentId=${
+        this.$store.getters.isSuperAdmin ? "" : this.$store.getters.roleId
+      }`,
+      this.vModel,
+    );
     this.loading = false;
     if (response.code.startsWith("S")) {
       this.syncedDialog = false;
@@ -96,10 +101,7 @@ export default class extends Vue {
 
   protected async update(): Promise<void> {
     this.loading = true;
-    const response = await putApi<Role>(
-      `${this.ENDPOINT_URL}${this.vModel.id}/`,
-      this.vModel,
-    );
+    const response = await putApi<Role>(`roles/${this.vModel.id}`, this.vModel);
     this.loading = false;
     if (response.code.startsWith("S")) {
       this.syncedDialog = false;

@@ -31,7 +31,7 @@
               @click:clear="pickerString = null"
               :error-messages="errors"
               :append-outer-icon="startType ? 'mdi-tilde' : undefined"
-              :class="endType ? 'ml-3' : undefined"
+              :class="classSet"
               :style="style"
               v-on="on"
             />
@@ -114,6 +114,17 @@ export default class extends Vue {
     let defaultWidth = 9.5;
     this.startType && (defaultWidth += 2);
     return `max-width: ${defaultWidth}rem;`;
+  }
+
+  get classSet(): string | undefined {
+    let result = "";
+    if (this.endType) {
+      result += " ml-3";
+    }
+    if (this.required) {
+      result += " required";
+    }
+    return result;
   }
 
   get hint(): string | undefined {

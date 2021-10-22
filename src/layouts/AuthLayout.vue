@@ -15,10 +15,6 @@
           class="display-2 font-weight-bold primary--text"
           v-text="envs.PRODUCT_TITLE"
         />
-        <div class="title my-2">
-          Welcome! Let's build amazing things together.
-        </div>
-        <v-btn to="/" class="my-4">Take me back</v-btn>
       </div>
       <img class="w-full" src="/images/illustrations/signin-illustration.svg" />
     </v-sheet>

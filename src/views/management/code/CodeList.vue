@@ -119,7 +119,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Vue, Watch } from "vue-property-decorator";
+import { Component, Ref, Vue, Watch } from "vue-property-decorator";
 import { deleteApi, getApi, postApi } from "@/utils/apis";
 import envs from "@/constants/envs";
 import CodeEditDialog from "@/views/management/code/CodeEditDialog.vue";
@@ -140,6 +140,7 @@ import CodeType from "@/views/management/code/CodeType.vue";
   },
 })
 export default class CodeList extends Vue {
+  @Ref("refCodeType") readonly refCodeType!: CodeType;
   readonly envs: typeof envs = envs;
 
   type = "";
@@ -170,10 +171,12 @@ export default class CodeList extends Vue {
     }
   }, 300);
 
-  @Emit("created")
-  protected onCreated(value: Code): Code {
-    this.items = [value, ...this.items];
-    return value;
+  protected onCreated(value: Code): void {
+    if (this.type === value.type) {
+      this.items = [value, ...this.items];
+    } else {
+      this.refCodeType.addNewItem(value);
+    }
   }
 
   protected onUpdated(value: Code): void {
@@ -201,7 +204,7 @@ export default class CodeList extends Vue {
     const result = await confirmDelete(`코드: ${value.value}`);
     if (result.value) {
       this.saving = true;
-      const response = await deleteApi<Code>(`codes/${value.id}/`);
+      const response = await deleteApi<Code>(`codes/${value.id}`);
       this.saving = false;
       if (response.code.startsWith("S")) {
         window.localStorage.removeItem(`code__${value.type}`);
@@ -213,7 +216,7 @@ export default class CodeList extends Vue {
   public async saveItems(): Promise<void> {
     this.saving = true;
     const response = await postApi<Code[]>(
-      "codes/save-all",
+      "codes/save-all/",
       this.items.map((item, index) => {
         return {
           ...item,

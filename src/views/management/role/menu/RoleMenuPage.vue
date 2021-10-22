@@ -4,26 +4,11 @@
       button-icon="mdi-content-save"
       button-text="저장"
       @click="saveItems"
+      :hide-button="role.id === $store.getters.roleId"
     />
-    <v-card flat :loading="loading">
-      <v-card-text class="py-0">
-        <v-chip-group v-model.number="roleId" column mandatory dense>
-          <v-chip
-            v-for="item in roles"
-            :value="item.value"
-            filter
-            :outlined="roleId !== item.value"
-            color="primary"
-            :key="item.value"
-            v-text="item.text"
-            class="px-4"
-            label
-          />
-        </v-chip-group>
-      </v-card-text>
-    </v-card>
+    <role-chips v-model="role" />
     <v-divider />
-    <role-menu-list ref="refRoleMenuList" :role-id="roleId" />
+    <role-menu-list ref="refRoleMenuList" :role-id="role.id" />
   </div>
 </template>
 
@@ -31,11 +16,13 @@
 import { Component, Ref, Vue } from "vue-property-decorator";
 import RoleMenuList from "@/views/management/role/menu/RoleMenuList.vue";
 import PageTitle from "@/components/title/PageTitle.vue";
-import { SelectItem } from "@/definitions/types";
-import { getApi } from "@/utils/apis";
+import RoleChips from "@/views/management/role/RoleChips.vue";
+import { Role } from "@/definitions/models";
+import { defaultRole } from "@/definitions/defaults";
 
 @Component({
   components: {
+    RoleChips,
     PageTitle,
     RoleMenuList,
   },
@@ -43,14 +30,7 @@ import { getApi } from "@/utils/apis";
 export default class extends Vue {
   @Ref() readonly refRoleMenuList!: RoleMenuList;
 
-  roles: SelectItem<number>[] = [];
-  roleId: number | null = null;
-  loading = false;
-
-  protected async created(): Promise<void> {
-    const response = await getApi<SelectItem<number>[]>("roles/codes");
-    this.roles = response.data || [];
-  }
+  role: Role = defaultRole();
 
   protected async saveItems(): Promise<void> {
     await this.refRoleMenuList.saveItems();

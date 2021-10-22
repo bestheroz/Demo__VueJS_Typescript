@@ -4,9 +4,9 @@ import dayjs from "dayjs";
 import { truncate } from "lodash-es";
 import envs from "@/constants/envs";
 
-export function getAdminNm(value: string | undefined | null): string {
-  const find: SelectItem = store.getters.adminCodes.find(
-    (value1: SelectItem) => value1.value === value,
+export function getAdminNm(value: number | undefined | null): string {
+  const find: SelectItem<number> = store.getters.adminCodes.find(
+    (value1: SelectItem<number>) => value1.value === value,
   );
   return find?.text ?? value ?? "-";
 }

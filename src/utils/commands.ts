@@ -1,13 +1,13 @@
 import router from "@/router";
 import axios from "axios";
 import envs from "@/constants/envs";
-import { goErrorPage } from "@/utils/errors";
 import { ApiDataResult, axiosInstance, deleteApi, getApi } from "@/utils/apis";
 import { AdminConfig, RoleMenuMap } from "@/definitions/models";
 import { Drawer, SelectItem } from "@/definitions/types";
 import { defaultAdminConfig } from "@/definitions/defaults";
 import { cloneDeep, debounce } from "lodash-es";
 import store from "@/store";
+import { toastError } from "@/utils/alerts";
 
 export async function goSignInPage(): Promise<void> {
   if (router.currentRoute.path !== "/sign-in") {
@@ -37,10 +37,10 @@ export async function getAccessToken(
       if (statusCode === 401 || e.message === "Invalid token specified!") {
         await goSignInPage();
       } else if ([403, 404, 500].includes(statusCode)) {
-        await goErrorPage(statusCode);
+        toastError(e.message);
       } else {
         console.warn(`Missing Status Code: ${statusCode}`);
-        await goErrorPage(500);
+        toastError(e.message);
       }
     } else {
       console.error(e);
@@ -51,10 +51,7 @@ export async function getAccessToken(
 const uploadConfigHandler = debounce((config: AdminConfig) => {
   try {
     axiosInstance
-      .post<AdminConfig, ApiDataResult<AdminConfig>>(
-        "/api/mine/config/",
-        config,
-      )
+      .post<AdminConfig, ApiDataResult<AdminConfig>>("/api/mine/config", config)
       .then();
   } catch (e) {
     console.error(e);
@@ -70,7 +67,7 @@ export async function getYourConfig(): Promise<AdminConfig> {
 }
 
 export async function getAdminCodes(): Promise<SelectItem<number>[]> {
-  const response = await getApi<SelectItem<number>[]>("admins/codes");
+  const response = await getApi<SelectItem<number>[]>("admins/codes/");
   return response.data || [];
 }
 

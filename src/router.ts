@@ -100,7 +100,7 @@ const routes = (): RouteConfig[] => {
     ...error,
     {
       path: "*",
-      redirect: "/error",
+      redirect: "/error/404",
     },
   ];
 };

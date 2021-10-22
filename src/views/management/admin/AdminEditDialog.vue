@@ -6,11 +6,18 @@
           v-model="vModel.available"
           :is-new="isNew"
           prefix="관리자"
+          :suffix="$store.getters.roleId === vModel.role.id ? '보기' : ''"
           with-switch
+          :disabled-switch="$store.getters.roleId === vModel.role.id"
           @click:close="syncedDialog = false"
         />
         <v-card-text>
-          <v-form :readonly="!$store.getters.writeAuthority">
+          <v-form
+            :readonly="
+              !$store.getters.writeAuthority ||
+              $store.getters.roleId === vModel.role.id
+            "
+          >
             <ValidationObserver ref="observer">
               <v-row>
                 <v-col cols="12" md="3">
@@ -21,9 +28,10 @@
                   >
                     <v-text-field
                       v-model="vModel.adminId"
-                      label="*관리자 아이디"
+                      label="관리자 아이디"
                       :counter="50"
                       :error-messages="errors"
+                      class="required"
                     />
                   </ValidationProvider>
                 </v-col>
@@ -35,9 +43,10 @@
                   >
                     <v-text-field
                       v-model="vModel.name"
-                      label="*관리자 이름"
+                      label="관리자 이름"
                       :counter="100"
                       :error-messages="errors"
+                      class="required"
                     />
                   </ValidationProvider>
                 </v-col>
@@ -47,12 +56,12 @@
                     name="권한"
                     rules="required"
                   >
-                    <v-select
-                      v-if="roles"
-                      v-model="vModel.role.id"
-                      :items="roles"
-                      label="*권한"
+                    <v-input :value="vModel.role.id" class="d-none" />
+                    <role-selections
+                      v-model="vModel.role"
                       :error-messages="errors"
+                      :param-available="true"
+                      required
                     />
                   </ValidationProvider>
                 </v-col>
@@ -61,6 +70,11 @@
                     v-model="vModel.expired"
                     label="만료일"
                     full-width
+                    :disabled="
+                      !$store.getters.writeAuthority ||
+                      $store.getters.roleId === vModel.role.id
+                    "
+                    required
                   />
                 </v-col>
                 <v-col cols="12" md="3" v-if="isNew">
@@ -68,7 +82,7 @@
                     v-slot="{ errors }"
                     name="비밀번호"
                     vid="password"
-                    rules="max:20"
+                    rules="required|max:20"
                   >
                     <v-text-field
                       v-model="password"
@@ -90,17 +104,21 @@
                   >
                     <v-text-field
                       v-model="password2"
-                      label="*비밀번호 확인"
+                      label="비밀번호 확인"
                       :counter="20"
                       :error-messages="errors"
                       :append-icon="show2 ? 'mdi-eye' : 'mdi-eye-off'"
                       :type="show2 ? 'text' : 'password'"
                       clearable
                       @click:append="show2 = !show2"
+                      class="required"
                     />
                   </ValidationProvider>
                   <v-btn
-                    v-else
+                    v-else-if="
+                      $store.getters.writeAuthority &&
+                      $store.getters.roleId !== vModel.role.id
+                    "
                     color="primary"
                     outlined
                     @click="resetPasswordDialog = true"
@@ -116,7 +134,10 @@
               icon="mdi-content-save"
               :loading="loading"
               @click="save"
-              v-if="$store.getters.writeAuthority"
+              v-if="
+                $store.getters.writeAuthority &&
+                $store.getters.roleId !== vModel.role.id
+              "
             />
           </v-form>
         </v-card-text>
@@ -137,7 +158,7 @@
 
 <script lang="ts">
 import { Component, PropSync, Ref, VModel, Vue } from "vue-property-decorator";
-import { getApi, patchApi, postApi } from "@/utils/apis";
+import { patchApi, postApi } from "@/utils/apis";
 import DatetimePicker from "@/components/picker/DatetimePicker.vue";
 import { ValidationObserver } from "vee-validate";
 import pbkdf2 from "pbkdf2";
@@ -146,10 +167,11 @@ import ResetPasswordDialog from "@/views/components/ResetPasswordDialog.vue";
 import type { Admin } from "@/definitions/models";
 import CreatedUpdatedBar from "@/components/history/CreatedUpdatedBar.vue";
 import ButtonWithIcon from "@/components/button/ButtonWithIcon.vue";
-import { SelectItem } from "@/definitions/types";
+import RoleSelections from "@/views/management/role/RoleSelections.vue";
 
 @Component({
   components: {
+    RoleSelections,
     ButtonWithIcon,
     CreatedUpdatedBar,
     DialogTitle,
@@ -167,16 +189,10 @@ export default class extends Vue {
   password2 = "";
   show1 = false;
   show2 = false;
-  roles: SelectItem<number>[] = [];
   resetPasswordDialog = false;
 
   get isNew(): boolean {
     return !this.vModel.id;
-  }
-
-  protected async created(): Promise<void> {
-    const response = await getApi<SelectItem<number>[]>("roles/codes");
-    this.roles = response.data;
   }
 
   protected async save(): Promise<void> {
@@ -212,7 +228,7 @@ export default class extends Vue {
         .pbkdf2Sync(params.password, "salt", 1, 32, "sha512")
         .toString();
     }
-    const response = await patchApi<Admin>(`admins/${this.vModel.id}/`, params);
+    const response = await patchApi<Admin>(`admins/${this.vModel.id}`, params);
     this.loading = false;
     if (response.code.startsWith("S")) {
       if (this.vModel.id === this.$store.getters.admin.id) {

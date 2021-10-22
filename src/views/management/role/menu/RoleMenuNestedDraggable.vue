@@ -10,7 +10,7 @@
     >
       <v-list-item dense :key="item.menu.id" v-for="item in items">
         <v-row no-gutters>
-          <v-col>
+          <v-col sm="12" lg="5">
             <v-list-item-icon>
               <v-icon v-text="item.menu.icon" style="top: 4px" />
             </v-list-item-icon>
@@ -21,59 +21,72 @@
               {{ item.menu.name }}
             </v-list-item-title>
           </v-col>
-          <v-spacer />
-          <v-col class="text-right">
-            <v-chip-group
-              multiple
+          <v-col sm="12" lg="7" class="text-right">
+            <v-btn-toggle
               v-model="item.authoritiesJson"
+              active-class="primary"
+              multiple
               v-if="item.menu.type !== MENU_TYPE.GROUP"
-              class="d-inline-block"
             >
-              <v-chip
+              <v-btn
                 :value="ROLE_AUTHORITY_TYPE.VIEW"
-                color="primary"
-                label
                 disabled
+                class="success-color"
               >
-                <v-icon size="24">mdi-eye</v-icon>
-              </v-chip>
-              <v-chip
-                :outlined="
-                  !item.authoritiesJson.includes(ROLE_AUTHORITY_TYPE.WRITE)
-                "
-                color="primary"
+                <v-icon>mdi-eye</v-icon>
+              </v-btn>
+
+              <v-btn
                 :value="ROLE_AUTHORITY_TYPE.WRITE"
-                label
-                :disabled="!$store.getters.writeAuthority"
-              >
-                <v-icon size="24">mdi-content-save-outline</v-icon>
-              </v-chip>
-              <v-chip
-                :outlined="
-                  !item.authoritiesJson.includes(ROLE_AUTHORITY_TYPE.DELETE)
+                :disabled="
+                  $store.getters.writeAuthority &&
+                  roleId === $store.getters.roleId
                 "
-                color="primary"
+                :class="
+                  item.authoritiesJson.includes(ROLE_AUTHORITY_TYPE.WRITE)
+                    ? 'success-color'
+                    : undefined
+                "
+              >
+                <v-icon>mdi-content-save-outline</v-icon>
+              </v-btn>
+
+              <v-btn
                 :value="ROLE_AUTHORITY_TYPE.DELETE"
-                label
-                :disabled="!$store.getters.writeAuthority"
-              >
-                <v-icon size="24">mdi-delete-outline</v-icon>
-              </v-chip>
-              <v-chip
-                :outlined="
-                  !item.authoritiesJson.includes(ROLE_AUTHORITY_TYPE.EXCEL)
+                :disabled="
+                  $store.getters.writeAuthority &&
+                  roleId === $store.getters.roleId
                 "
-                color="primary"
-                :value="ROLE_AUTHORITY_TYPE.EXCEL"
-                label
-                :disabled="!$store.getters.excelAuthority"
+                :class="
+                  item.authoritiesJson.includes(ROLE_AUTHORITY_TYPE.DELETE)
+                    ? 'success-color'
+                    : undefined
+                "
               >
-                <v-icon size="24">mdi-file-excel-outline</v-icon>
-              </v-chip>
-            </v-chip-group>
+                <v-icon>mdi-delete-outline</v-icon>
+              </v-btn>
+
+              <v-btn
+                :value="ROLE_AUTHORITY_TYPE.EXCEL"
+                :disabled="
+                  $store.getters.writeAuthority &&
+                  roleId === $store.getters.roleId
+                "
+                :class="
+                  item.authoritiesJson.includes(ROLE_AUTHORITY_TYPE.EXCEL)
+                    ? 'success-color'
+                    : undefined
+                "
+              >
+                <v-icon>mdi-file-excel-outline</v-icon>
+              </v-btn>
+            </v-btn-toggle>
           </v-col>
           <v-col cols="12" v-if="item.menu.type === MENU_TYPE.GROUP">
-            <role-menu-nested-draggable v-model="item.children" />
+            <role-menu-nested-draggable
+              v-model="item.children"
+              :role-id="roleId"
+            />
           </v-col>
         </v-row>
       </v-list-item>
@@ -81,7 +94,7 @@
   </v-list>
 </template>
 <script lang="ts">
-import { Component, VModel, Vue } from "vue-property-decorator";
+import { Component, Prop, VModel, Vue } from "vue-property-decorator";
 import { RoleMenuMap } from "@/definitions/models";
 import draggable from "vuedraggable";
 import { ROLE_AUTHORITY_TYPE, MENU_TYPE } from "@/definitions/selections";
@@ -97,6 +110,8 @@ export default class extends Vue {
   @VModel({ required: true, type: Array, default: () => [] })
   readonly items!: RoleMenuMap[];
 
+  @Prop({ required: true }) roleId!: number;
+
   readonly ROLE_AUTHORITY_TYPE = ROLE_AUTHORITY_TYPE;
   readonly MENU_TYPE = MENU_TYPE;
 
@@ -111,5 +126,10 @@ export default class extends Vue {
 .dragArea {
   min-height: 30px;
   border: 1px dotted var(--v-secondary-base);
+  .v-item-group {
+    .success-color {
+      background-color: var(--v-primary-base) !important;
+    }
+  }
 }
 </style>

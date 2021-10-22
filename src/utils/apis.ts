@@ -1,9 +1,9 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
 import envs from "@/constants/envs";
-import { goErrorPage } from "@/utils/errors";
 import store from "@/store";
 import { toastError, toastSuccess } from "@/utils/alerts";
 import { goSignInPage } from "@/utils/commands";
+import { Code } from "@/definitions/models";
 
 export const axiosInstance = axios.create({
   baseURL: envs.API_HOST,
@@ -44,7 +44,8 @@ axiosInstance.interceptors.response.use(
         await goSignInPage();
         return;
       } else if ([403, 404, 500].includes(error.response.status)) {
-        await goErrorPage(error.response.status);
+        console.error(error.response.data);
+        toastError(error.message);
         return;
       }
     }
@@ -141,9 +142,7 @@ export async function deleteApi<T = never, R = T>(
   return response.data;
 }
 
-export async function getCodesApi<SelectItem>(
-  type: string,
-): Promise<SelectItem[]> {
+export async function getCodesApi(type: string): Promise<Code[]> {
   const item = window.localStorage.getItem(`code__${type}`);
   if (item) {
     return JSON.parse(item);
@@ -151,8 +150,8 @@ export async function getCodesApi<SelectItem>(
     try {
       const response = await axiosInstance.get<
         string,
-        AxiosResponse<ApiDataResult<SelectItem[]>>
-      >(`api/v1/codes/?type=${type}`);
+        AxiosResponse<ApiDataResult<Code[]>>
+      >(`api/v1/codes/?type=${type}&available=true`);
       const result = response.data.data || [];
       if (result.length > 0) {
         window.localStorage.setItem(`code__${type}`, JSON.stringify(result));
@@ -202,11 +201,11 @@ function alertResponseMessage(data: ApiDataResult<unknown>): void {
 export async function uploadFileApi<T = string>(
   url: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types
-  formData: any,
+  formData: FormData,
   alert = false,
 ): Promise<ApiDataResult<T>> {
   const response = await axiosInstance.post<
-    never,
+    FormData,
     AxiosResponse<ApiDataResult<T>>
   >(`${envs.FILE_API_HOST}api/${url}`, formData, {
     headers: {

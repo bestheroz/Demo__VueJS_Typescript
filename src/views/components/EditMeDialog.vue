@@ -21,9 +21,10 @@
                 >
                   <v-text-field
                     v-model="item.name"
-                    label="*나의 이름"
+                    label="나의 이름"
                     :counter="100"
                     :error-messages="errors"
+                    class="required"
                   />
                 </ValidationProvider>
               </v-col>

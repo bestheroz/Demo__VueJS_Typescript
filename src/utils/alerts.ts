@@ -13,9 +13,10 @@ const Toast = Swal.mixin({
   },
 });
 
-export function toastSuccess(message: string, timer = 3000): void {
+export function toastSuccess(message: string, timer = 2000): void {
   Toast.fire({
     icon: "success",
+    iconColor: "var(--v-primary-base)",
     timer: timer,
     timerProgressBar: !!timer,
     title: message,
@@ -126,6 +127,7 @@ export async function promptPassword(
     title: title,
     text: text,
     icon: "question",
+    // prettier-ignore
     iconHtml: "<i class=\"mdi mdi-keyboard-outline\"></i>",
     inputPlaceholder: inputPlaceholder,
     showCancelButton: true,

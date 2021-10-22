@@ -31,6 +31,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
 import ButtonIconTooltip from "@/components/button/ButtonIconTooltip.vue";
+import { RoleMenuMap } from "@/definitions/models";
 
 @Component({
   components: { ButtonIconTooltip },
@@ -43,7 +44,12 @@ export default class extends Vue {
   @Prop({ type: Boolean }) readonly hideButton!: boolean;
 
   get _title(): string {
-    return this.title || this.$store.getters.currentPageTitle;
+    return (
+      this.title ||
+      this.$store.getters.flatAuthorities.find(
+        (f: RoleMenuMap) => f.menu.url === this.$route.path,
+      ).menu.name
+    );
   }
 }
 </script>

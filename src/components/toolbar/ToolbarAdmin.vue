@@ -64,7 +64,7 @@ import EditMeDialog from "@/views/components/EditMeDialog.vue";
 import ToolbarTheme from "@/components/config/ToolbarTheme.vue";
 import EditPasswordDialog from "@/views/components/EditPasswordDialog.vue";
 import { signOut } from "@/utils/commands";
-import { promptPassword, toastError, toastWarning } from "@/utils/alerts";
+import { promptPassword, toastError } from "@/utils/alerts";
 import pbkdf2 from "pbkdf2";
 import { postApi } from "@/utils/apis";
 
@@ -100,12 +100,6 @@ export default class extends Vue {
       this.$store.getters.admin.name +
         " 님의 정보확인을 위해 비밀번호를 입력 해 주세요",
     );
-
-    // 사용자 입력 값이 없으면 return
-    if (!adminPassword) {
-      toastWarning("입력 값이 없습니다");
-      return;
-    }
 
     const adminEncodedPassword = pbkdf2
       .pbkdf2Sync(adminPassword, "salt", 1, 32, "sha512")

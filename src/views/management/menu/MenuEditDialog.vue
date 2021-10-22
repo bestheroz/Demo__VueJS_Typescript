@@ -19,9 +19,10 @@
                   >
                     <v-text-field
                       v-model="vModel.name"
-                      label="*메뉴명"
+                      label="메뉴명"
                       :counter="50"
                       :error-messages="errors"
+                      class="required"
                     />
                   </ValidationProvider>
                 </v-col>
@@ -34,8 +35,9 @@
                     <v-select
                       v-model="vModel.type"
                       :items="MenuTypes"
-                      label="*타입"
+                      label="타입"
                       :error-messages="errors"
+                      class="required"
                     />
                   </ValidationProvider>
                 </v-col>
@@ -116,7 +118,6 @@ export default class extends Vue {
   @PropSync("dialog", { required: true, type: Boolean }) syncedDialog!: boolean;
   @Ref("observer") readonly observer!: InstanceType<typeof ValidationObserver>;
 
-  readonly ENDPOINT_URL = "menus/";
   loading = false;
   readonly MenuTypes = MenuTypes;
   readonly MENU_TYPE = MENU_TYPE;
@@ -135,7 +136,7 @@ export default class extends Vue {
 
   protected async create(): Promise<void> {
     this.loading = true;
-    const response = await postApi<Menu>(this.ENDPOINT_URL, this.vModel);
+    const response = await postApi<Menu>("menus/", this.vModel);
     this.loading = false;
     if (response.code.startsWith("S")) {
       await this.$store.dispatch("reloadRole");
@@ -146,10 +147,7 @@ export default class extends Vue {
 
   protected async update(): Promise<void> {
     this.loading = true;
-    const response = await putApi<Menu>(
-      `${this.ENDPOINT_URL}${this.vModel.id}/`,
-      this.vModel,
-    );
+    const response = await putApi<Menu>(`menus/${this.vModel.id}`, this.vModel);
     this.loading = false;
     if (response.code.startsWith("S")) {
       await this.$store.dispatch("reloadRole");
@@ -159,7 +157,7 @@ export default class extends Vue {
   }
 
   protected linkIconSite(): void {
-    window.open("https://materialdesignicons.com/cdn/5.8.55/", "_blank");
+    window.open("https://pictogrammers.github.io/@mdi/font/6.2.95/", "_blank");
   }
 }
 </script>

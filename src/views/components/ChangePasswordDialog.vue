@@ -18,12 +18,13 @@
                 >
                   <v-text-field
                     v-model="oldPassword"
-                    label="*이전 비밀번호"
+                    label="이전 비밀번호"
                     :counter="20"
                     :error-messages="errors"
                     :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
                     :type="show1 ? 'text' : 'password'"
                     @click:append="show1 = !show1"
+                    class="required"
                   />
                 </ValidationProvider>
               </v-col>
@@ -36,12 +37,13 @@
                 >
                   <v-text-field
                     v-model="password"
-                    label="*비밀번호"
+                    label="비밀번호"
                     :counter="20"
                     :error-messages="errors"
                     :append-icon="show2 ? 'mdi-eye' : 'mdi-eye-off'"
                     :type="show2 ? 'text' : 'password'"
                     @click:append="show2 = !show2"
+                    class="required"
                   />
                 </ValidationProvider>
               </v-col>
@@ -53,13 +55,14 @@
                 >
                   <v-text-field
                     v-model="password2"
-                    label="*비밀번호 확인"
+                    label="비밀번호 확인"
                     :counter="20"
                     :error-messages="errors"
                     :append-icon="show3 ? 'mdi-eye' : 'mdi-eye-off'"
                     :type="show3 ? 'text' : 'password'"
                     @keyup.enter="save"
                     @click:append="show3 = !show3"
+                    class="required"
                   />
                 </ValidationProvider>
               </v-col>
@@ -111,7 +114,7 @@ export default class extends Vue {
     const response = await patchApi<{
       oldPassword: string;
       newPassword: string;
-    }>("mine/password/", {
+    }>("mine/password", {
       oldPassword: pbkdf2
         .pbkdf2Sync(this.oldPassword, "salt", 1, 32, "sha512")
         .toString(),
