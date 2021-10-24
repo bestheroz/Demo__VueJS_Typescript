@@ -29,7 +29,7 @@
     "@mdi/font": "6.3.95",
     "@sentry/tracing": "6.13.3",
     "@sentry/vue": "6.13.3",
-    "@sentry/webpack-plugin": "^1.18.2",
+    "@sentry/webpack-plugin": "^1.18.3",
     "@types/dotenv-parse-variables": "2.0.1",
     "@types/lodash-es": "4.17.5",
     "@types/pbkdf2": "3.1.0",
