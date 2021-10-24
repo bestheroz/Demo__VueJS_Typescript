@@ -47,16 +47,18 @@
       </v-card>
     </v-menu>
     <!--    필터 선택 Chip 부분-->
-    <span
-      v-for="filter in filters"
-      :key="filter.key"
-      class="d-inline-flex ml-1"
-    >
-      <data-table-filter-selected-chip
-        :filter="filter"
-        @change="onChangeFilter"
-      />
-    </span>
+    <template v-if="show">
+      <span
+        v-for="filter in filters"
+        :key="filter.key"
+        class="d-inline-flex ml-1"
+      >
+        <data-table-filter-selected-chip
+          :filter="filter"
+          @change="onChangeFilter"
+        />
+      </span>
+    </template>
   </div>
 </template>
 
@@ -73,6 +75,7 @@ export default class extends Vue {
   @Prop({ required: true }) readonly filters!: Filter[];
 
   index = 0;
+  show = true;
 
   get selectedFilter(): Filter {
     return this.filters[this.index];
@@ -98,6 +101,8 @@ export default class extends Vue {
   protected watchFilters(
     val: Filter[],
   ): Record<string, (string | number | boolean)[]> {
+    this.show = false;
+    this.$nextTick(() => (this.show = true));
     return Object.fromEntries(
       Object.entries(
         val

@@ -31,7 +31,7 @@
               <v-col cols="12">
                 <v-text-field
                   :value="item.role.name"
-                  label="나의 권한"
+                  label="나의 역할"
                   disabled
                 />
               </v-col>

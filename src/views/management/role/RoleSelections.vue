@@ -10,6 +10,7 @@
       :clearable="clearable"
       return-object
       :class="required ? 'required' : undefined"
+      :disabled="disabled"
     />
   </div>
 </template>
@@ -26,17 +27,22 @@ import { defaultRole } from "@/definitions/defaults";
 export default class extends Vue {
   @VModel({ required: true, default: () => defaultRole() }) vModel!: Role;
   @Prop() readonly errorMessages!: string[];
-  @Prop({ default: "권한" }) readonly label!: string;
+  @Prop({ default: "역할" }) readonly label!: string;
   @Prop({ type: Boolean }) readonly clearable!: boolean;
   @Prop({ type: Boolean }) readonly required!: boolean;
-  @Prop() readonly paramAvailable!: boolean;
+  @Prop({ type: Boolean }) readonly disabled!: boolean;
+  @Prop() readonly paramAvailable?: boolean;
   items: Role[] = [];
   loading = false;
 
   protected async created(): Promise<void> {
     this.loading = true;
     const response = await getApi<Role[]>(
-      `roles/selections/?available=${this.paramAvailable}`,
+      `roles/selections/?available=${
+        !this.disabled && this.paramAvailable !== undefined
+          ? this.paramAvailable
+          : ""
+      }`,
     );
     this.items = response.data || [];
     this.loading = false;

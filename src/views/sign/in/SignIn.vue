@@ -128,10 +128,7 @@ export default class extends Vue {
       password: pbkdf2Password,
     });
     this.loading = false;
-    if (response.data.code === "S002") {
-      this.dialog = true;
-      this.password = "";
-    } else if (response.data.code.startsWith("S") && response.data.data) {
+    if (response.data.code.startsWith("S") && response.data.data) {
       await this.$store.dispatch("saveToken", {
         accessToken: response.data.data.accessToken,
         refreshToken: response.data.data.refreshToken,

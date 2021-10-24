@@ -6,18 +6,13 @@
           v-model="vModel.available"
           :is-new="isNew"
           prefix="관리자"
-          :suffix="$store.getters.roleId === vModel.role.id ? '보기' : ''"
+          :suffix="noneWriteAuthority ? '보기' : ''"
           with-switch
-          :disabled-switch="$store.getters.roleId === vModel.role.id"
+          :disabled-switch="noneWriteAuthority"
           @click:close="syncedDialog = false"
         />
         <v-card-text>
-          <v-form
-            :readonly="
-              !$store.getters.writeAuthority ||
-              $store.getters.roleId === vModel.role.id
-            "
-          >
+          <v-form :readonly="noneWriteAuthority">
             <ValidationObserver ref="observer">
               <v-row>
                 <v-col cols="12" md="3">
@@ -53,7 +48,7 @@
                 <v-col cols="12" md="3">
                   <ValidationProvider
                     v-slot="{ errors }"
-                    name="권한"
+                    name="역할"
                     rules="required"
                   >
                     <v-input :value="vModel.role.id" class="d-none" />
@@ -61,6 +56,7 @@
                       v-model="vModel.role"
                       :error-messages="errors"
                       :param-available="true"
+                      :disabled="noneWriteAuthority"
                       required
                     />
                   </ValidationProvider>
@@ -70,10 +66,7 @@
                     v-model="vModel.expired"
                     label="만료일"
                     full-width
-                    :disabled="
-                      !$store.getters.writeAuthority ||
-                      $store.getters.roleId === vModel.role.id
-                    "
+                    :disabled="noneWriteAuthority"
                     required
                   />
                 </v-col>
@@ -95,7 +88,7 @@
                     />
                   </ValidationProvider>
                 </v-col>
-                <v-col cols="12" md="3" v-if="$store.getters.writeAuthority">
+                <v-col cols="12" md="3" v-if="!noneWriteAuthority">
                   <ValidationProvider
                     v-if="isNew"
                     v-slot="{ errors }"
@@ -115,10 +108,6 @@
                     />
                   </ValidationProvider>
                   <v-btn
-                    v-else-if="
-                      $store.getters.writeAuthority &&
-                      $store.getters.roleId !== vModel.role.id
-                    "
                     color="primary"
                     outlined
                     @click="resetPasswordDialog = true"
@@ -134,10 +123,7 @@
               icon="mdi-content-save"
               :loading="loading"
               @click="save"
-              v-if="
-                $store.getters.writeAuthority &&
-                $store.getters.roleId !== vModel.role.id
-              "
+              v-if="!noneWriteAuthority"
             />
           </v-form>
         </v-card-text>
@@ -193,6 +179,15 @@ export default class extends Vue {
 
   get isNew(): boolean {
     return !this.vModel.id;
+  }
+
+  get noneWriteAuthority(): boolean {
+    return (
+      (!this.$store.getters.writeAuthority ||
+        this.$store.getters.roleId === this.vModel.role.id ||
+        !this.vModel.role.available) &&
+      !this.isNew
+    );
   }
 
   protected async save(): Promise<void> {

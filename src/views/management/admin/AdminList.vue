@@ -61,7 +61,11 @@
           </template>
           <template #[`item.availableSignIn`]="{ item }">
             <v-icon
-              v-if="item.available && dayjs(item.expired).isAfter(dayjs())"
+              v-if="
+                item.available &&
+                item.role.available &&
+                dayjs(item.expired).isAfter(dayjs())
+              "
               color="success"
             >
               mdi-check-circle
@@ -76,11 +80,6 @@
           </template>
           <template #[`item.updatedBy`]="{ item }">
             {{ item.updatedBy | formatAdminNm }}
-          </template>
-          <template #[`item.actions`]="{ item }">
-            <v-btn icon @click="remove(item)">
-              <v-icon color="error"> mdi-delete-outline </v-icon>
-            </v-btn>
           </template>
         </v-data-table>
       </v-card-text>
@@ -147,8 +146,8 @@ export default class AdminList extends Vue {
     return [
       {
         type: "checkbox",
-        text: "권한",
-        key: "roleList",
+        text: "역할",
+        key: "roleIdList",
         items: this.roles.map((v) => {
           return { ...v, checked: false };
         }),
@@ -158,7 +157,7 @@ export default class AdminList extends Vue {
         text: "사용 가능",
         key: "availableList",
         items: BooleanTypes.map((v) => {
-          return { ...v, checked: false };
+          return { ...v, checked: v.value };
         }),
         single: true,
       },
@@ -166,7 +165,7 @@ export default class AdminList extends Vue {
   }
 
   get headers(): DataTableHeader[] {
-    let headers: DataTableHeader[] = [
+    return [
       {
         text: "#key",
         align: "start",
@@ -183,7 +182,7 @@ export default class AdminList extends Vue {
         value: "name",
       },
       {
-        text: "권한",
+        text: "역할",
         align: "center",
         value: "role.name",
       },
@@ -204,7 +203,6 @@ export default class AdminList extends Vue {
         align: "center",
         value: "availableSignIn",
         width: "6rem",
-        sortable: false,
       },
       {
         text: "작업 일시",
@@ -219,19 +217,6 @@ export default class AdminList extends Vue {
         width: "8rem",
       },
     ];
-    if (this.$store.getters.deleteAuthority) {
-      headers = [
-        ...headers,
-        {
-          text: "Action",
-          align: "center",
-          value: "actions",
-          width: "5rem",
-          sortable: false,
-        },
-      ];
-    }
-    return headers;
   }
 
   get queryString(): string {
@@ -261,13 +246,13 @@ export default class AdminList extends Vue {
 
   @Watch("queryString", { immediate: true })
   public async getList(): Promise<void> {
-    this.items = [];
-    this.totalItems = 0;
-    this.loading = true;
     this.fetchList();
   }
 
   protected fetchList = debounce(async function (this: AdminList) {
+    this.items = [];
+    this.totalItems = 0;
+    this.loading = true;
     const response = await getApi<PageResult<Admin>>(
       `admins/?${this.queryString}`,
     );

@@ -73,6 +73,26 @@ export default class extends Vue {
 <style scoped lang="scss">
 .dragArea {
   min-height: 30px;
-  border: 1px dotted var(--v-secondary-base);
+  border: 1px dotted var(--v-primary-base);
+  .dragArea {
+    min-height: 30px;
+    border: 1px dotted var(--v-warning-base);
+    .dragArea {
+      min-height: 30px;
+      border: 1px dotted var(--v-info-base);
+      .dragArea {
+        min-height: 30px;
+        border: 1px dotted var(--v-error-base);
+        .dragArea {
+          min-height: 30px;
+          border: 1px dotted var(--v-success-base);
+          .dragArea {
+            min-height: 30px;
+            border: 1px dotted var(--v-secondary-base);
+          }
+        }
+      }
+    }
+  }
 }
 </style>

@@ -22,13 +22,6 @@
             @click="$emit('click:edit', role)"
             v-text="role.name"
           />
-          <v-btn
-            icon
-            @click="$emit('click:delete', role)"
-            v-if="$store.getters.deleteAuthority"
-          >
-            <v-icon color="error"> mdi-delete-outline </v-icon>
-          </v-btn>
           <role-nested-draggable
             v-model="role.children"
             @click:edit="(item) => $emit('click:edit', item)"
@@ -65,6 +58,26 @@ export default class extends Vue {
 <style scoped lang="scss">
 .dragArea {
   min-height: 30px;
-  border: 1px dotted var(--v-secondary-base);
+  border: 1px dotted var(--v-primary-base);
+  .dragArea {
+    min-height: 30px;
+    border: 1px dotted var(--v-warning-base);
+    .dragArea {
+      min-height: 30px;
+      border: 1px dotted var(--v-info-base);
+      .dragArea {
+        min-height: 30px;
+        border: 1px dotted var(--v-error-base);
+        .dragArea {
+          min-height: 30px;
+          border: 1px dotted var(--v-success-base);
+          .dragArea {
+            min-height: 30px;
+            border: 1px dotted var(--v-secondary-base);
+          }
+        }
+      }
+    }
+  }
 }
 </style>

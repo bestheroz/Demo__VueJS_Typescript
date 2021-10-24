@@ -101,6 +101,10 @@ export default class extends Vue {
         " 님의 정보확인을 위해 비밀번호를 입력 해 주세요",
     );
 
+    if (!adminPassword) {
+      return;
+    }
+
     const adminEncodedPassword = pbkdf2
       .pbkdf2Sync(adminPassword, "salt", 1, 32, "sha512")
       .toString();
