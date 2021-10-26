@@ -69,6 +69,7 @@
                       :counter="50"
                       :error-messages="errors"
                       @click:append="linkIconSite"
+                      class="required"
                     />
                   </ValidationProvider>
                 </v-col>
