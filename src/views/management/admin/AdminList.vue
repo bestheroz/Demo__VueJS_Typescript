@@ -262,7 +262,7 @@ export default class AdminList extends Vue {
   }, 300);
 
   protected onCreated(value: Admin): void {
-    this.items = [value, ...this.items];
+    this.items = [value, ...this.items].slice(0, this.pagination.itemsPerPage);
     this.totalItems++;
   }
 
