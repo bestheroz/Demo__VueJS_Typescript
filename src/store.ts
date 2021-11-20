@@ -69,7 +69,7 @@ const admin = {
         state.roleId = admin.roleId;
         state.accessToken = accessToken;
       } catch (e: unknown) {
-        signOut();
+        signOut().then();
       }
     },
     setRefreshToken(state: any, refreshToken: string): void {
@@ -321,5 +321,5 @@ export default new Vuex.Store({
     authority,
     codes,
   },
-  plugins: [createPersistedState()],
+  plugins: [createPersistedState({ storage: window.sessionStorage })],
 });
