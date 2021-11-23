@@ -28,10 +28,11 @@ axiosInstance.interceptors.request.use(
 );
 axiosInstance.interceptors.response.use(
   function (response) {
-    response.data.success =
-      [200, 201].includes(response.status) &&
-      response.data?.code?.startsWith("S");
-    return response;
+    if (response.data) {
+      response.data.success =
+        [200, 201].includes(response.status) &&
+        response.data.code?.startsWith("S");
+    }
   },
   async function (error: AxiosError) {
     if (error.message === "Network Error") {
