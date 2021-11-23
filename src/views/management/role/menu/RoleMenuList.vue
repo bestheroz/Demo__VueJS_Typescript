@@ -145,7 +145,7 @@ export default class extends Vue {
       this.items,
     );
     this.saving = false;
-    if (response.code.startsWith("S") && response.data) {
+    if (response.success && response.data) {
       this.items = response.data;
       this.$store.dispatch("reloadRole").then();
     }
