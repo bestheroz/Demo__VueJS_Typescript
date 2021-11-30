@@ -33,6 +33,7 @@ axiosInstance.interceptors.response.use(
         [200, 201].includes(response.status) &&
         response.data.code?.startsWith("S");
     }
+    return response;
   },
   async function (error: AxiosError) {
     if (error.message === "Network Error") {
