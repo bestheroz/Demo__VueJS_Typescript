@@ -24,6 +24,7 @@
                 v-for="filter in cloneFilters"
                 :key="filter.key"
                 :disabled="filter.disabled"
+                active-class="primary--text"
               >
                 <v-list-item-content>
                   <v-list-item-title v-text="filter.text" />
@@ -94,10 +95,23 @@ export default class extends Vue {
 
   @Watch("filters", { immediate: true })
   protected watchFilters(): void {
-    this.cloneFilters = this.filters;
-    if (this.filteredLength > 0) {
-      this.onChangeFilter();
-    }
+    this.cloneFilters = [
+      ...this.filters.map((f) => {
+        return {
+          ...f,
+          items: [
+            ...f.items.map((i) => {
+              return { ...i };
+            }),
+          ],
+        };
+      }),
+    ];
+    this.onChangeFilter();
+  }
+
+  public resetFilter(): void {
+    this.watchFilters();
   }
 
   @Emit("update:output")
