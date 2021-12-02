@@ -1,18 +1,19 @@
 <template>
   <div>
-    <page-title
-      @click="showAddDialog"
-      :button-loading="saving"
-      :more-actions="$store.getters.excelAuthority"
-    >
-      <template #list>
-        <v-list>
-          <v-list-item>
-            <v-btn @click="excel" v-if="$store.getters.excelAuthority">
-              <v-icon> mdi-file-excel </v-icon> 엑셀다운로드
-            </v-btn>
-          </v-list-item>
-        </v-list>
+    <page-title @click="showAddDialog" :button-loading="saving">
+      <template #more-buttons>
+        <v-btn
+          @click="excel"
+          color="primary"
+          outlined
+          x-large
+          v-if="$store.getters.excelAuthority"
+        >
+          <v-icon> mdi-file-excel </v-icon> 엑셀다운로드
+        </v-btn>
+        <v-btn @click="getList" color="primary" outlined x-large>
+          <v-icon> mdi-refresh </v-icon> 새로고침
+        </v-btn>
       </template>
     </page-title>
     <v-card>
