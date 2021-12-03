@@ -48,11 +48,11 @@
           :height="height"
           :footer-props="envs.FOOTER_PROPS_MAX_100"
         >
-          <template #[`item.adminId`]="{ item }">
+          <template #[`item.loginId`]="{ item }">
             <a
               class="text--anchor"
               @click="showEditDialog({ ...item, password: undefined })"
-              v-text="item.adminId"
+              v-text="item.loginId"
             />
           </template>
           <template #[`item.available`]="{ item }">
@@ -175,7 +175,7 @@ export default class AdminList extends Vue {
       {
         text: "관리자 아이디",
         align: "start",
-        value: "adminId",
+        value: "loginId",
       },
       {
         text: "관리자 이름",

@@ -12,13 +12,13 @@ import config from "../configs";
 
 export function defaultSignedAdmin(): {
   id: number;
-  adminId: string;
+  loginId: string;
   name: string;
   roleId: number;
 } {
   return {
     id: 0,
-    adminId: "",
+    loginId: "",
     name: "",
     roleId: 0,
   };
@@ -37,7 +37,7 @@ export function defaultAdminConfig(): AdminConfig {
 
 export function defaultAdmin(): Admin {
   return {
-    adminId: "",
+    loginId: "",
     name: "",
     expired: dayjs().add(1, "years").endOf("day"),
     available: false,

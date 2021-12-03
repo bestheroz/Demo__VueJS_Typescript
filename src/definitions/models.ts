@@ -46,7 +46,7 @@ export interface Role extends IdCreatedUpdated {
 }
 
 export interface Admin extends IdCreatedUpdated {
-  adminId: string;
+  loginId: string;
   name: string;
   expired: DateTime;
   available: boolean;
