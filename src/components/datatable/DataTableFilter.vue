@@ -3,7 +3,7 @@
     <v-menu rounded="lg" :close-on-content-click="false">
       <template #activator="{ on, attrs }">
         <v-chip
-          color="primary"
+          :color="filteredLength === 0 ? 'secondary' : 'primary'"
           outlined
           filter
           filter-icon="mdi-filter-variant"
@@ -18,7 +18,7 @@
       </template>
       <v-card min-width="400" class="mt-6">
         <v-row no-gutters>
-          <v-col cols="12" sm="6">
+          <v-col width="auto">
             <v-list-item-group v-model="index" mandatory>
               <v-list-item
                 v-for="filter in cloneFilters"
@@ -30,13 +30,13 @@
                   <v-list-item-title v-text="filter.text" />
                 </v-list-item-content>
                 <v-list-item-icon>
-                  <v-icon> mdi-chevron-right </v-icon>
+                  <v-icon> mdi-chevron-right</v-icon>
                 </v-list-item-icon>
               </v-list-item>
             </v-list-item-group>
           </v-col>
 
-          <v-col cols="12" sm="6">
+          <v-col width="auto">
             <data-table-filter-items
               v-model="cloneFilters[index]"
               @change="onChangeFilter"
@@ -50,7 +50,7 @@
       <span
         v-for="(filter, index) in cloneFilters"
         :key="filter.key"
-        class="d-inline-flex ml-1 my-0"
+        class="d-inline-flex ml-1 mt-0 mb-1"
       >
         <data-table-filter-selected-chip
           v-model="cloneFilters[index]"
