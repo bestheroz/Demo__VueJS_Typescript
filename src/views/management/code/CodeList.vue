@@ -184,7 +184,7 @@ export default class CodeList extends Vue {
       const response = await deleteApi<Code>(`codes/${value.id}`);
       this.loading = false;
       if (response.success) {
-        window.localStorage.removeItem(`code__${value.type}`);
+        window.sessionStorage.removeItem(`code__${value.type}`);
         this.items = this.items.filter((item) => item.id !== value.id);
         if (this.items.length === 0) {
           this.$emit("removed", value);
@@ -206,7 +206,7 @@ export default class CodeList extends Vue {
     );
     this.loading = false;
     if (response.success) {
-      window.localStorage.removeItem(`code__${this.type}`);
+      window.sessionStorage.removeItem(`code__${this.type}`);
       this.items = response.data || [];
     }
   }
