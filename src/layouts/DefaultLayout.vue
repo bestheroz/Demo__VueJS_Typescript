@@ -69,7 +69,7 @@
         <div class="overline">
           <a
             class="text-decoration-none"
-            href="http://work.cubewiz.co.kr/"
+            href="https://github.com/bestheroz"
             target="_blank"
           >
             @bestheroz
