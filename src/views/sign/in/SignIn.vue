@@ -78,12 +78,14 @@ import { toastCloseAll } from "@/utils/alerts";
 import { defaultAdminConfig, defaultAdmin } from "@/definitions/defaults";
 import { getYourConfig, routerReplace } from "@/utils/commands";
 import { AxiosResponse } from "axios";
+import envs from "@/constants/envs";
 
 @Component({
   components: {},
 })
 export default class extends Vue {
   @Ref("observer") readonly observer!: InstanceType<typeof ValidationObserver>;
+  readonly envs = envs;
 
   loginId = "1";
   password = "1";
