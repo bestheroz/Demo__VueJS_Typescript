@@ -71,10 +71,10 @@
         <div class="text-overline">
           <a
             class="text-decoration-none"
-            href="http://work.cubewiz.co.kr/"
+            href="https://github.com/bestheroz"
             target="_blank"
           >
-            @CUBEWIZ
+            @bestheroz
           </a>
           <v-icon small color="pink"> mdi-heart </v-icon>
         </div>
