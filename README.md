@@ -1,7 +1,7 @@
-# demo-vue2-typescript
+# base-admin
 
-[![Node.js](https://img.shields.io/badge/Node.js-v14-darkgreen.svg?logo=node.js)](https://nodejs.org/)
-[![Npm](https://img.shields.io/badge/npm-v6-blue.svg?logo=npm)](https://nodejs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-v16-darkgreen.svg?logo=node.js)](https://nodejs.org/)
+[![Npm](https://img.shields.io/badge/npm-v8-blue.svg?logo=npm)](https://nodejs.org/)
 [![Vue.js](https://img.shields.io/badge/Vue.js-v2.6-deepgreen.svg?logo=vue.js)](https://kr.vuejs.org/v2/guide/index.html)
 [![Vuetify](https://img.shields.io/badge/Vuetify-v2.6-blue.svg?logo=vuetify)](https://vuetifyjs.com/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-v4.5-blue.svg?logo=typescript)](https://www.typescriptlang.org/)

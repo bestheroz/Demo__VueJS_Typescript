@@ -1,8 +1,8 @@
-name: 'Clean'
-description: 'Clean the previous build'
+name: "Clean"
+description: "Clean the previous build"
 
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
     - run: |
         echo "clean dist"

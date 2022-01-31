@@ -21,37 +21,32 @@ export async function routerPush(path: string): Promise<void> {
   }
 }
 
-export function routerToNewTab(path: string): void {
-  window.open(path, "_blank");
-}
-
-export function routerToNewWindow(path: string): void {
-  window.open(
-    path,
-    "_blank",
-    "location=false,menubar=false,scrollbars=true,status=false,toolbar=false",
-  );
-}
-
 export async function goSignInPage(): Promise<void> {
   await routerReplace("/sign-in");
 }
 
-export async function getAccessToken(
-  accessToken: string,
-  refreshToken: string,
-): Promise<string | undefined> {
+export async function getNewToken(): Promise<
+  | {
+      accessToken: string;
+      refreshToken: string;
+    }
+  | undefined
+> {
   try {
     const response = await axios
       .create({
         baseURL: envs.API_HOST,
         headers: {
           contentType: "application/json",
-          Authorization: accessToken,
-          AuthorizationR: refreshToken,
+          AuthorizationR: window.localStorage.getItem("refreshToken") ?? "",
         },
       })
-      .get<ApiDataResult<string>>("api/sign-in/refresh-token");
+      .get<
+        ApiDataResult<{
+          accessToken: string;
+          refreshToken: string;
+        }>
+      >("api/sign-in/refresh-token");
     return response.data.data;
   } catch (e: unknown) {
     if (axios.isAxiosError(e)) {
@@ -79,6 +74,7 @@ const uploadConfigHandler = debounce((config: AdminConfig) => {
     console.error(e);
   }
 }, 1000);
+
 export function uploadConfig(config: AdminConfig): void {
   uploadConfigHandler(config);
 }
@@ -124,6 +120,7 @@ export function getDrawersFromRoleMenuMaps(
     };
   });
 }
+
 export function getFlatRoleMenuMaps(
   roleMenuMaps: RoleMenuMap[],
 ): RoleMenuMap[] {

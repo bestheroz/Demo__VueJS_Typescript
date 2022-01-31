@@ -1,8 +1,8 @@
-name: 'Build'
-description: 'Build app'
+name: "Build"
+description: "Build app"
 
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
     - run: |
         echo "npm run build"

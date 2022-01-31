@@ -1,8 +1,8 @@
-name: 'Test'
-description: 'Test app'
+name: "Test"
+description: "Test app"
 
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
     - name: npm run lint
       run: |
