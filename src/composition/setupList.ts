@@ -32,6 +32,20 @@ export default function <T>(url: string) {
     getList: () => {
       computes.fetchList.value();
     },
+    onCreated: (item: T): void => {
+      state.items = [item as UnwrapRefSimple<T>, ...state.items];
+      state.totalItems++;
+    },
+
+    onUpdated: (item: T): void => {
+      state.items.splice(
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        state.items.findIndex((_item) => _item.id === item.id),
+        1,
+        item as UnwrapRefSimple<T>,
+      );
+    },
   };
 
   return { ...toRefs(state), ...computes, ...methods };

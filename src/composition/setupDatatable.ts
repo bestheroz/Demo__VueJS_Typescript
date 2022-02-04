@@ -56,16 +56,6 @@ export default function <T>(url: string) {
       ) as UnwrapRefSimple<T>[];
       listPage.totalItems.value++;
     },
-
-    onUpdated: (item: T): void => {
-      listPage.items.value.splice(
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        listPage.items.value.findIndex((_item) => _item.id === item.id),
-        1,
-        item as UnwrapRefSimple<T>,
-      );
-    },
   };
 
   return { ...listPage, ...toRefs(state), ...computes, ...methods };
