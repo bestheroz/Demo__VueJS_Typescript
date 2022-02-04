@@ -168,15 +168,6 @@ export default defineComponent({
           emit("created", value);
         }
       },
-      onUpdated: (value: Code): void => {
-        listPage.items.value.splice(
-          listPage.items.value.findIndex(
-            (item) => item.id === listDialog.editItem.value.id,
-          ),
-          1,
-          value,
-        );
-      },
       getList: (): void => {
         listPage.fetchList.value();
       },
