@@ -91,7 +91,7 @@ export default defineComponent({
       getTypes: async (): Promise<void> => {
         state.types = [];
         const response = await getApi<string[]>("codes/types/");
-        state.types = response.data ? response.data : [];
+        state.types = response.data || [];
       },
       onCreated: async (value: Code): Promise<void> => {
         if (state.types.every((t) => t === value.type)) {
