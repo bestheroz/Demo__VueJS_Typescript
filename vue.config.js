@@ -38,7 +38,10 @@ module.exports = {
         opts.happyPackMode = true;
         opts.appendTsSuffixTo = [/\.vue$/];
         return opts;
-      });
+      })
+      .end()
+      .exclude.add(/node_modules/)
+      .end();
     if (process.env.NODE_ENV === "production") {
       config.plugin("forkTsCheckerWebpack").use(
         // eslint-disable-next-line @typescript-eslint/no-var-requires
