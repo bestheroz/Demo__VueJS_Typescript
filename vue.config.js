@@ -57,6 +57,8 @@ module.exports = {
           },
         ],
       );
+    }
+    if (process.env.VUE_APP_ENVIRONMENT === "production") {
       config
         .plugin("sentryWebpack")
         // eslint-disable-next-line @typescript-eslint/no-var-requires
