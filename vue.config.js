@@ -22,34 +22,6 @@ module.exports = {
   configureWebpack: (config) => {
     if (process.env.NODE_ENV === "production") {
       config.devtool = "hidden-source-map";
-      config
-        .plugin("forkTsCheckerWebpack")
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        .use(require("fork-ts-checker-webpack-plugin")),
-        [
-          {
-            typescript: {
-              diagnosticOptions: {
-                semantic: true,
-                syntactic: true,
-              },
-            },
-          },
-        ];
-      config
-        .plugin("sentryWebpack")
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        .use(require("@sentry/webpack-plugin")),
-        [
-          {
-            authToken:
-              "d55afb6a392443ddbe98e05d8a079b7d4cceb631027843c5a70489e681d9bb70",
-            org: "bestheroz",
-            project: "demo-vuejs-typescript",
-            include: "./dist",
-            ignore: ["node_modules", "webpack.config.js"],
-          },
-        ];
     } else {
       config.devtool = "eval";
     }
@@ -67,5 +39,34 @@ module.exports = {
         opts.appendTsSuffixTo = [/\.vue$/];
         return opts;
       });
+    if (process.env.NODE_ENV === "production") {
+      config.plugin("forkTsCheckerWebpack").use(
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        require("fork-ts-checker-webpack-plugin"),
+        [
+          {
+            typescript: {
+              diagnosticOptions: {
+                semantic: true,
+                syntactic: true,
+              },
+            },
+          },
+        ],
+      );
+      config
+        .plugin("sentryWebpack")
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        .use(require("@sentry/webpack-plugin"), [
+          {
+            authToken:
+              "d55afb6a392443ddbe98e05d8a079b7d4cceb631027843c5a70489e681d9bb70",
+            org: "bestheroz",
+            project: "demo-vuejs-typescript",
+            include: "./dist",
+            ignore: ["node_modules", "webpack.config.js"],
+          },
+        ]);
+    }
   },
 };
