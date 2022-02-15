@@ -1,5 +1,4 @@
 module.exports = {
-  transpileDependencies: ["vuetify"],
   css: {
     extract:
       /* eslint-disable indent */
@@ -18,6 +17,7 @@ module.exports = {
       },
     },
   },
+  lintOnSave: process.env.NODE_ENV !== "production",
   productionSourceMap: false,
   configureWebpack: (config) => {
     if (process.env.NODE_ENV === "production") {
@@ -34,29 +34,22 @@ module.exports = {
       .use("ts-loader")
       .loader("ts-loader")
       .tap((opts) => {
-        opts.transpileOnly = true;
         opts.happyPackMode = true;
-        opts.appendTsSuffixTo = [/\.vue$/];
         return opts;
-      })
-      .end()
-      .exclude.add(/node_modules/)
-      .end();
+      });
     if (process.env.NODE_ENV === "production") {
-      config.plugin("forkTsCheckerWebpack").use(
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        require("fork-ts-checker-webpack-plugin"),
-        [
-          {
-            typescript: {
-              diagnosticOptions: {
-                semantic: true,
-                syntactic: true,
-              },
-            },
+      config.plugin("fork-ts-checker").tap((opts) => {
+        opts.typescript = {
+          diagnosticOptions: {
+            semantic: true,
+            syntactic: true,
           },
-        ],
-      );
+          extensions: {
+            vue: true,
+          },
+        };
+        return opts;
+      });
     }
     if (process.env.VUE_APP_ENVIRONMENT === "production") {
       config
