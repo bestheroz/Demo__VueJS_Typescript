@@ -81,8 +81,10 @@ import { ValidationObserver } from "vee-validate";
 import {
   computed,
   defineComponent,
+  nextTick,
   onBeforeMount,
   onMounted,
+  onUnmounted,
   reactive,
   ref,
   toRefs,
@@ -99,6 +101,7 @@ export default defineComponent({
       errorProvider: false,
       errorProviderMessages: "",
       showPassword: false,
+      interval: null as number | null,
     });
     const computes = {
       envs: computed((): typeof envs => envs),
@@ -152,10 +155,34 @@ export default defineComponent({
         state.errorProviderMessages = "";
       },
     };
+    onUnmounted(() => {
+      state.interval && clearInterval(state.interval);
+      state.interval = null;
+      nextTick(() => {
+        state.interval && clearInterval(state.interval);
+        state.interval = null;
+      });
+    });
     onBeforeMount(() => {
       Vuetify.framework.theme.dark = false;
     });
     onMounted(async () => {
+      if (
+        window.localStorage.getItem("refreshToken") &&
+        window.localStorage.getItem("accessToken")
+      ) {
+        await routerReplace("/");
+        return;
+      }
+      state.interval = window.setInterval(() => {
+        if (
+          window.localStorage.getItem("refreshToken") &&
+          window.localStorage.getItem("accessToken")
+        ) {
+          window.location.reload();
+        }
+      }, 1_000);
+
       await store.commit("clearAdmin");
       await store.dispatch("reloadConfig");
       await store.commit("setRole", null);
