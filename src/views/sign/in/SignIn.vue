@@ -156,8 +156,6 @@ export default defineComponent({
       },
     };
     onUnmounted(() => {
-      state.interval && clearInterval(state.interval);
-      state.interval = null;
       nextTick(() => {
         state.interval && clearInterval(state.interval);
         state.interval = null;
