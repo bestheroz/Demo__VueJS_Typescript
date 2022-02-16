@@ -132,12 +132,12 @@ export default defineComponent({
         });
         state.loading = false;
         if (response.data.success && response.data.data) {
-          await store.commit("saveToken", {
+          store.commit("saveToken", {
             accessToken: response.data.data.accessToken,
             refreshToken: response.data.data.refreshToken,
           });
           await store.dispatch("reloadRole");
-          await store.commit(
+          store.commit(
             "setConfig",
             (await getYourConfig()) || defaultAdminConfig(),
           );
@@ -183,10 +183,10 @@ export default defineComponent({
         }
       }, 1_000);
 
-      await store.commit("clearAdmin");
+      store.commit("clearAdmin");
       await store.dispatch("reloadConfig");
-      await store.commit("setRole", null);
-      await store.commit("setAdminCodes", null);
+      store.commit("setRole", null);
+      store.commit("setAdminCodes", null);
       window.localStorage.clear();
       window.sessionStorage.clear();
     });

@@ -70,13 +70,13 @@ const admin = {
           name: string;
           roleId: string;
         }>(payload.accessToken);
+        window.localStorage.setItem("accessToken", payload.accessToken);
+        window.localStorage.setItem("refreshToken", payload.refreshToken);
         state.id = jwt.id;
         state.loginId = jwt.loginId;
         state.name = jwt.name;
         state.roleId = jwt.roleId;
         state.accessToken = payload.accessToken;
-        window.localStorage.setItem("accessToken", payload.accessToken);
-        window.localStorage.setItem("refreshToken", payload.refreshToken);
       } catch (e: unknown) {
         signOut().then();
       }
