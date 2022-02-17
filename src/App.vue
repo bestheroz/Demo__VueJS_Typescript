@@ -17,14 +17,9 @@ import DefaultLayout from "@/layouts/DefaultLayout.vue";
 import ErrorLayout from "@/layouts/ErrorLayout.vue";
 import Vuetify from "@/plugins/vuetify";
 import envs from "@/constants/envs";
-// eslint-disable-next-line camelcase
-import jwt_decode from "jwt-decode";
-import dayjs from "dayjs";
 import {
   getValidatedAccessToken,
   getValidatedRefreshToken,
-  goSignInPage,
-  signOut,
 } from "@/utils/commands";
 import type { RoleMenuMap } from "@/definitions/models";
 import {
