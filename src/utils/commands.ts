@@ -8,6 +8,8 @@ import { defaultAdminConfig } from "@/definitions/defaults";
 import { cloneDeep, debounce } from "lodash-es";
 import store from "@/store";
 import { toastError } from "@/utils/alerts";
+import jwt_decode from "jwt-decode";
+import dayjs from "dayjs";
 
 export async function routerReplace(path: string): Promise<void> {
   if (router.currentRoute.path !== path) {
@@ -40,7 +42,7 @@ export async function getNewToken(): Promise<
         baseURL: envs.API_HOST,
         headers: {
           contentType: "application/json",
-          AuthorizationR: window.localStorage.getItem("refreshToken") ?? "",
+          AuthorizationR: await getValidatedRefreshToken(),
         },
       })
       .get<
@@ -141,4 +143,41 @@ export function getFlatRoleMenuMaps(
     result = [...result, roleMenuMap];
   }
   return result;
+}
+
+export async function getValidatedAccessToken(): Promise<string> {
+  const accessToken = window.localStorage.getItem("accessToken");
+  if (!accessToken) {
+    await goSignInPage();
+    return "";
+  }
+
+  try {
+    if (
+      dayjs((jwt_decode(accessToken) as { exp: number }).exp * 1000).isBefore(
+        dayjs(),
+      )
+    ) {
+      await store.dispatch("reIssueAccessToken");
+    }
+  } catch (e: unknown) {
+    await signOut();
+  }
+  return accessToken ?? "";
+}
+export async function getValidatedRefreshToken(): Promise<string> {
+  const refreshToken = window.localStorage.getItem("refreshToken");
+  if (!refreshToken) {
+    await goSignInPage();
+    return "";
+  }
+
+  if (
+    dayjs((jwt_decode(refreshToken) as { exp: number }).exp * 1000).isBefore(
+      dayjs(),
+    )
+  ) {
+    await signOut();
+  }
+  return refreshToken ?? "";
 }

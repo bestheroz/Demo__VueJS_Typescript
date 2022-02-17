@@ -2,12 +2,12 @@ import axios, { AxiosError, AxiosResponse } from "axios";
 import envs from "@/constants/envs";
 import store from "@/store";
 import { toastError, toastSuccess } from "@/utils/alerts";
-import { goSignInPage } from "@/utils/commands";
+import {
+  getValidatedAccessToken,
+  getValidatedRefreshToken,
+  goSignInPage,
+} from "@/utils/commands";
 import { Code } from "@/definitions/models";
-
-function getAccessToken(): string {
-  return window.localStorage.getItem("accessToken") ?? "";
-}
 
 export const axiosInstance = axios.create({
   baseURL: envs.API_HOST,
@@ -17,12 +17,12 @@ export const axiosInstance = axios.create({
 });
 
 axiosInstance.interceptors.request.use(
-  function (config) {
+  async function (config) {
     if (!config.headers) {
       console.error("Failed to set 'request headers' : headers is not exist");
       return;
     }
-    config.headers.Authorization = getAccessToken();
+    config.headers.Authorization = await getValidatedAccessToken();
     return config;
   },
   function (error) {
@@ -36,13 +36,15 @@ axiosInstance.interceptors.response.use(
       response.data.success =
         [200, 201].includes(response.status) &&
         response.data.code?.startsWith("S");
+      return response;
     } else {
       console.error(response);
       toastError("에러가 발생하였습니다. 잠시 후 다시 시도해주세요.");
+      return { data: { success: false, code: "E" } } as ApiDataResult;
     }
-    return response;
   },
   async function (error: AxiosError) {
+    console.error(error.message);
     if (error.message === "Network Error") {
       toastError("Service Unavailable");
       return;
@@ -51,7 +53,8 @@ axiosInstance.interceptors.response.use(
       if (error.response.headers.refreshtoken === "must") {
         const refreshToken = await apiRefreshToken(error);
         if (refreshToken?.config?.headers) {
-          refreshToken.config.headers.Authorization = getAccessToken();
+          refreshToken.config.headers.Authorization =
+            await getValidatedAccessToken();
           return axios.request(refreshToken.config);
         } else {
           return;
@@ -61,9 +64,7 @@ axiosInstance.interceptors.response.use(
         await goSignInPage();
         return;
       } else if ([403, 404, 500].includes(error.response.status)) {
-        console.error(error.response.data);
-        toastError(error.message);
-        return;
+        return { data: { success: false, code: "E" } } as ApiDataResult;
       }
     }
     if (process.env.NODE_ENV === "development") {
@@ -88,11 +89,7 @@ export async function getApi<T = never, R = T>(
   const response = await axiosInstance.get<T, AxiosResponse<ApiDataResult<R>>>(
     `api/${url}`,
   );
-  if (
-    !response.data.success &&
-    !response.data.code?.startsWith("S") &&
-    failAlert
-  ) {
+  if (!response.data.success && failAlert) {
     alertResponseMessage(response.data);
   }
   return response.data;
@@ -216,7 +213,7 @@ function alertResponseMessage(data: ApiDataResult<unknown>): void {
   if (data.success || data.code.startsWith("S")) {
     toastSuccess(data.message);
   } else {
-    toastError(data.message);
+    data.message && toastError(data.message);
   }
 }
 
@@ -326,7 +323,7 @@ async function apiRefreshToken(error: AxiosError) {
     console.error("Failed to set 'request headers' : headers is not exist");
     return;
   }
-  error.config.headers.AuthorizationR = getAccessToken();
+  error.config.headers.AuthorizationR = await getValidatedRefreshToken();
   return error;
 }
 

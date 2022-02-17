@@ -20,7 +20,12 @@ import envs from "@/constants/envs";
 // eslint-disable-next-line camelcase
 import jwt_decode from "jwt-decode";
 import dayjs from "dayjs";
-import { goSignInPage, signOut } from "@/utils/commands";
+import {
+  getValidatedAccessToken,
+  getValidatedRefreshToken,
+  goSignInPage,
+  signOut,
+} from "@/utils/commands";
 import type { RoleMenuMap } from "@/definitions/models";
 import {
   computed,
@@ -45,33 +50,10 @@ export default defineComponent({
         (): string => (router.app.$route.meta?.layout || "default") + "Layout",
       ),
     };
-    onBeforeMount(async () => {
-      const refreshToken = window.localStorage.getItem("refreshToken");
-      const accessToken = window.localStorage.getItem("accessToken");
-      if (!refreshToken || !accessToken) {
-        await goSignInPage();
-        return;
-      }
 
-      if (
-        dayjs(
-          (jwt_decode(refreshToken) as { exp: number }).exp * 1000,
-        ).isBefore(dayjs())
-      ) {
-        await signOut();
-        return;
-      }
-      try {
-        if (
-          dayjs(
-            (jwt_decode(accessToken) as { exp: number }).exp * 1000,
-          ).isBefore(dayjs())
-        ) {
-          await store.dispatch("reIssueAccessToken");
-        }
-      } catch (e: unknown) {
-        await signOut();
-      }
+    onBeforeMount(async () => {
+      await getValidatedRefreshToken();
+      await getValidatedAccessToken();
     });
 
     onMounted(() => {

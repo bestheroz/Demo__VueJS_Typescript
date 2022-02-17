@@ -36,6 +36,7 @@ import {
 } from "@vue/composition-api";
 import store from "@/store";
 import setupVModel from "@/composition/setupVModel";
+import { getValidatedAccessToken } from "@/utils/commands";
 
 interface DropzoneFile {
   height: number;
@@ -186,10 +187,10 @@ export default defineComponent({
     );
     watch(
       () => store.getters.accessToken,
-      () => {
+      async () => {
         vueDropzone &&
           vueDropzone.value?.setOption("headers", {
-            Authorization: window.localStorage.getItem("accessToken"),
+            Authorization: await getValidatedAccessToken(),
           });
       },
     );

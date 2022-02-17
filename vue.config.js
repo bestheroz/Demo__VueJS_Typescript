@@ -21,9 +21,9 @@ module.exports = {
   productionSourceMap: false,
   configureWebpack: (config) => {
     if (process.env.NODE_ENV === "production") {
-      config.devtool = "hidden-source-map";
+      config.devtool = "source-map";
     } else {
-      config.devtool = "eval";
+      config.devtool = "eval-source-map";
     }
     config.output.pathinfo = false;
   },
