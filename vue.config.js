@@ -18,7 +18,6 @@ module.exports = {
     },
   },
   lintOnSave: process.env.NODE_ENV !== "production",
-  productionSourceMap: false,
   configureWebpack: (config) => {
     if (process.env.NODE_ENV === "production") {
       config.devtool = "source-map";
@@ -26,8 +25,16 @@ module.exports = {
       config.devtool = "eval-source-map";
     }
     config.output.pathinfo = false;
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+    };
   },
   chainWebpack: (config) => {
+    config
+      .plugin("NodePolyfillPlugin")
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      .use(require("node-polyfill-webpack-plugin"));
     config.module
       .rule("ts")
       .test(/\.ts$/)
