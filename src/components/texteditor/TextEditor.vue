@@ -38,7 +38,7 @@ export default defineComponent({
   setup(props, { emit }) {
     const vModel = setupVModel<string>(props, emit);
     const computes = {
-      trixId: computed(() => `trixId#${props.cssId}`),
+      trixId: computed(() => `trixId-${props.cssId}`),
     };
     const methods = {
       async handleAttachmentChanges(event: any) {
