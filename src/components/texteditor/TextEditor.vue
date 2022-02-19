@@ -1,76 +1,64 @@
 <template>
   <div>
     <h3 v-text="label" v-if="label" class="secondary mb-3" />
-    <vue-editor
+    <vue-trix
+      :id="trixId"
       v-model="vModel"
-      :editor-options="defaultOptions"
       :placeholder="placeholder"
-      use-custom-image-handler
-      @image-added="uploadImage"
+      :height="height"
+      @trix-attachment-add="handleAttachmentChanges"
       :style="{ height: height }"
     />
   </div>
 </template>
 
 <script lang="ts">
-import { VueEditor } from "vue2-editor";
 import { uploadFileApi } from "@/utils/apis";
 import { getImageUrl } from "@/utils/formatter";
-import { computed, defineComponent } from "@vue/composition-api";
+import { computed, defineComponent, onMounted } from "@vue/composition-api";
 import setupVModel from "@/composition/setupVModel";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import VueTrix from "vue-trix";
 
 export default defineComponent({
-  components: { VueEditor },
+  components: { VueTrix },
   props: {
     value: {
       type: String,
       required: true,
     },
+    cssId: { type: String, default: "" },
     label: { type: String, default: undefined },
     folderName: { type: String, default: "uploaded/textEditor" },
     apiUrl: { type: String, default: "upload/file" },
-    height: { type: [String, Number], default: "40vh" },
+    height: { type: String, default: "40vh" },
     placeholder: { type: String, default: "Please enter text." },
   },
   setup(props, { emit }) {
     const vModel = setupVModel<string>(props, emit);
     const computes = {
-      defaultOptions: computed(
-        (): {
-          modules: { toolbar: unknown[] };
-        } => ({
-          modules: {
-            toolbar: [
-              [{ color: [] }],
-              ["bold", "italic", "underline", "strike"],
-              [
-                { align: "" },
-                { align: "center" },
-                { align: "right" },
-                { align: "justify" },
-              ],
-
-              [{ list: "ordered" }, { list: "bullet" }],
-              ["link", "image", "video"],
-
-              ["clean"], // remove formatting button
-            ],
-          },
-        }),
-      ),
+      trixId: computed(() => `trixId#${props.cssId}`),
     };
     const methods = {
-      uploadImage: async (
-        file: File,
-        // eslint-disable-next-line @typescript-eslint/ban-types
-        Editor: { insertEmbed: Function },
-        cursorLocation: number,
-      ): Promise<void> => {
+      async handleAttachmentChanges(event: any) {
+        // 1. get file object
+        const file = event.attachment.file;
+
+        // 2. upload file to remote server with FormData
         const formData = new FormData();
         formData.append("folderName", props.folderName);
         formData.append("file", file);
+        await uploadFileApi(props.apiUrl, formData);
         const result = await uploadFileApi(props.apiUrl, formData);
-        Editor.insertEmbed(cursorLocation, "image", getImageUrl(result.data));
+
+        // 3. if upload success, set back the attachment's URL attribute
+        // @param object data from remote server response data after upload.
+        let attributes = {
+          url: getImageUrl(result.data),
+          href: getImageUrl(result.data),
+        };
+        event.attachment.setAttributes(attributes);
       },
 
       validateText: (): boolean => {
@@ -79,25 +67,21 @@ export default defineComponent({
         return !!vModel.vModel.value.replace(extractTextPattern, "");
       },
     };
+    onMounted(() => {
+      const selector = document.querySelector<HTMLElement>(
+        `#${computes.trixId.value}>trix-editor`,
+      );
+      if (selector) {
+        selector.style.height = props.height;
+      }
+    });
     return { ...vModel, ...computes, ...methods };
   },
 });
 </script>
 
 <style lang="scss">
-.quillWrapper {
-  padding-bottom: 40px;
-
-  .ql-toolbar {
-    background-color: #a6a6a6;
-  }
-
-  .ql-container {
-    overflow-y: auto;
-
-    .ql-tooltip {
-      left: 0 !important;
-    }
-  }
+button.trix-button--icon {
+  background-color: #a6a6a6;
 }
 </style>
