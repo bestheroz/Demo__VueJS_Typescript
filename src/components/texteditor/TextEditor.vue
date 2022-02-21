@@ -5,7 +5,6 @@
       :id="trixId"
       v-model="vModel"
       :placeholder="placeholder"
-      @trix-attachment-add="handleAttachmentChanges"
       :style="{ 'min-height': minHeight }"
     />
   </div>
