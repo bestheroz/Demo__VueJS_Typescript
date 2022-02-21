@@ -35,29 +35,6 @@ module.exports = {
       .plugin("NodePolyfillPlugin")
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       .use(require("node-polyfill-webpack-plugin"));
-    config.module
-      .rule("ts")
-      .test(/\.ts$/)
-      .use("ts-loader")
-      .loader("ts-loader")
-      .tap((opts) => {
-        opts.happyPackMode = true;
-        return opts;
-      });
-    if (process.env.NODE_ENV === "production") {
-      config.plugin("fork-ts-checker").tap((opts) => {
-        opts.typescript = {
-          diagnosticOptions: {
-            semantic: true,
-            syntactic: true,
-          },
-          extensions: {
-            vue: true,
-          },
-        };
-        return opts;
-      });
-    }
     if (process.env.VUE_APP_ENVIRONMENT === "production") {
       config
         .plugin("sentryWebpack")
