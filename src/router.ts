@@ -49,12 +49,6 @@ const routes = (): RouteConfig[] => {
       component: () => import("@/views/developer/picker/PickerPage.vue"),
     },
     {
-      path: "/developer/file-uploader",
-      beforeEnter: requireAuth(),
-      component: () =>
-        import("@/views/developer/file/upload/FileUploaderPage.vue"),
-    },
-    {
       path: "/developer/text-editor",
       beforeEnter: requireAuth(),
       component: () => import("@/views/developer/editor/TextEditorPage.vue"),
