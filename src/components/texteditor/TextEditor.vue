@@ -5,12 +5,14 @@
       :id="trixId"
       v-model="vModel"
       :placeholder="placeholder"
+      @trix-attachment-add="handleAttachmentChanges"
       :style="{ 'min-height': minHeight }"
     />
   </div>
 </template>
 
 <script lang="ts">
+import { uploadFileApi } from "@/utils/apis";
 import { computed, defineComponent, onMounted } from "@vue/composition-api";
 import setupVModel from "@/composition/setupVModel";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -37,6 +39,23 @@ export default defineComponent({
       trixId: computed(() => `trixId-${props.cssId}`),
     };
     const methods = {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      async handleAttachmentChanges(event: any) {
+        const file = event.attachment.file;
+
+        const formData = new FormData();
+        formData.append("path", props.filePath);
+        formData.append("file", file);
+        await uploadFileApi(props.apiUrl, formData);
+        const result = await uploadFileApi(props.apiUrl, formData);
+
+        let attributes = {
+          url: result.data,
+          href: result.data,
+        };
+        event.attachment.setAttributes(attributes);
+      },
+
       validateText: (): boolean => {
         // html 태그 삭제 정규식
         const extractTextPattern = /(<([^>]+)>)/gi;
