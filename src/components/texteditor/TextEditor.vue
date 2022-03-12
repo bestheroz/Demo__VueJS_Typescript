@@ -6,7 +6,10 @@
       v-model="vModel"
       :placeholder="placeholder"
       @trix-attachment-add="handleAttachmentChanges"
-      :style="{ 'min-height': minHeight }"
+      :style="{
+        minHeight: minHeight,
+        border: '1px ridge var(--v-secondary-base)',
+      }"
     />
   </div>
 </template>
@@ -76,8 +79,12 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-button.trix-button--icon {
-  background-color: #a6a6a6;
+div.trix-button-row {
+  border-bottom: 1px groove var(--v-secondary-base);
+
+  .trix-button-group {
+    margin-bottom: 0;
+  }
 }
 .trix-content {
   .attachment--preview {

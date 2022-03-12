@@ -1,12 +1,11 @@
 <template>
   <div>
-    <div class="text-right mr-4" style="opacity: 0.7">
+    <div class="text-right mr-4 text--secondary" style="opacity: 0.7">
       <span v-if="createdDateTimeString">
         Created
         <v-icon size="16" style="vertical-align: initial">
           mdi-clock-outline
         </v-icon>
-
         {{ createdDateTimeString }}
       </span>
       <span
@@ -19,7 +18,6 @@
         <v-icon size="16" style="vertical-align: initial">
           mdi-clock-check-outline
         </v-icon>
-
         {{ updatedDateTimeString }}
       </span>
     </div>

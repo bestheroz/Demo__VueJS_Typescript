@@ -1,13 +1,6 @@
 <template>
   <div>
-    <v-card-title class="text-h4 py-2">
-      <v-icon
-        v-text="
-          isNew ? 'mdi-database-plus-outline' : 'mdi-database-edit-outline'
-        "
-        :size="28"
-        class="mr-2"
-      />
+    <v-card-title class="text-h4 py-1 pl-4 text--secondary">
       {{ title }}
       <v-spacer />
       <v-switch class="d-none" />

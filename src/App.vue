@@ -10,8 +10,6 @@
 </template>
 
 <script lang="ts">
-import "@/scss/common.scss";
-
 import AuthLayout from "@/layouts/AuthLayout.vue";
 import DefaultLayout from "@/layouts/DefaultLayout.vue";
 import ErrorLayout from "@/layouts/ErrorLayout.vue";

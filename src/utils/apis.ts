@@ -89,6 +89,9 @@ export async function getApi<T = never, R = T>(
   const response = await axiosInstance.get<T, AxiosResponse<ApiDataResult<R>>>(
     `api/${url}`,
   );
+  // accessToken 재발급시 success 값을 만들어줘야함.
+  response.data.success =
+    [200, 201].includes(response.status) && response.data.code?.startsWith("S");
   if (!response.data.success && failAlert) {
     alertResponseMessage(response.data);
   }

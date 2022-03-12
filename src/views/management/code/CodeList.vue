@@ -1,94 +1,62 @@
 <template>
   <div>
-    <v-card :loading="loading">
-      <v-list>
-        <div>
-          <span>
-            <v-list-item dense class="elevation-1 bottom-solid">
-              <v-list-item-content style="display: inline-block">
-                코드
-              </v-list-item-content>
-              <v-list-item-content style="display: inline-block">
-                코드명
-              </v-list-item-content>
-              <v-list-item-content style="display: inline-block">
-                사용 가능
-              </v-list-item-content>
-              <v-list-item-content style="display: inline-block">
-                작업 일시
-              </v-list-item-content>
-              <v-list-item-content style="display: inline-block">
-                작업자
-              </v-list-item-content>
-              <v-list-item-action
-                style="display: inline-block"
-                class="my-0"
-                v-if="$store.getters.deleteAuthority"
-              >
-                <div class="actions" style="visibility: hidden">
-                  <v-btn icon>
-                    <v-icon color="error"> mdi-delete-outline </v-icon>
-                  </v-btn>
-                </div>
-              </v-list-item-action>
-            </v-list-item>
-          </span>
-        </div>
-        <draggable
-          tag="div"
-          v-model="items"
-          :animation="200"
-          handle=".drag-handle"
-        >
-          <transition-group type="transition" name="flip-list">
-            <v-list-item
-              dense
-              :key="item.value"
-              v-for="item in items"
-              class="elevation-1 bottom-solid"
-            >
-              <v-list-item-content style="display: inline-block">
-                <v-btn icon v-if="$store.getters.writeAuthority">
-                  <v-icon class="drag-handle"> mdi-sort</v-icon>
-                </v-btn>
-                <a
-                  class="text--anchor"
-                  @click="showEditDialog(item)"
-                  v-text="item.value"
-                />
-              </v-list-item-content>
-              <v-list-item-content
-                style="display: inline-block"
-                v-text="item.text"
+    <v-simple-table fixed-header class="sortableTable">
+      <template #default>
+        <thead>
+          <tr>
+            <th class="text-left">코드</th>
+            <th class="text-left">코드명</th>
+            <th class="text-center">사용 가능</th>
+            <th class="text-center">작업 일시</th>
+            <th class="text-left">작업자</th>
+            <th class="text-center" v-if="$store.getters.writeAuthority">
+              Action
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-if="items.length === 0 && !loading">
+            <td :colspan="6" class="text-center">
+              <span class="grey--text">데이터가 없습니다.</span>
+            </td>
+          </tr>
+          <tr
+            v-for="item in items"
+            :key="item.value"
+            class="sortableTable"
+            v-else
+          >
+            <td>
+              <v-btn icon v-if="$store.getters.writeAuthority">
+                <v-icon class="drag-handle"> mdi-sort</v-icon>
+              </v-btn>
+              <a
+                class="text--anchor"
+                @click="showEditDialog({ ...item })"
+                v-text="item.value"
               />
-              <v-list-item-content style="display: inline-block">
-                <v-icon v-if="item.available" color="success">
-                  mdi-check-circle
-                </v-icon>
-                <v-icon v-else> mdi-circle-outline</v-icon>
-              </v-list-item-content>
-              <v-list-item-content style="display: inline-block">
-                {{ item.updated | formatDatetime }}
-              </v-list-item-content>
-              <v-list-item-content style="display: inline-block">
-                {{ item.updatedBy | formatAdminNm }}
-              </v-list-item-content>
-              <v-list-item-action
-                style="display: inline-block"
-                class="my-0"
-                v-if="$store.getters.deleteAuthority"
-              >
-                <div class="actions">
-                  <v-btn icon @click="remove(item)">
-                    <v-icon color="error"> mdi-delete-outline</v-icon>
-                  </v-btn>
-                </div>
-              </v-list-item-action>
-            </v-list-item>
-          </transition-group>
-        </draggable>
-      </v-list>
-    </v-card>
+            </td>
+            <td v-text="item.text" />
+            <td class="text-center">
+              <checkbox-marker :value="item.available" />
+            </td>
+            <td class="text-center">
+              {{ item.updated | formatDatetime }}
+            </td>
+            <td>
+              {{ item.updatedBy | formatAdminNm }}
+            </td>
+            <td class="text-center my-0" v-if="$store.getters.deleteAuthority">
+              <div class="actions">
+                <v-btn icon @click="remove(item)">
+                  <v-icon color="error"> mdi-delete-outline</v-icon>
+                </v-btn>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </template>
+    </v-simple-table>
     <code-edit-dialog
       v-model="editItem"
       :dialog.sync="dialog"
@@ -105,20 +73,21 @@ import CodeEditDialog from "@/views/management/code/CodeEditDialog.vue";
 import { confirmDelete } from "@/utils/alerts";
 import { defaultCode } from "@/definitions/defaults";
 import type { Code } from "@/definitions/models";
-import draggable from "vuedraggable";
-import { defineComponent, watch } from "@vue/composition-api";
+import { defineComponent, onMounted, watch } from "@vue/composition-api";
 import setupListDialog from "@/composition/setupListDialog";
 import setupListPage from "@/composition/setupList";
+import CheckboxMarker from "@/components/datatable/CheckboxMarker.vue";
+import Sortable, { SortableEvent } from "sortablejs";
 
 export default defineComponent({
-  components: { CodeEditDialog, draggable },
+  components: { CheckboxMarker, CodeEditDialog },
   props: {
     type: {
       type: String,
       required: true,
     },
   },
-  setup(props, { emit }) {
+  setup(props, { emit, root }) {
     const listPage = setupListPage<Code>(`codes/?type=${props.type}`);
     const listDialog = setupListDialog<Code>(() => ({
       ...defaultCode(),
@@ -179,6 +148,27 @@ export default defineComponent({
         listPage.fetchList.value();
       },
     );
+    onMounted(() => {
+      const querySelector = root.$el.querySelector(
+        ".sortableTable tbody",
+      ) as HTMLElement;
+      Sortable.create(querySelector, {
+        handle: ".drag-handle",
+        animation: 500,
+        onEnd(evt: SortableEvent) {
+          if (
+            evt.oldIndex !== undefined &&
+            evt.newIndex !== undefined &&
+            evt.newIndex != evt.oldIndex
+          ) {
+            const newArray = [...listPage.items.value];
+            const rowSelected = newArray.splice(evt.oldIndex, 1)[0];
+            newArray.splice(evt.newIndex, 0, rowSelected);
+            listPage.items.value = newArray;
+          }
+        },
+      });
+    });
     return { ...listDialog, ...listPage, ...methods };
   },
 });

@@ -58,23 +58,16 @@
             />
           </template>
           <template #[`item.available`]="{ item }">
-            <v-icon v-if="item.available" color="success">
-              mdi-check-circle
-            </v-icon>
-            <v-icon v-else> mdi-circle-outline</v-icon>
+            <checkbox-marker :value="item.available" />
           </template>
           <template #[`item.availableSignIn`]="{ item }">
-            <v-icon
-              v-if="
+            <checkbox-marker
+              :value="
                 item.available &&
                 item.role.available &&
                 dayjs(item.expired).isAfter(dayjs())
               "
-              color="success"
-            >
-              mdi-check-circle
-            </v-icon>
-            <v-icon v-else> mdi-circle-outline</v-icon>
+            />
           </template>
           <template #[`item.expired`]="{ item }">
             {{ item.expired | formatDatetime }}
@@ -120,9 +113,10 @@ import setupListDialog from "@/composition/setupListDialog";
 import { DataTableHeader } from "vuetify";
 import setupDatatable from "@/composition/setupDatatable";
 import qs from "qs";
+import CheckboxMarker from "@/components/datatable/CheckboxMarker.vue";
 
 export default defineComponent({
-  components: { DataTableFilter, PageTitle, AdminEditDialog },
+  components: { CheckboxMarker, DataTableFilter, PageTitle, AdminEditDialog },
   props: {
     height: {
       type: [Number, String],

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-list flat>
+    <v-list class="py-0">
       <v-list-item
         v-for="item in vModel.items"
         :key="item.value"
@@ -11,6 +11,11 @@
             v-model="item.checked"
             :true-value="item.value"
             :disabled="vModel.required && checkedLength === 1 && item.checked"
+            :style="
+              item.checked
+                ? 'color: var(--v-primary-base) !important'
+                : undefined
+            "
             @click="onClickCheckbox(item)"
           />
         </v-list-item-action>
@@ -34,7 +39,7 @@
         <v-list-item-content v-if="vModel.type !== 'text'">
           <v-list-item-title
             v-text="item.text"
-            :class="item.checked ? 'success--text' : undefined"
+            :class="item.checked ? 'primary--text' : 'secondary--text'"
           />
         </v-list-item-content>
       </v-list-item>

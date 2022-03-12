@@ -1,4 +1,4 @@
-# base-admin
+# demo-admin
 
 [![Node.js](https://img.shields.io/badge/Node.js-v16-darkgreen.svg?logo=node.js)](https://nodejs.org/)
 [![Npm](https://img.shields.io/badge/npm-v8-blue.svg?logo=npm)](https://nodejs.org/)

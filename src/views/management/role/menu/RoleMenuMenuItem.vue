@@ -1,5 +1,5 @@
 <template>
-  <div :class="`offset-${depth}`">
+  <div :class="`pl-1 offset-${depth}`">
     <div
       v-for="menu in menus"
       :key="menu.id"
@@ -8,7 +8,7 @@
       <v-chip
         :value="menu.id"
         :outlined="!vModel.includes(menu.id)"
-        color="primary"
+        :color="vModel.includes(menu.id) ? 'primary' : 'secondary'"
         class="px-4"
         label
         :disabled="disabled || !$store.getters.writeAuthority"
@@ -16,8 +16,8 @@
         <v-icon
           v-text="menu.icon"
           v-if="menu.type === MENU_TYPE.GROUP"
-          class="pr-2"
-          size="24"
+          class="pr-1"
+          size="22"
         />
         {{ menu.name }}
       </v-chip>

@@ -1,6 +1,6 @@
 <template>
-  <div class="d-flex align-center pb-2">
-    <div class="text-h4" v-text="_title" />
+  <div class="d-flex align-center pb-1">
+    <div class="text-h4 pl-1 text--secondary" v-text="_title" />
     <v-spacer />
     <v-menu
       bottom
@@ -22,7 +22,7 @@
         </v-btn>
       </template>
 
-      <v-list class="pa-0">
+      <v-list style="margin-top: 9px" class="pa-0">
         <slot name="more-buttons" />
       </v-list>
     </v-menu>
@@ -30,7 +30,7 @@
       :text="buttonText"
       :icon="buttonIcon"
       :loading="buttonLoading"
-      class-name="px-2"
+      class-name="px-2 mr-1"
       large
       @click="$emit('click')"
       v-if="!hideButton && $store.getters.writeAuthority"

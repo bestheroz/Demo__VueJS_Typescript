@@ -26,12 +26,16 @@
               v-model="item.authoritiesJson"
               active-class="primary"
               multiple
+              class="transparent"
               v-if="item.menu.type !== MENU_TYPE.GROUP"
             >
               <v-btn
                 :value="ROLE_AUTHORITY_TYPE.VIEW"
                 disabled
-                class="success-color"
+                style="
+                  background-color: var(--v-primary-base) !important;
+                  color: initial !important;
+                "
               >
                 <v-icon>mdi-eye</v-icon>
               </v-btn>
@@ -44,11 +48,18 @@
                 "
                 :class="
                   item.authoritiesJson.includes(ROLE_AUTHORITY_TYPE.WRITE)
-                    ? 'success-color'
-                    : undefined
+                    ? 'primary'
+                    : 'transparent'
                 "
               >
-                <v-icon>mdi-content-save-outline</v-icon>
+                <v-icon
+                  :color="
+                    item.authoritiesJson.includes(ROLE_AUTHORITY_TYPE.WRITE)
+                      ? undefined
+                      : 'secondary'
+                  "
+                  >mdi-content-save-outline</v-icon
+                >
               </v-btn>
 
               <v-btn
@@ -59,11 +70,18 @@
                 "
                 :class="
                   item.authoritiesJson.includes(ROLE_AUTHORITY_TYPE.DELETE)
-                    ? 'success-color'
-                    : undefined
+                    ? 'primary'
+                    : 'transparent'
                 "
               >
-                <v-icon>mdi-delete-outline</v-icon>
+                <v-icon
+                  :color="
+                    item.authoritiesJson.includes(ROLE_AUTHORITY_TYPE.DELETE)
+                      ? undefined
+                      : 'secondary'
+                  "
+                  >mdi-delete-outline</v-icon
+                >
               </v-btn>
 
               <v-btn
@@ -74,11 +92,18 @@
                 "
                 :class="
                   item.authoritiesJson.includes(ROLE_AUTHORITY_TYPE.EXCEL)
-                    ? 'success-color'
-                    : undefined
+                    ? 'primary'
+                    : 'transparent'
                 "
               >
-                <v-icon>mdi-file-excel-outline</v-icon>
+                <v-icon
+                  :color="
+                    item.authoritiesJson.includes(ROLE_AUTHORITY_TYPE.EXCEL)
+                      ? undefined
+                      : 'secondary'
+                  "
+                  >mdi-file-excel-outline</v-icon
+                >
               </v-btn>
             </v-btn-toggle>
           </v-col>
@@ -128,34 +153,3 @@ export default defineComponent({
   },
 });
 </script>
-<style scoped lang="scss">
-.dragArea {
-  min-height: 30px;
-  border: 1px dotted var(--v-primary-base);
-  .v-item-group {
-    .success-color {
-      background-color: var(--v-primary-base) !important;
-    }
-  }
-  .dragArea {
-    min-height: 30px;
-    border: 1px dotted var(--v-warning-base);
-    .dragArea {
-      min-height: 30px;
-      border: 1px dotted var(--v-info-base);
-      .dragArea {
-        min-height: 30px;
-        border: 1px dotted var(--v-error-base);
-        .dragArea {
-          min-height: 30px;
-          border: 1px dotted var(--v-success-base);
-          .dragArea {
-            min-height: 30px;
-            border: 1px dotted var(--v-secondary-base);
-          }
-        }
-      }
-    }
-  }
-}
-</style>
