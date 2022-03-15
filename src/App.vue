@@ -76,13 +76,6 @@ export default defineComponent({
         Vuetify.framework.theme.themes.light.primary = val;
       },
     );
-    watch(
-      () => store.getters.globalTheme,
-      (val: string) => {
-        Vuetify.framework.theme.dark = val === "dark";
-      },
-      { immediate: true },
-    );
 
     return { ...computes };
   },
