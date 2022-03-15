@@ -1,6 +1,6 @@
 <template>
   <div class="d-flex align-center pb-1">
-    <div class="text-h4 pl-1 text--secondary" v-text="_title" />
+    <div class="text-h4 pl-1 text--secondary" v-text="computedTitle" />
     <v-spacer />
     <v-menu
       bottom
@@ -57,7 +57,7 @@ export default defineComponent({
   },
   setup(props) {
     const computes = {
-      _title: computed(
+      computedTitle: computed(
         (): string =>
           props.title ||
           store.getters.flatAuthorities.find(
