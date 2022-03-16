@@ -68,11 +68,11 @@
 </template>
 
 <script lang="ts">
-import { deleteApi, postApi } from "@/utils/apis";
+import { deleteApi, patchApi } from "@/utils/apis";
 import CodeEditDialog from "@/views/management/code/CodeEditDialog.vue";
 import { confirmDelete } from "@/utils/alerts";
 import { defaultCode } from "@/definitions/defaults";
-import type { Code } from "@/definitions/models";
+import type { Code, UpdateDisplayOrder } from "@/definitions/models";
 import { defineComponent, onMounted, watch } from "@vue/composition-api";
 import setupListDialog from "@/composition/setupListDialog";
 import setupListPage from "@/composition/setupList";
@@ -98,14 +98,14 @@ export default defineComponent({
     const methods = {
       saveItems: async (): Promise<void> => {
         listPage.loading.value = true;
-        const response = await postApi<Code[]>(
-          "codes/save-all/",
-          listPage.items.value.map((item, index) => {
-            return {
-              ...item,
+        const response = await patchApi<Code[]>(
+          `codes/display-orders/?type=${props.type}`,
+          listPage.items.value.map(
+            ({ id }, index): UpdateDisplayOrder => ({
+              id: id as number,
               displayOrder: index + 1,
-            };
-          }),
+            }),
+          ),
         );
         listPage.loading.value = false;
         if (response.success) {
