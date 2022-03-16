@@ -5,7 +5,6 @@ import { Drawer, SelectItem } from "@/definitions/types";
 // eslint-disable-next-line camelcase
 import jwt_decode from "jwt-decode";
 import type { AdminConfig, Role, RoleMenuMap } from "@/definitions/models";
-import Vuetify from "./plugins/vuetify";
 import { ROLE_AUTHORITY_TYPE } from "@/definitions/selections";
 import config from "./configs";
 import {
@@ -120,7 +119,6 @@ const config1 = {
       };
     },
     globalTheme: (state: AdminConfig): "light" | "dark" => {
-      Vuetify.framework.theme.dark = state.globalTheme === "dark";
       return state.globalTheme;
     },
     menuTheme: (state: AdminConfig): "global" | "light" | "dark" => {
