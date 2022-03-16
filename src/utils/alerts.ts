@@ -1,78 +1,78 @@
-import "sweetalert2/dist/sweetalert2.css";
-import "@/scss/sweetalert.scss";
-import Swal, { SweetAlertResult } from "sweetalert2";
+import { locale, Message, MessageBox } from "vuetify-pro-dialog";
+import Vuetify from "@/plugins/vuetify";
+import store from "@/store";
 
-const Toast = Swal.mixin({
-  toast: true,
-  position: "top",
-  showCloseButton: true,
-  showConfirmButton: false,
-  didOpen: (toast) => {
-    toast.addEventListener("mouseenter", Swal.stopTimer);
-    toast.addEventListener("mouseleave", Swal.resumeTimer);
-  },
+locale.setMessage("ko", {
+  "dialog.cancel.text": "취소",
+  "dialog.ok.text": "확인",
 });
 
-export function toastSuccess(message: string, timer = 2000): void {
-  Toast.fire({
-    icon: "success",
-    iconColor: "var(--v-primary-base)",
-    timer: timer,
-    timerProgressBar: !!timer,
-    titleText: message,
-    width: `${message.replaceAll(" ", "").length * 0.9 + 10}rem`,
+locale.set("ko_KR");
+
+export function toastSuccess(message: string, timer = 2_000): void {
+  Message.success(message, {
+    timeout: timer,
+    position: "bottom",
+    showIcon: true,
+    // 라이브러리 버그인지 dark 테마일 때 color: "var(--v-success-base)" 가 동작하지 않아서 아래와 같읕 방법을 사용한다.
+    // 추후 라이브러리 vue3 교체 시 제거될 로직
+    color: (store.getters.globalTheme === "dark"
+      ? Vuetify.framework.theme.themes.dark.success
+      : Vuetify.framework.theme.themes.light.success) as string,
   });
 }
-export function toastInfo(message: string, timer = 5000): void {
-  Toast.fire({
-    icon: "info",
-    iconColor: "var(--v-info-base)",
-    timer: timer,
-    timerProgressBar: !!timer,
-    titleText: message,
-    width: `${message.replaceAll(" ", "").length * 0.9 + 10}rem`,
+
+export function toastInfo(message: string, timer = 5_000): void {
+  Message.notify.info(message, {
+    timeout: timer,
+    position: "top",
+    showIcon: true,
+    color: (store.getters.globalTheme === "dark"
+      ? Vuetify.framework.theme.themes.dark.info
+      : Vuetify.framework.theme.themes.light.info) as string,
   });
 }
-export function toastWarning(message: string, timer = 3000): void {
-  Toast.fire({
-    icon: "warning",
-    iconColor: "var(--v-warning-base)",
-    timer: timer,
-    timerProgressBar: !!timer,
-    titleText: message,
-    width: `${message.replaceAll(" ", "").length * 0.9 + 10}rem`,
+
+export function toastWarning(message: string, timer = 10_000): void {
+  Message.notify.warning(message, {
+    timeout: timer,
+    position: "top",
+    showIcon: true,
+    color: (store.getters.globalTheme === "dark"
+      ? Vuetify.framework.theme.themes.dark.warning
+      : Vuetify.framework.theme.themes.light.warning) as string,
   });
 }
-export function toastError(message: string, timer?: number): void {
-  Toast.fire({
-    icon: "error",
-    iconColor: "var(--v-error-base)",
-    timer: timer,
-    timerProgressBar: !!timer,
-    titleText: message,
-    width: `${message.replaceAll(" ", "").length * 0.9 + 10}rem`,
+
+export function toastError(message: string, timer = 60_000): void {
+  Message.notify.error(message, {
+    timeout: timer,
+    position: "top",
+    showIcon: true,
+    color: (store.getters.globalTheme === "dark"
+      ? Vuetify.framework.theme.themes.dark.error
+      : Vuetify.framework.theme.themes.light.error) as string,
   });
 }
+
 export function toastCloseAll(): void {
-  Toast.close();
+  Message.closeAll();
 }
 
 export async function confirm(
   title: string,
-  text?: string,
+  text: string,
   confirmButtonText = "확인",
   cancelButtonText = "취소",
-): Promise<SweetAlertResult> {
-  return await Swal.fire({
-    titleText: title,
-    text: text,
-    icon: "question",
-    showConfirmButton: true,
-    confirmButtonColor: "var(--v-primary-base)",
-    confirmButtonText: confirmButtonText,
-    showCancelButton: true,
-    cancelButtonColor: "var(--v-secondary-base)",
-    cancelButtonText: cancelButtonText,
+): Promise<boolean> {
+  return MessageBox.confirm(text, title, {
+    type: "info",
+    icon: "mdi-alert-octagram",
+    showIcon: true,
+    actions: {
+      true: { text: confirmButtonText },
+      false: { text: cancelButtonText },
+    },
   });
 }
 
@@ -81,69 +81,71 @@ export async function confirmDelete(
   title = "삭제 하시겠습니까?",
   confirmButtonText = "확인",
   cancelButtonText = "취소",
-): Promise<SweetAlertResult> {
-  return await Swal.fire({
-    titleText: title,
-    text: text,
-    icon: "question",
-    showConfirmButton: true,
-    confirmButtonColor: "var(--v-error-base)",
-    confirmButtonText: confirmButtonText,
-    showCancelButton: true,
-    cancelButtonColor: "var(--v-secondary-base)",
-    cancelButtonText: cancelButtonText,
+): Promise<boolean> {
+  return MessageBox.confirm(text ?? title, {
+    title: title,
+    type: "error",
+    icon: "mdi-delete-alert",
+    showIcon: true,
+    actions: {
+      true: { text: confirmButtonText },
+      false: { text: cancelButtonText },
+    },
   });
 }
 
 export async function prompt(
   title: string,
-  text?: string,
   inputPlaceholder = "값을 입력하세요",
-): Promise<string> {
-  return await Swal.fire({
-    input: "text",
-    titleText: title,
-    text: text,
-    icon: "question",
-    inputPlaceholder: inputPlaceholder,
-    showCancelButton: true,
-    allowEscapeKey: false,
-    allowOutsideClick: false,
-    inputValidator(inputValue: string): string {
-      if (!inputValue) {
-        return "값을 입력하세요";
-      } else {
-        return "";
-      }
+): Promise<string | undefined> {
+  let text: string | undefined;
+  await MessageBox.prompt(title, {
+    title: title,
+    type: "error",
+    icon: "mdi-keyboard",
+    textFieldProps: {
+      placeholder: inputPlaceholder,
     },
-  }).then((result) => {
-    return result.value;
+    showIcon: true,
+    actions: {
+      true: { text: "확인" },
+      false: { text: "취소" },
+    },
+    beforeClose: (v: string) => {
+      text = v;
+      return new Promise((resolve) => {
+        setTimeout(() => resolve(true), 2000);
+      });
+    },
   });
+  return text;
 }
 
 export async function promptPassword(
   title: string,
-  text?: string,
   inputPlaceholder = "비밀번호를 입력 해 주세요",
-): Promise<string> {
-  return await Swal.fire({
-    input: "password",
-    titleText: title,
-    text: text,
-    icon: "question",
-    iconHtml: "<i class='mdi mdi-keyboard-outline'></i>",
-    inputPlaceholder: inputPlaceholder,
-    showCancelButton: true,
-    allowEscapeKey: false,
-    allowOutsideClick: false,
-    inputValidator(inputValue: string): string {
-      if (!inputValue) {
-        return "비밀번호를 입력하세요";
-      } else {
-        return "";
-      }
+): Promise<string | undefined> {
+  let text: string | undefined;
+  await MessageBox.prompt(title, {
+    title: title,
+    type: "error",
+    icon: "mdi-shield-key",
+    textFieldProps: {
+      type: "password",
+      autocomplete: "new-password",
+      placeholder: inputPlaceholder,
     },
-  }).then((result) => {
-    return result.value;
+    showIcon: true,
+    actions: {
+      true: { text: "확인" },
+      false: { text: "취소" },
+    },
+    beforeClose: (v: string) => {
+      text = v;
+      return new Promise((resolve) => {
+        setTimeout(() => resolve(true), 2000);
+      });
+    },
   });
+  return text;
 }

@@ -81,6 +81,15 @@
     box-shadow: initial !important;
   }
 
+  .v-snack {
+    .v-snack__content {
+      font-size: 1rem;
+      i {
+        font-size: 1rem !important;
+      }
+    }
+  }
+
   .dragArea {
     min-height: 30px;
     border: 2px solid var(--v-info-base);

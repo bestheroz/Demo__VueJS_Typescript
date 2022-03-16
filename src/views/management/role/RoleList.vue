@@ -92,7 +92,7 @@ export default defineComponent({
       },
       onDelete: async (value: Role): Promise<void> => {
         const result = await confirmDelete(`역할명: ${value.name}`);
-        if (result.value) {
+        if (result) {
           state.saving = true;
           const response = await deleteApi<Role>(`roles/${value.id}`);
           state.saving = false;

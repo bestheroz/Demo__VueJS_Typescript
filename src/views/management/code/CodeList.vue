@@ -115,7 +115,7 @@ export default defineComponent({
       },
       remove: async (value: Code): Promise<void> => {
         const result = await confirmDelete(`코드: ${value.value}`);
-        if (result.value) {
+        if (result) {
           listPage.loading.value = true;
           const response = await deleteApi<Code>(`codes/${value.id}`);
           listPage.loading.value = false;

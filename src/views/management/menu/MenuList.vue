@@ -118,7 +118,7 @@ export default defineComponent({
 
       onDelete: async (value: Menu): Promise<void> => {
         const result = await confirmDelete(`메뉴명: ${value.name}`);
-        if (result.value) {
+        if (result) {
           state.saving = true;
           const response = await deleteApi<Menu>(`menus/${value.id}`);
           state.saving = false;
