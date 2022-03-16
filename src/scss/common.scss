@@ -89,6 +89,10 @@
       }
     }
   }
+  > .v-menu__content {
+    padding-right: 66px;
+    box-shadow: initial;
+  }
 
   .dragArea {
     min-height: 30px;
