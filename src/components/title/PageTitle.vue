@@ -3,6 +3,7 @@
     <div class="text-h4 pl-1 text--secondary" v-text="computedTitle" />
     <v-spacer />
     <v-menu
+      content-class="page-title-menu"
       bottom
       left
       transition="slide-x-reverse-transition"

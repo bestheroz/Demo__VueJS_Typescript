@@ -23,7 +23,7 @@
         >
           <v-list-item-icon>
             <v-icon
-              :class="{ 'grey--text': item.disabled }"
+              :class="{ 'secondary--text': item.disabled }"
               v-text="item.icon"
             />
           </v-list-item-icon>
@@ -31,8 +31,6 @@
             <v-list-item-title v-text="item.text" />
           </v-list-item-content>
         </v-list-item>
-
-        <v-divider class="my-1"></v-divider>
 
         <v-list-item @click="signOut">
           <v-list-item-icon>
