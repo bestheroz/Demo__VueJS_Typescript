@@ -63,6 +63,7 @@
       <v-container class="fill-height" :fluid="!$store.getters.isContentBoxed">
         <v-layout>
           <slot />
+          <input type="text" style="width: 0; height: 0" />
         </v-layout>
       </v-container>
 
