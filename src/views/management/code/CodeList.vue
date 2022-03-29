@@ -13,6 +13,11 @@
               Action
             </th>
           </tr>
+          <tr>
+            <td colspan="10" class="px-0" style="height: 0">
+              <v-progress-linear height="0.5rem" indeterminate v-if="loading" />
+            </td>
+          </tr>
         </thead>
         <tbody>
           <tr v-if="items.length === 0 && !loading">
