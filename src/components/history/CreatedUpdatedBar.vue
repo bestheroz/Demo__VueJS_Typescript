@@ -2,8 +2,9 @@
   <div>
     <div class="text-right mr-4 text--secondary" style="opacity: 0.7">
       <span v-if="createdDateTimeString">
-        Created
-        <v-icon size="16" style="vertical-align: initial">
+        Created by
+        {{ createdBy | formatAdminNm }}
+        <v-icon size="1rem" style="vertical-align: initial" class="ml-1">
           mdi-clock-outline
         </v-icon>
         {{ createdDateTimeString }}
@@ -14,8 +15,9 @@
         >|</span
       >
       <span v-if="updatedDateTimeString">
-        Updated
-        <v-icon size="16" style="vertical-align: initial">
+        Updated by
+        {{ updatedBy | formatAdminNm }}
+        <v-icon size="1rem" style="vertical-align: initial" class="ml-1">
           mdi-clock-check-outline
         </v-icon>
         {{ updatedDateTimeString }}
@@ -31,8 +33,16 @@ import { DateTime } from "@/definitions/types";
 
 export default defineComponent({
   props: {
+    createdBy: {
+      type: Number,
+      default: undefined,
+    },
     createdDateTime: {
       type: [String, Number, Date, Object] as PropType<DateTime>,
+      default: undefined,
+    },
+    updatedBy: {
+      type: Number,
       default: undefined,
     },
     updatedDateTime: {

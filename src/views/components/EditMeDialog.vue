@@ -46,7 +46,9 @@
           />
         </v-card-text>
         <created-updated-bar
+          :created-by="item.createdBy"
           :created-date-time="item.created"
+          :updated-by="item.updatedBy"
           :updated-date-time="item.updated"
         />
       </v-card>

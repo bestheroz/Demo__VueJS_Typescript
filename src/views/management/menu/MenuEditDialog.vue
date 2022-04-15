@@ -89,7 +89,9 @@
           </v-form>
         </v-card-text>
         <created-updated-bar
+          :created-by="vModel.createdBy"
           :created-date-time="vModel.created"
+          :updated-by="vModel.updatedBy"
           :updated-date-time="vModel.updated"
         />
       </v-card>
