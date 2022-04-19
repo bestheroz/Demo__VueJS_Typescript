@@ -102,6 +102,7 @@ export default defineComponent({
       errorProviderMessages: "",
       showPassword: false,
       interval: null as number | null,
+      reloadable: true,
     });
     const computes = {
       envs: computed((): typeof envs => envs),
@@ -132,6 +133,7 @@ export default defineComponent({
         });
         state.loading = false;
         if (response.data.success && response.data.data) {
+          state.reloadable = false;
           store.commit("saveToken", {
             accessToken: response.data.data.accessToken,
             refreshToken: response.data.data.refreshToken,
@@ -142,6 +144,7 @@ export default defineComponent({
             (await getYourConfig()) || defaultAdminConfig(),
           );
           await store.dispatch("reloadAdminCodes");
+          state.reloadable = true;
           toastCloseAll();
           await routerReplace("/");
         } else {
@@ -174,6 +177,7 @@ export default defineComponent({
       }
       state.interval = window.setInterval(() => {
         if (
+          state.reloadable &&
           window.localStorage.getItem("refreshToken") &&
           window.localStorage.getItem("accessToken")
         ) {
