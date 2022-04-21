@@ -55,7 +55,7 @@ axiosInstance.interceptors.response.use(
         if (refreshToken?.config?.headers) {
           refreshToken.config.headers.Authorization =
             await getValidatedAccessToken();
-          return axios.request(refreshToken.config);
+          return axiosInstance.request(refreshToken.config);
         } else {
           return;
         }
