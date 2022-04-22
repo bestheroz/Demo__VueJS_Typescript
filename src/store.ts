@@ -45,6 +45,7 @@ const admin = {
     loggedIn: (state: any): boolean => {
       return (
         !!state.id &&
+        !!state.accessToken &&
         !!window.localStorage.getItem("accessToken") &&
         !!window.localStorage.getItem("refreshToken")
       );

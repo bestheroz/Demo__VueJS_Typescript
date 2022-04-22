@@ -26,6 +26,7 @@ export async function routerPush(path: string): Promise<void> {
 export async function goSignInPage(): Promise<void> {
   window.localStorage.removeItem("refreshToken");
   window.localStorage.removeItem("accessToken");
+  store.commit("clearAdmin");
   await routerReplace("/sign-in");
 }
 
@@ -95,12 +96,13 @@ export async function getAdminCodes(): Promise<SelectItem<number>[]> {
 
 export async function signOut(): Promise<void> {
   try {
-    window.localStorage.removeItem("refreshToken");
-    window.localStorage.removeItem("accessToken");
     await deleteApi("sign-out", false);
   } catch (e) {
     console.error(e);
   }
+  window.localStorage.removeItem("refreshToken");
+  window.localStorage.removeItem("accessToken");
+  store.commit("clearAdmin");
   await goSignInPage();
 }
 
