@@ -95,10 +95,18 @@ export async function getAdminCodes(): Promise<SelectItem<number>[]> {
 }
 
 export async function signOut(): Promise<void> {
-  try {
-    await deleteApi("sign-out", false);
-  } catch (e) {
-    console.error(e);
+  const refreshToken = window.localStorage.getItem("refreshToken");
+  if (
+    refreshToken &&
+    dayjs((jwt_decode(refreshToken) as { exp: number }).exp * 1000).isBefore(
+      dayjs(),
+    )
+  ) {
+    try {
+      await deleteApi("sign-out", false);
+    } catch (e) {
+      console.error(e);
+    }
   }
   window.localStorage.removeItem("refreshToken");
   window.localStorage.removeItem("accessToken");
