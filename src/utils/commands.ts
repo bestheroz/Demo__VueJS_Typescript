@@ -8,8 +8,8 @@ import { defaultAdminConfig } from "@/definitions/defaults";
 import { cloneDeep, debounce } from "lodash-es";
 import store from "@/store";
 import { toastError } from "@/utils/alerts";
-import jwt_decode from "jwt-decode";
 import dayjs from "dayjs";
+import jwt_decode from "jwt-decode";
 
 export async function routerReplace(path: string): Promise<void> {
   if (router.currentRoute.path !== path) {
@@ -24,8 +24,6 @@ export async function routerPush(path: string): Promise<void> {
 }
 
 export async function goSignInPage(): Promise<void> {
-  window.localStorage.removeItem("refreshToken");
-  window.localStorage.removeItem("accessToken");
   store.commit("clearAdmin");
   await routerReplace("/sign-in");
 }
@@ -95,22 +93,11 @@ export async function getAdminCodes(): Promise<SelectItem<number>[]> {
 }
 
 export async function signOut(): Promise<void> {
-  const refreshToken = window.localStorage.getItem("refreshToken");
-  if (
-    refreshToken &&
-    dayjs((jwt_decode(refreshToken) as { exp: number }).exp * 1000).isBefore(
-      dayjs(),
-    )
-  ) {
-    try {
-      await deleteApi("sign-out", false);
-    } catch (e) {
-      console.error(e);
-    }
+  try {
+    await deleteApi("sign-out", false);
+  } catch (e) {
+    console.error(e);
   }
-  window.localStorage.removeItem("refreshToken");
-  window.localStorage.removeItem("accessToken");
-  store.commit("clearAdmin");
   await goSignInPage();
 }
 
@@ -177,17 +164,13 @@ export async function getValidatedAccessToken(): Promise<string> {
 }
 export async function getValidatedRefreshToken(): Promise<string> {
   const refreshToken = window.localStorage.getItem("refreshToken");
-  if (!refreshToken) {
-    await goSignInPage();
-    return "";
-  }
-
   if (
+    !refreshToken ||
     dayjs((jwt_decode(refreshToken) as { exp: number }).exp * 1000).isBefore(
       dayjs(),
     )
   ) {
-    await signOut();
+    await goSignInPage();
   }
   return refreshToken ?? "";
 }

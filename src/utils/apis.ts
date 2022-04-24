@@ -8,6 +8,8 @@ import {
   goSignInPage,
 } from "@/utils/commands";
 import { Code } from "@/definitions/models";
+import dayjs from "dayjs";
+import jwt_decode from "jwt-decode";
 
 export const axiosInstance = axios.create({
   baseURL: envs.API_HOST,
@@ -241,45 +243,6 @@ export async function uploadFileApi<T = string>(
   return response.data;
 }
 
-export async function downloadFileApi(
-  url: string,
-  contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-): Promise<void> {
-  const response = await axiosInstance.get<Blob>(
-    `${envs.FILE_API_HOST}api/${url}`,
-    {
-      responseType: "blob",
-      headers: {
-        "Content-Type": contentType,
-      },
-    },
-  );
-  const newUrl = window.URL.createObjectURL(
-    new Blob([response.data], { type: response.headers["content-type"] }),
-  );
-  const tempLink = document.createElement("a");
-  tempLink.style.display = "none";
-  tempLink.href = newUrl;
-  const contentDisposition = response.headers["content-disposition"];
-  tempLink.setAttribute(
-    "download",
-    (contentDisposition
-      ? contentDisposition
-          .split("=")
-          .pop()
-          ?.split(";")
-          .join("")
-          // eslint-disable-next-line
-          .split('"')
-          .join("")
-      : url.split("/").pop()) || "",
-  );
-  document.body.appendChild(tempLink);
-  tempLink.click();
-  document.body.removeChild(tempLink);
-  window.URL.revokeObjectURL(newUrl);
-}
-
 export async function downloadExcelApi(url: string): Promise<void> {
   const response = await axiosInstance.get<Blob>(`api/${url}`, {
     responseType: "blob",
@@ -316,6 +279,15 @@ export async function downloadExcelApi(url: string): Promise<void> {
 
 async function apiRefreshToken(error: AxiosError) {
   try {
+    const refreshToken = window.localStorage.getItem("refreshToken");
+    if (
+      !refreshToken ||
+      dayjs((jwt_decode(refreshToken) as { exp: number }).exp * 1000).isBefore(
+        dayjs(),
+      )
+    ) {
+      await goSignInPage();
+    }
     await store.dispatch("reIssueAccessToken");
   } catch (e) {
     console.error(e);
