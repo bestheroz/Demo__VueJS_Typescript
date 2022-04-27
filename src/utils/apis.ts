@@ -91,13 +91,19 @@ export async function getApi<T = never, R = T>(
   const response = await axiosInstance.get<T, AxiosResponse<ApiDataResult<R>>>(
     `api/${url}`,
   );
-  // accessToken 재발급시 success 값을 만들어줘야함.
-  response.data.success =
-    [200, 201].includes(response.status) && response.data.code?.startsWith("S");
-  if (!response.data.success && failAlert) {
-    alertResponseMessage(response.data);
+  if (response?.data) {
+    // accessToken 재발급시 success 값을 만들어줘야함.
+    response.data.success =
+      [200, 201].includes(response.status) &&
+      response.data.code?.startsWith("S");
+    if (!response.data.success && failAlert) {
+      alertResponseMessage(response.data);
+    }
+  } else {
+    console.error(response);
+    toastError("에러가 발생하였습니다. 잠시 후 다시 시도해주세요.");
   }
-  return response.data;
+  return response.data ?? { success: false, code: "E" };
 }
 
 export async function postApi<T = never, R = T>(
