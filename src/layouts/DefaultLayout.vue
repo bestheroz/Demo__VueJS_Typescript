@@ -104,7 +104,7 @@ export default defineComponent({
     const computes = {
       envs: computed((): typeof envs => envs),
       drawers: computed((): Drawer[] =>
-        envs.ENVIRONMENT === "local"
+        ["local", "sandbox"].includes(envs.ENVIRONMENT)
           ? store.getters.drawers
           : store.getters.drawers.filter((d: Drawer) => d.id !== 1),
       ),

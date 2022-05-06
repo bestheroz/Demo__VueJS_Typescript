@@ -143,7 +143,7 @@ export function getFlatRoleMenuMaps(
 }
 
 export async function getValidatedAccessToken(): Promise<string> {
-  const accessToken = window.localStorage.getItem("accessToken");
+  let accessToken = window.localStorage.getItem("accessToken");
   if (!accessToken) {
     await goSignInPage();
     return "";
@@ -156,6 +156,7 @@ export async function getValidatedAccessToken(): Promise<string> {
       )
     ) {
       await store.dispatch("reIssueAccessToken");
+      accessToken = window.localStorage.getItem("accessToken");
     }
   } catch (e: unknown) {
     await signOut();
