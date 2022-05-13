@@ -71,7 +71,6 @@
 
 <script lang="ts">
 import envs from "@/constants/envs";
-import pbkdf2 from "pbkdf2";
 import { ApiDataResult, axiosInstance } from "@/utils/apis";
 import { toastCloseAll } from "@/utils/alerts";
 import { defaultAdminConfig } from "@/definitions/defaults";
@@ -91,6 +90,7 @@ import {
 } from "@vue/composition-api";
 import Vuetify from "@/plugins/vuetify";
 import store from "@/store";
+import { SHA512 } from "crypto-js";
 
 export default defineComponent({
   setup() {
@@ -115,9 +115,6 @@ export default defineComponent({
           return;
         }
 
-        const pbkdf2Password: string = pbkdf2
-          .pbkdf2Sync(state.password || "", "salt", 1, 32, "sha512")
-          .toString();
         state.loading = true;
         const response = await axiosInstance.post<
           { loginId: string; password: string },
@@ -129,7 +126,7 @@ export default defineComponent({
           >
         >("api/sign-in", {
           loginId: state.loginId,
-          password: pbkdf2Password,
+          password: SHA512(state.password || "").toString(),
         });
         state.loading = false;
         if (response.data.success && response.data.data) {

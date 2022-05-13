@@ -156,7 +156,6 @@
 import { getApi, patchApi, postApi } from "@/utils/apis";
 import DatetimePicker from "@/components/picker/DatetimePicker.vue";
 import { ValidationObserver } from "vee-validate";
-import pbkdf2 from "pbkdf2";
 import DialogTitle from "@/components/title/DialogTitle.vue";
 import ResetPasswordDialog from "@/views/components/ResetPasswordDialog.vue";
 import type { Admin } from "@/definitions/models";
@@ -175,6 +174,7 @@ import {
   toRefs,
 } from "@vue/composition-api";
 import store from "@/store";
+import { SHA512 } from "crypto-js";
 
 export default defineComponent({
   components: {
@@ -262,13 +262,14 @@ export default defineComponent({
       },
       create: async (): Promise<void> => {
         state.saving = true;
-        const params = { ...editDialog.vModel.value, password: state.password };
-        if (params.password) {
-          params.password = pbkdf2
-            .pbkdf2Sync(params.password, "salt", 1, 32, "sha512")
-            .toString();
-        }
-        const response = await postApi<Admin>("admins/", params);
+        const response = await postApi<Admin>("admins/", {
+          ...{
+            ...editDialog.vModel.value,
+            password: state.password
+              ? SHA512(state.password).toString()
+              : undefined,
+          },
+        });
         state.saving = false;
         if (response.success) {
           await store.dispatch("reloadAdminCodes");
@@ -278,15 +279,16 @@ export default defineComponent({
       },
       update: async (): Promise<void> => {
         state.saving = true;
-        const params = { ...editDialog.vModel.value, password: state.password };
-        if (params.password) {
-          params.password = pbkdf2
-            .pbkdf2Sync(params.password, "salt", 1, 32, "sha512")
-            .toString();
-        }
         const response = await patchApi<Admin>(
           `admins/${editDialog.vModel.value.id}`,
-          params,
+          {
+            ...{
+              ...editDialog.vModel.value,
+              password: state.password
+                ? SHA512(state.password).toString()
+                : undefined,
+            },
+          },
         );
         state.saving = false;
         if (response.success) {

@@ -84,11 +84,11 @@
 <script lang="ts">
 import { patchApi } from "@/utils/apis";
 import { ValidationObserver } from "vee-validate";
-import pbkdf2 from "pbkdf2";
 import DialogTitle from "@/components/title/DialogTitle.vue";
 import ButtonWithIcon from "@/components/button/ButtonWithIcon.vue";
 import { defineComponent, reactive, ref, toRefs } from "@vue/composition-api";
 import setupSyncedDialog from "@/composition/setupSyncedDialog";
+import { SHA512 } from "crypto-js";
 
 export default defineComponent({
   components: { ButtonWithIcon, DialogTitle },
@@ -118,12 +118,8 @@ export default defineComponent({
           oldPassword: string;
           newPassword: string;
         }>("mine/password", {
-          oldPassword: pbkdf2
-            .pbkdf2Sync(state.oldPassword, "salt", 1, 32, "sha512")
-            .toString(),
-          newPassword: pbkdf2
-            .pbkdf2Sync(state.password, "salt", 1, 32, "sha512")
-            .toString(),
+          oldPassword: SHA512(state.oldPassword).toString(),
+          newPassword: SHA512(state.password).toString(),
         });
         state.loading = false;
         if (response.success) {

@@ -62,10 +62,10 @@ import ToolbarTheme from "@/components/config/ToolbarTheme.vue";
 import EditPasswordDialog from "@/views/components/EditPasswordDialog.vue";
 import { signOut } from "@/utils/commands";
 import { promptPassword, toastError } from "@/utils/alerts";
-import pbkdf2 from "pbkdf2";
 import { postApi } from "@/utils/apis";
 import store from "@/store";
 import { defineComponent, reactive, toRefs } from "@vue/composition-api";
+import { SHA512 } from "crypto-js";
 
 export default defineComponent({
   components: { ToolbarTheme, EditMeDialog, EditPasswordDialog },
@@ -104,9 +104,7 @@ export default defineComponent({
           return;
         }
 
-        const adminEncodedPassword = pbkdf2
-          .pbkdf2Sync(adminPassword, "salt", 1, 32, "sha512")
-          .toString();
+        const adminEncodedPassword = SHA512(adminPassword).toString();
 
         const response = await postApi<void>(
           "mine/verify-password",

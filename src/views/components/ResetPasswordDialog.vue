@@ -65,12 +65,12 @@
 <script lang="ts">
 import { patchApi } from "@/utils/apis";
 import { ValidationObserver } from "vee-validate";
-import pbkdf2 from "pbkdf2";
 import DialogTitle from "@/components/title/DialogTitle.vue";
 import ButtonWithIcon from "@/components/button/ButtonWithIcon.vue";
 import { Admin } from "@/definitions/models";
 import { defineComponent, reactive, ref, toRefs } from "@vue/composition-api";
 import setupSyncedDialog from "@/composition/setupSyncedDialog";
+import { SHA512 } from "crypto-js";
 
 export default defineComponent({
   components: { ButtonWithIcon, DialogTitle },
@@ -102,13 +102,9 @@ export default defineComponent({
 
         state.loading = true;
 
-        const password = pbkdf2
-          .pbkdf2Sync(state.password, "salt", 1, 32, "sha512")
-          .toString();
-
         await patchApi<Admin>(
           `admins/${props.adminId}/reset-password`,
-          password,
+          SHA512(state.password).toString(),
         );
         state.loading = false;
         syncedDialog.syncedDialog.value = false;
