@@ -26,7 +26,7 @@
       </template>
 
       <!-- Navigation menu -->
-      <nav-menu :drawers="drawers" />
+      <nav-menu :drawers="drawers" v-if="show" />
     </v-navigation-drawer>
 
     <!-- Toolbar -->
@@ -92,24 +92,38 @@ import { Drawer } from "@/definitions/types";
 import {
   computed,
   defineComponent,
+  nextTick,
+  onBeforeMount,
   reactive,
   toRefs,
+  watch,
 } from "@vue/composition-api";
 import store from "@/store";
 
 export default defineComponent({
   components: { NavMenu, ToolbarAdmin },
   setup() {
-    const state = reactive({ drawer: null });
+    const state = reactive({ drawer: true, show: true });
     const computes = {
-      envs: computed((): typeof envs => envs),
       drawers: computed((): Drawer[] =>
         ["local", "sandbox"].includes(envs.ENVIRONMENT)
           ? store.getters.drawers
           : store.getters.drawers.filter((d: Drawer) => d.id !== 1),
       ),
     };
-    return { ...toRefs(state), ...computes };
+    onBeforeMount(async () => {
+      if (store.getters.drawers.length === 0) {
+        await store.dispatch("reloadRole");
+      }
+    });
+    watch(
+      () => computes.drawers.value,
+      () => {
+        state.show = false;
+        nextTick(() => (state.show = true));
+      },
+    );
+    return { ...toRefs(state), ...computes, envs };
   },
 });
 </script>

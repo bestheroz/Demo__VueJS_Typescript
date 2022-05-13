@@ -259,6 +259,10 @@ const authority = {
         state.superAdminFlag = role?.id === 1;
         state.drawers = getDrawersFromRoleMenuMaps(role.maps);
         state.flatAuthorities = getFlatRoleMenuMaps(role.maps);
+      } else {
+        state.superAdminFlag = false;
+        state.drawers = [];
+        state.flatAuthorities = [];
       }
     },
     reloadCurrentAuthority(state: any, path: string): void {
