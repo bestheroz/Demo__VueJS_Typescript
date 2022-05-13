@@ -215,6 +215,7 @@ export default defineComponent({
       ),
       noneWriteAuthority: computed(
         (): boolean =>
+          !store.getters.isSuperAdmin &&
           (!store.getters.writeAuthority ||
             store.getters.roleId === editDialog.vModel.value.role.id ||
             !editDialog.vModel.value.role.available) &&
