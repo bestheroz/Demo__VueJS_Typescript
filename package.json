@@ -75,9 +75,7 @@
     "vuetify-loader": "1.7.3"
   },
   "browserslist": [
-    "last 1 version",
-    "> 5%",
-    "not IE 11"
+    "defaults"
   ],
   "engines": {
     "node": "16"
