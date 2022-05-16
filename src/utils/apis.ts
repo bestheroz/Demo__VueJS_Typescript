@@ -101,7 +101,6 @@ export async function getApi<T = never, R = T>(
     }
   } else {
     console.error(response);
-    toastError("에러가 발생하였습니다. 잠시 후 다시 시도해주세요.");
   }
   return response.data ?? { success: false, code: "E" };
 }
