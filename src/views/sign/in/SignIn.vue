@@ -78,7 +78,6 @@ import { getYourConfig, routerReplace } from "@/utils/commands";
 import { AxiosResponse } from "axios";
 import { ValidationObserver } from "vee-validate";
 import {
-  computed,
   defineComponent,
   nextTick,
   onBeforeMount,
@@ -104,9 +103,6 @@ export default defineComponent({
       interval: null as number | null,
       reloadable: true,
     });
-    const computes = {
-      envs: computed((): typeof envs => envs),
-    };
     const methods = {
       submit: async (): Promise<void> => {
         methods.resetErrors();
@@ -190,7 +186,7 @@ export default defineComponent({
       window.sessionStorage.clear();
     });
     const observer = ref<null | InstanceType<typeof ValidationObserver>>(null);
-    return { ...toRefs(state), ...computes, ...methods, observer };
+    return { ...toRefs(state), ...methods, observer, envs };
   },
 });
 </script>

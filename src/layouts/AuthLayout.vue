@@ -16,15 +16,11 @@
 
 <script lang="ts">
 import envs from "@/constants/envs";
-import { computed, defineComponent } from "@vue/composition-api";
+import { defineComponent } from "@vue/composition-api";
 
 export default defineComponent({
   setup() {
-    const computes = {
-      envs: computed((): typeof envs => envs),
-    };
-
-    return { ...computes };
+    return { envs };
   },
 });
 </script>

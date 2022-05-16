@@ -106,7 +106,6 @@ export default defineComponent({
       valid: false,
     });
     const computes = {
-      envs: computed((): typeof envs => envs),
       DATEPICKER_FORMAT: computed((): string => "YYYY-MM-DD"),
       defaultLabel: computed((): string => props.label || "날짜 선택"),
 
@@ -204,7 +203,14 @@ export default defineComponent({
       { immediate: true },
     );
     const observer = ref<null | InstanceType<typeof ValidationObserver>>(null);
-    return { ...vModel, ...toRefs(state), ...computes, ...methods, observer };
+    return {
+      ...vModel,
+      ...toRefs(state),
+      ...computes,
+      ...methods,
+      observer,
+      envs,
+    };
   },
 });
 </script>

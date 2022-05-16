@@ -12,7 +12,6 @@
 import dayjs from "dayjs";
 import envs from "@/constants/envs";
 import {
-  computed,
   defineComponent,
   nextTick,
   onMounted,
@@ -30,9 +29,6 @@ export default defineComponent({
       color: "",
     });
 
-    const computes = {
-      envs: computed((): typeof envs => envs),
-    };
     const methods = {
       getRandomColor: (): string => {
         const letters = "0123456789ABCDEF";
@@ -67,7 +63,7 @@ export default defineComponent({
         state.color = methods.getRandomColor();
       }, 10000);
     });
-    return { ...toRefs(state), ...computes, ...methods };
+    return { ...toRefs(state), ...methods, envs };
   },
 });
 </script>

@@ -120,7 +120,6 @@ export default defineComponent({
       valid: false,
     });
     const computes = {
-      envs: computed((): typeof envs => envs),
       DATEPICKER_FORMAT: computed((): string => "YYYY-MM-DD"),
       DATETIMEPICKER_MINUTE_FORMAT: computed((): string => "YYYY-MM-DD HH:mm"),
       DATETIMEPICKER_FORMAT: computed((): string => "YYYY-MM-DD HH:mm:ss"),
@@ -327,7 +326,7 @@ export default defineComponent({
       { immediate: true },
     );
     const observer = ref<null | InstanceType<typeof ValidationObserver>>(null);
-    return { ...toRefs(state), ...computes, ...methods, observer };
+    return { ...toRefs(state), ...computes, ...methods, observer, envs };
   },
 });
 </script>
