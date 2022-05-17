@@ -29,7 +29,6 @@
   tr:not(.v-data-table__selected) {
     transition: initial;
     &:hover {
-      background-color: var(--v-surface-base) !important;
       transform: initial !important;
     }
   }
