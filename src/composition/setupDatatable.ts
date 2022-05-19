@@ -3,6 +3,7 @@ import {
   reactive,
   toRefs,
   UnwrapRefSimple,
+  watch,
 } from "@vue/composition-api";
 import { FilterOutput, PageResult, Pagination } from "@/definitions/types";
 import qs from "qs";
@@ -57,6 +58,13 @@ export default function <T>(url: string) {
       listPage.totalItems.value++;
     },
   };
+
+  watch(
+    () => [state.search, state.filterOutput],
+    () => {
+      state.pagination.page = 1;
+    },
+  );
 
   return { ...listPage, ...toRefs(state), ...computes, ...methods };
 }
