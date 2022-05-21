@@ -34,12 +34,7 @@
 <script lang="ts">
 import { MENU_TYPE } from "@/definitions/selections";
 import { Menu } from "@/definitions/models";
-import {
-  defineComponent,
-  PropType,
-  reactive,
-  toRefs,
-} from "@vue/composition-api";
+import { defineComponent, PropType } from "@vue/composition-api";
 import setupVModel from "@/composition/setupVModel";
 
 export default defineComponent({
@@ -63,8 +58,7 @@ export default defineComponent({
   },
   setup(props, { emit }) {
     const vModel = setupVModel<number[]>(props, emit);
-    const state = reactive({ MENU_TYPE: MENU_TYPE });
-    return { ...vModel, ...toRefs(state) };
+    return { ...vModel, MENU_TYPE };
   },
 });
 </script>

@@ -122,12 +122,7 @@
 import { RoleMenuMap } from "@/definitions/models";
 import draggable from "vuedraggable";
 import { MENU_TYPE, ROLE_AUTHORITY_TYPE } from "@/definitions/selections";
-import {
-  defineComponent,
-  PropType,
-  reactive,
-  toRefs,
-} from "@vue/composition-api";
+import { defineComponent, PropType } from "@vue/composition-api";
 import setupVModel from "@/composition/setupVModel";
 
 export default defineComponent({
@@ -145,11 +140,7 @@ export default defineComponent({
   },
   setup(props, { emit }) {
     const vModel = setupVModel<RoleMenuMap[]>(props, emit);
-    const state = reactive({
-      ROLE_AUTHORITY_TYPE: ROLE_AUTHORITY_TYPE,
-      MENU_TYPE: MENU_TYPE,
-    });
-    return { ...vModel, ...toRefs(state) };
+    return { ...vModel, ROLE_AUTHORITY_TYPE, MENU_TYPE };
   },
 });
 </script>

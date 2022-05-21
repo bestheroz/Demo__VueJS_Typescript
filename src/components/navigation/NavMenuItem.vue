@@ -47,12 +47,7 @@
 <script lang="ts">
 import type { Drawer } from "@/definitions/types";
 import { MENU_TYPE } from "@/definitions/selections";
-import {
-  defineComponent,
-  PropType,
-  reactive,
-  toRefs,
-} from "@vue/composition-api";
+import { defineComponent, PropType } from "@vue/composition-api";
 
 export default defineComponent({
   props: {
@@ -60,8 +55,7 @@ export default defineComponent({
     depth: { type: Number, required: true },
   },
   setup() {
-    const state = reactive({ MENU_TYPE: MENU_TYPE });
-    return { ...toRefs(state) };
+    return { MENU_TYPE };
   },
 });
 </script>

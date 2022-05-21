@@ -189,7 +189,6 @@ export default defineComponent({
   },
   setup(props, { emit }) {
     const vModel = setupVModel<boolean>(props, emit);
-    const state = reactive({ timeout: 0 });
     const computes = {
       swatches: computed((): string[][] => [
         ["#0096c7", "#31944f"],
@@ -202,7 +201,7 @@ export default defineComponent({
         store.dispatch("setPrimaryColor", primaryColor);
       },
     };
-    return { ...vModel, ...toRefs(state), ...computes, ...methods };
+    return { ...vModel, ...computes, ...methods };
   },
 });
 </script>

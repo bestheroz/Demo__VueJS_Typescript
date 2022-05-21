@@ -131,10 +131,6 @@ export default defineComponent({
   },
   setup(props, { emit }) {
     const editDialog = setupEditDialog<Menu>(props, emit, "menus/");
-    const state = reactive({
-      MenuTypes: MenuTypes,
-      MENU_TYPE: MENU_TYPE,
-    });
     const methods = {
       save: async (): Promise<void> => {
         const isValid = await observer.value?.validate();
@@ -179,7 +175,7 @@ export default defineComponent({
       },
     };
     const observer = ref<null | InstanceType<typeof ValidationObserver>>(null);
-    return { ...editDialog, ...toRefs(state), ...methods, observer };
+    return { ...editDialog, ...methods, observer, MENU_TYPE, MenuTypes };
   },
 });
 </script>

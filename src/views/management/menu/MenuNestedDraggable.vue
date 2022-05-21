@@ -54,12 +54,7 @@
 import { Menu } from "@/definitions/models";
 import draggable from "vuedraggable";
 import { MENU_TYPE } from "@/definitions/selections";
-import {
-  defineComponent,
-  PropType,
-  reactive,
-  toRefs,
-} from "@vue/composition-api";
+import { defineComponent, PropType } from "@vue/composition-api";
 import setupVModel from "@/composition/setupVModel";
 
 export default defineComponent({
@@ -75,9 +70,7 @@ export default defineComponent({
     },
   },
   setup(props, { emit }) {
-    const vModel = setupVModel<Menu[]>(props, emit);
-    const state = reactive({ MENU_TYPE: MENU_TYPE });
-    return { ...vModel, ...toRefs(state) };
+    return { ...setupVModel<Menu[]>(props, emit), MENU_TYPE };
   },
 });
 </script>
