@@ -108,13 +108,7 @@ import CreatedUpdatedBar from "@/components/history/CreatedUpdatedBar.vue";
 import { MENU_TYPE, MenuTypes } from "@/definitions/selections";
 import ButtonWithIcon from "@/components/button/ButtonWithIcon.vue";
 import setupEditDialog from "@/composition/setupEditDialog";
-import {
-  defineComponent,
-  PropType,
-  reactive,
-  ref,
-  toRefs,
-} from "@vue/composition-api";
+import { defineComponent, PropType, ref } from "@vue/composition-api";
 import store from "@/store";
 
 export default defineComponent({
