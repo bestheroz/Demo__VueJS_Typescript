@@ -68,9 +68,9 @@
     "eslint-plugin-vuetify": "1.1.0",
     "node-polyfill-webpack-plugin": "1.1.4",
     "prettier": "2.6.2",
-    "sass": "1.52.0",
+    "sass": "1.52.1",
     "sass-loader": "12.6.0",
-    "vue-cli-plugin-vuetify": "2.4.8",
+    "vue-cli-plugin-vuetify": "2.5.0",
     "vue-template-compiler": "2.6.14",
     "vuetify-loader": "1.7.3"
   },
