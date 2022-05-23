@@ -31,13 +31,6 @@ module.exports = {
       ...config.resolve.fallback,
       fs: false,
     };
-    config.resolve.symlinks = false;
-    config.optimization = {
-      ...config.optimization,
-      removeAvailableModules: false,
-      removeEmptyChunks: false,
-      splitChunks: false,
-    };
   },
   chainWebpack: (config) => {
     config
