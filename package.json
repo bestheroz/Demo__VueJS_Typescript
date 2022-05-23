@@ -76,10 +76,11 @@
     "vuetify-loader": "1.7.3"
   },
   "browserslist": [
-    "last 1 version",
+    "last 1 Chrome version",
     "> 5%",
     "not dead",
-    "not IE <= 11"
+    "not IE <= 11",
+    "supports es6-module"
   ],
   "engines": {
     "node": "16"
