@@ -1,7 +1,6 @@
 {
   "name": "demo-admin",
   "version": "1.0.0",
-  "type": "commonjs",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve --port 8081",
