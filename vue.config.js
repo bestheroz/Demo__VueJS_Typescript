@@ -1,3 +1,6 @@
+/* eslint @typescript-eslint/no-var-requires: "off" */
+const path = require("path");
+
 module.exports = {
   // ckeditor5 관련 설정
   transpileDependencies: [/ckeditor5-[^/\\]+[/\\]src[/\\].+\.js$/],
@@ -36,26 +39,21 @@ module.exports = {
   chainWebpack: (config) => {
     config
       .plugin("NodePolyfillPlugin")
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
       .use(require("node-polyfill-webpack-plugin"));
     if (process.env.VUE_APP_ENVIRONMENT === "production") {
-      config
-        .plugin("sentryWebpack")
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        .use(require("@sentry/webpack-plugin"), [
-          {
-            authToken:
-              "d55afb6a392443ddbe98e05d8a079b7d4cceb631027843c5a70489e681d9bb70",
-            org: "bestheroz",
-            project: "demo-vuejs-typescript",
-            include: "./dist",
-            ignore: ["node_modules", "webpack.config.js"],
-          },
-        ]);
+      config.plugin("sentryWebpack").use(require("@sentry/webpack-plugin"), [
+        {
+          authToken:
+            "d55afb6a392443ddbe98e05d8a079b7d4cceb631027843c5a70489e681d9bb70",
+          org: "bestheroz",
+          project: "demo-vuejs-typescript",
+          include: "./dist",
+          ignore: ["node_modules", "webpack.config.js"],
+        },
+      ]);
     }
     // CKEDITOR 관련 설정 START
     config.plugin("CKEditorWebpackPlugin").use(
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
       new (require("@ckeditor/ckeditor5-dev-webpack-plugin"))({
         // See https://ckeditor.com/docs/ckeditor5/latest/features/ui-language.html
         language: "ko",
@@ -73,10 +71,7 @@ module.exports = {
     //		svgRule.uses.clear();
     //
     // * or exclude ckeditor directory from node_modules:
-    svgRule.exclude.add(
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require("path").join(__dirname, "node_modules", "@ckeditor"),
-    );
+    svgRule.exclude.add(path.join(__dirname, "node_modules", "@ckeditor"));
 
     // Add an entry for *.svg files belonging to CKEditor. You can either:
     //
@@ -101,7 +96,6 @@ module.exports = {
       .tap(() => {
         return {
           postcssOptions:
-            // eslint-disable-next-line @typescript-eslint/no-var-requires
             require("@ckeditor/ckeditor5-dev-utils").styles.getPostCssConfig({
               themeImporter: {
                 themePath: require.resolve("@ckeditor/ckeditor5-theme-lark"),
