@@ -31,6 +31,7 @@ module.exports = {
       ...config.resolve.fallback,
       fs: false,
     };
+    config.resolve.symlinks = false;
   },
   chainWebpack: (config) => {
     config
