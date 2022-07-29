@@ -1,21 +1,21 @@
 <template>
   <v-list>
-    <draggable
+    <vuedraggable
       class="dragArea"
       tag="div"
-      :list="vModel"
+      :list="value"
       :group="{ name: 'g1' }"
       :animation="200"
       handle=".drag-handle"
     >
-      <v-list-item dense :key="item.menu.id" v-for="item in vModel">
+      <v-list-item dense :key="item.menu.id" v-for="item in value">
         <v-row no-gutters>
           <v-col sm="12" lg="5">
             <v-list-item-icon>
               <v-icon v-text="item.menu.icon" style="top: 4px" />
             </v-list-item-icon>
             <v-list-item-title class="d-inline">
-              <v-btn icon v-if="$store.getters.writeAuthority" small>
+              <v-btn icon v-if="hasWriteAuthority" small>
                 <v-icon class="drag-handle"> mdi-sort </v-icon>
               </v-btn>
               {{ item.menu.name }}
@@ -42,10 +42,7 @@
 
               <v-btn
                 :value="ROLE_AUTHORITY_TYPE.WRITE"
-                :disabled="
-                  $store.getters.writeAuthority &&
-                  roleId === $store.getters.roleId
-                "
+                :disabled="hasWriteAuthority && roleId === adminStore.roleId"
                 :class="
                   item.authoritiesJson.includes(ROLE_AUTHORITY_TYPE.WRITE)
                     ? 'primary'
@@ -64,10 +61,7 @@
 
               <v-btn
                 :value="ROLE_AUTHORITY_TYPE.DELETE"
-                :disabled="
-                  $store.getters.writeAuthority &&
-                  roleId === $store.getters.roleId
-                "
+                :disabled="hasWriteAuthority && roleId === adminStore.roleId"
                 :class="
                   item.authoritiesJson.includes(ROLE_AUTHORITY_TYPE.DELETE)
                     ? 'primary'
@@ -86,10 +80,7 @@
 
               <v-btn
                 :value="ROLE_AUTHORITY_TYPE.EXCEL"
-                :disabled="
-                  $store.getters.writeAuthority &&
-                  roleId === $store.getters.roleId
-                "
+                :disabled="hasWriteAuthority && roleId === adminStore.roleId"
                 :class="
                   item.authoritiesJson.includes(ROLE_AUTHORITY_TYPE.EXCEL)
                     ? 'primary'
@@ -108,39 +99,35 @@
             </v-btn-toggle>
           </v-col>
           <v-col cols="12" v-if="item.menu.type === MENU_TYPE.GROUP">
-            <role-menu-nested-draggable
+            <component
+              :is="RoleMenuNestedDraggable"
               v-model="item.children"
               :role-id="roleId"
             />
           </v-col>
         </v-row>
       </v-list-item>
-    </draggable>
+    </vuedraggable>
   </v-list>
 </template>
-<script lang="ts">
+<script setup lang="ts">
 import { RoleMenuMap } from "@/definitions/models";
-import draggable from "vuedraggable";
+import * as Vuedraggable from "vuedraggable";
 import { MENU_TYPE, ROLE_AUTHORITY_TYPE } from "@/definitions/selections";
-import { defineComponent, PropType } from "@vue/composition-api";
-import setupVModel from "@/composition/setupVModel";
+import { useVModel } from "@vueuse/core";
+import RoleMenuNestedDraggable from "@/views/management/role/menu/RoleMenuNestedDraggable.vue";
+import { useAuthorityStore } from "@/stores/authority";
+import { useAdminStore } from "@/stores/admin";
 
-export default defineComponent({
-  name: "RoleMenuNestedDraggable",
-  components: { draggable },
-  props: {
-    value: {
-      type: Array as PropType<RoleMenuMap[]>,
-      required: true,
-    },
-    roleId: {
-      type: Number,
-      required: true,
-    },
-  },
-  setup(props, { emit }) {
-    const vModel = setupVModel<RoleMenuMap[]>(props, emit);
-    return { ...vModel, ROLE_AUTHORITY_TYPE, MENU_TYPE };
-  },
-});
+const { hasWriteAuthority } = useAuthorityStore();
+const adminStore = useAdminStore();
+
+const props = defineProps<{
+  value: RoleMenuMap[];
+  roleId: number;
+}>();
+const emits = defineEmits<{
+  (e: "input", v: RoleMenuMap[]): void;
+}>();
+const value = useVModel(props, "value", emits, { eventName: "input" });
 </script>

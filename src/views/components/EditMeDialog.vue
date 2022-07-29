@@ -1,10 +1,10 @@
 <template>
   <div>
-    <v-bottom-sheet v-model="syncedDialog" inset scrollable max-width="40vw">
+    <v-bottom-sheet v-model="dialog" inset scrollable max-width="40vw">
       <v-card class="pb-4">
-        <dialog-title text="내 정보" @click:close="syncedDialog = false" />
+        <DialogTitle text="내 정보" @click:close="dialog = false" />
         <v-card-text>
-          <ValidationObserver ref="observer">
+          <validation-observer ref="observer">
             <v-row>
               <v-col cols="12">
                 <v-text-field
@@ -14,7 +14,7 @@
                 />
               </v-col>
               <v-col cols="12">
-                <ValidationProvider
+                <validation-provider
                   v-slot="{ errors }"
                   name="나의 이름"
                   rules="required|max:100"
@@ -26,7 +26,7 @@
                     :error-messages="errors"
                     class="required"
                   />
-                </ValidationProvider>
+                </validation-provider>
               </v-col>
               <v-col cols="12">
                 <v-text-field
@@ -36,8 +36,8 @@
                 />
               </v-col>
             </v-row>
-          </ValidationObserver>
-          <button-with-icon
+          </validation-observer>
+          <ButtonWithIcon
             block
             text="저장"
             icon="mdi-content-save"
@@ -45,7 +45,7 @@
             @click="save"
           />
         </v-card-text>
-        <created-updated-bar
+        <CreatedUpdatedBar
           :created-by="item.createdBy"
           :created-date-time="item.created"
           :updated-by="item.updatedBy"
@@ -56,7 +56,7 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { getApi, patchApi } from "@/utils/apis";
 import { ValidationObserver } from "vee-validate";
 import DialogTitle from "@/components/title/DialogTitle.vue";
@@ -64,58 +64,45 @@ import { defaultAdmin } from "@/definitions/defaults";
 import type { Admin } from "@/definitions/models";
 import CreatedUpdatedBar from "@/components/history/CreatedUpdatedBar.vue";
 import ButtonWithIcon from "@/components/button/ButtonWithIcon.vue";
-import {
-  defineComponent,
-  onBeforeMount,
-  reactive,
-  ref,
-  toRefs,
-} from "@vue/composition-api";
-import setupSyncedDialog from "@/composition/setupSyncedDialog";
-import store from "@/store";
+import { onBeforeMount, ref } from "vue";
+import { useVModels } from "@vueuse/core";
+import { useAdminStore } from "@/stores/admin";
+import { useCodesStore } from "@/stores/codes";
 
-export default defineComponent({
-  components: {
-    ButtonWithIcon,
-    CreatedUpdatedBar,
-    DialogTitle,
-  },
-  props: {
-    dialog: {
-      required: true,
-      type: Boolean,
-    },
-    adminPassword: {
-      required: true,
-      type: String,
-    },
-  },
-  setup(props, { emit }) {
-    const syncedDialog = setupSyncedDialog(props, emit);
-    const state = reactive({ item: defaultAdmin(), loading: false });
-    const methods = {
-      save: async () => {
-        const isValid = await observer.value?.validate();
-        if (!isValid) {
-          return;
-        }
-        state.loading = true;
-        const payload = { ...state.item, password: props.adminPassword };
-        const response = await patchApi<Admin>("mine", payload);
-        state.loading = false;
-        if (response.success) {
-          await store.dispatch("reIssueAccessToken");
-          await store.dispatch("reloadAdminCodes");
-          syncedDialog.syncedDialog.value = false;
-        }
-      },
-    };
-    onBeforeMount(async () => {
-      const response = await getApi<Admin>("mine");
-      state.item = response.data || defaultAdmin();
-    });
-    const observer = ref<null | InstanceType<typeof ValidationObserver>>(null);
-    return { ...syncedDialog, ...toRefs(state), ...methods, observer };
-  },
+const { reIssueAccessToken } = useAdminStore();
+const { reloadAdminCodes } = useCodesStore();
+
+const props = defineProps<{
+  dialog: boolean;
+  adminPassword: string;
+}>();
+
+const emits = defineEmits<{
+  (e: "update:dialog", v: boolean): void;
+}>();
+
+const { dialog } = useVModels(props, emits);
+const item = ref(defaultAdmin());
+const loading = ref(false);
+
+async function save() {
+  const isValid = await observer.value?.validate();
+  if (!isValid) {
+    return;
+  }
+  loading.value = true;
+  const payload = { ...item.value, password: props.adminPassword };
+  const response = await patchApi<Admin>("mine", payload);
+  loading.value = false;
+  if (response.success) {
+    await reIssueAccessToken();
+    await reloadAdminCodes();
+    dialog.value = false;
+  }
+}
+onBeforeMount(async () => {
+  const response = await getApi<Admin>("mine");
+  item.value = response.data ?? defaultAdmin();
 });
+const observer = ref();
 </script>

@@ -7,11 +7,15 @@
     />
     <div class="text-h3 mt-10">OOPS! Something went wrong here</div>
     <div class="my-3">Our experts are working to fix the issue.</div>
-    <v-btn block large color="primary" @click="$router.back()"
+    <v-btn block large color="primary" @click="router.back()"
       >Send me back</v-btn
     >
   </v-card>
 </template>
+
+<script setup lang="ts">
+import router from "@/router";
+</script>
 
 <style>
 .error-page {

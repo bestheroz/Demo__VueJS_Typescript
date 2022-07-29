@@ -1,69 +1,69 @@
 <template>
   <div>
-    <v-bottom-sheet v-model="syncedDialog" inset scrollable>
+    <v-bottom-sheet v-model="dialog" inset scrollable>
       <v-card class="pb-4">
-        <dialog-title
+        <DialogTitle
           :is-new="isNew"
           prefix="메뉴"
-          @click:close="syncedDialog = false"
+          @click:close="dialog = false"
         />
         <v-card-text>
-          <v-form :readonly="!$store.getters.writeAuthority">
-            <ValidationObserver ref="observer">
+          <v-form :readonly="!hasWriteAuthority">
+            <validation-observer ref="observer">
               <v-row>
                 <v-col cols="12" md="3">
-                  <ValidationProvider
+                  <validation-provider
                     v-slot="{ errors }"
                     name="메뉴명"
                     rules="required|max:50"
                   >
                     <v-text-field
-                      v-model="vModel.name"
+                      v-model="value.name"
                       label="메뉴명"
                       :counter="50"
                       :error-messages="errors"
                       class="required"
                     />
-                  </ValidationProvider>
+                  </validation-provider>
                 </v-col>
                 <v-col cols="12" md="3">
-                  <ValidationProvider
+                  <validation-provider
                     v-slot="{ errors }"
                     name="타입"
                     rules="required"
                   >
                     <v-select
-                      v-model="vModel.type"
+                      v-model="value.type"
                       :items="MenuTypes"
                       label="타입"
                       :error-messages="errors"
                       class="required"
                     />
-                  </ValidationProvider>
+                  </validation-provider>
                 </v-col>
-                <v-col cols="12" md="6" v-if="vModel.type !== MENU_TYPE.GROUP">
-                  <ValidationProvider
+                <v-col cols="12" md="6" v-if="value.type !== MENU_TYPE.GROUP">
+                  <validation-provider
                     v-slot="{ errors }"
                     name="링크 URL"
                     rules="max:255"
                   >
                     <v-text-field
-                      v-model="vModel.url"
+                      v-model="value.url"
                       label="링크 URL"
                       :counter="255"
                       :error-messages="errors"
                       clearable
                     />
-                  </ValidationProvider>
+                  </validation-provider>
                 </v-col>
-                <v-col v-if="vModel.type === MENU_TYPE.GROUP" cols="12" md="4">
-                  <ValidationProvider
+                <v-col v-if="value.type === MENU_TYPE.GROUP" cols="12" md="4">
+                  <validation-provider
                     v-slot="{ errors }"
                     name="메뉴 아이콘"
                     rules="max:50|required"
                   >
                     <v-text-field
-                      v-model="vModel.icon"
+                      v-model="value.icon"
                       label="메뉴 아이콘"
                       append-icon="mdi-open-in-new"
                       :counter="50"
@@ -71,35 +71,35 @@
                       @click:append="linkIconSite"
                       class="required"
                     />
-                  </ValidationProvider>
+                  </validation-provider>
                 </v-col>
-                <v-col v-if="vModel.type === MENU_TYPE.GROUP" cols="12" md="1">
-                  <v-icon v-text="vModel.icon" size="3.5rem" />
+                <v-col v-if="value.type === MENU_TYPE.GROUP" cols="12" md="1">
+                  <v-icon v-text="value.icon" size="3.5rem" />
                 </v-col>
               </v-row>
-            </ValidationObserver>
-            <button-with-icon
+            </validation-observer>
+            <ButtonWithIcon
               block
               text="저장"
               icon="mdi-content-save"
               :loading="loading"
               @click="save"
-              v-if="$store.getters.writeAuthority"
+              v-if="hasWriteAuthority"
             />
           </v-form>
         </v-card-text>
-        <created-updated-bar
-          :created-by="vModel.createdBy"
-          :created-date-time="vModel.created"
-          :updated-by="vModel.updatedBy"
-          :updated-date-time="vModel.updated"
+        <CreatedUpdatedBar
+          :created-by="value.createdBy"
+          :created-date-time="value.created"
+          :updated-by="value.updatedBy"
+          :updated-date-time="value.updated"
         />
       </v-card>
     </v-bottom-sheet>
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { postApi, putApi } from "@/utils/apis";
 import { ValidationObserver } from "vee-validate";
 import DialogTitle from "@/components/title/DialogTitle.vue";
@@ -107,69 +107,61 @@ import type { Menu } from "@/definitions/models";
 import CreatedUpdatedBar from "@/components/history/CreatedUpdatedBar.vue";
 import { MENU_TYPE, MenuTypes } from "@/definitions/selections";
 import ButtonWithIcon from "@/components/button/ButtonWithIcon.vue";
-import setupEditDialog from "@/composition/setupEditDialog";
-import { defineComponent, PropType, ref } from "@vue/composition-api";
-import store from "@/store";
+import useEditDialog from "@/composition/useEditDialog";
+import { ref } from "vue";
+import { useAuthorityStore } from "@/stores/authority";
 
-export default defineComponent({
-  components: { ButtonWithIcon, CreatedUpdatedBar, DialogTitle },
-  props: {
-    value: {
-      type: Object as PropType<Menu>,
-      required: true,
-    },
-    dialog: {
-      required: true,
-      type: Boolean,
-    },
-  },
-  setup(props, { emit }) {
-    const editDialog = setupEditDialog<Menu>(props, emit, "menus/");
-    const methods = {
-      save: async (): Promise<void> => {
-        const isValid = await observer.value?.validate();
-        if (!isValid) {
-          return;
-        }
-        editDialog.isNew.value
-          ? await methods.create()
-          : await methods.update();
-      },
+const { hasWriteAuthority, reloadRole } = useAuthorityStore();
+const props = defineProps<{
+  value: Menu;
+  dialog: boolean;
+}>();
 
-      create: async (): Promise<void> => {
-        editDialog.loading.value = true;
-        const response = await postApi<Menu>("menus/", editDialog.vModel.value);
-        editDialog.loading.value = false;
-        if (response.success) {
-          store.dispatch("reloadRole").then();
-          editDialog.syncedDialog.value = false;
-          emit("created", response.data);
-        }
-      },
+const emits = defineEmits<{
+  (e: "created", v: Menu): void;
+  (e: "updated", v: Menu): void;
+  (e: "update:dialog", v: boolean): void;
+  (e: "input", v: Menu): void;
+}>();
 
-      update: async (): Promise<void> => {
-        editDialog.loading.value = true;
-        const response = await putApi<Menu>(
-          `menus/${editDialog.vModel.value.id}`,
-          editDialog.vModel.value,
-        );
-        editDialog.loading.value = false;
-        if (response.success) {
-          store.dispatch("reloadRole").then();
-          editDialog.syncedDialog.value = false;
-          emit("updated", response.data);
-        }
-      },
+const { dialog, loading, isNew, value } = useEditDialog<Menu>(
+  props,
+  emits,
+  "menus/",
+);
 
-      linkIconSite: (): void => {
-        window.open(
-          "https://pictogrammers.github.io/@mdi/font/6.5.95/",
-          "_blank",
-        );
-      },
-    };
-    const observer = ref<null | InstanceType<typeof ValidationObserver>>(null);
-    return { ...editDialog, ...methods, observer, MENU_TYPE, MenuTypes };
-  },
-});
+async function save(): Promise<void> {
+  const isValid = await observer.value?.validate();
+  if (!isValid) {
+    return;
+  }
+  isNew.value ? await create() : await update();
+}
+
+async function create(): Promise<void> {
+  loading.value = true;
+  const response = await postApi<Menu>("menus/", value.value);
+  loading.value = false;
+  if (response.success) {
+    reloadRole().then();
+    dialog.value = false;
+    emits("created", response.data);
+  }
+}
+
+async function update(): Promise<void> {
+  loading.value = true;
+  const response = await putApi<Menu>(`menus/${value.value.id}`, value.value);
+  loading.value = false;
+  if (response.success) {
+    reloadRole().then();
+    dialog.value = false;
+    emits("updated", response.data);
+  }
+}
+
+function linkIconSite(): void {
+  window.open("https://pictogrammers.github.io/@mdi/font/6.5.95/", "_blank");
+}
+const observer = ref();
 </script>

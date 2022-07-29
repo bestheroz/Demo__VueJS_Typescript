@@ -1,10 +1,8 @@
 {
   "reject": [
-    "vee-validate",
-    "vuex-persistedstate",
     "vue",
     "vue-router",
-    "vuex",
+    "vee-validate",
     "eslint-plugin-vue",
     "sass-loader"
   ]

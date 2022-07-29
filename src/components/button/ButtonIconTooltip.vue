@@ -36,35 +36,32 @@
   </div>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent } from "@vue/composition-api";
+<script setup lang="ts">
+import { computed } from "vue";
 
-export default defineComponent({
-  props: {
-    icon: { required: true, type: String },
-    text: { required: true, type: String },
-    color: { default: "primary", type: String },
-    disabled: { type: Boolean },
-    loading: { type: Boolean },
-    bottom: { type: Boolean },
-    left: { type: Boolean },
-    top: { type: Boolean },
-    right: { type: Boolean },
-    small: { type: Boolean },
-    xSmall: { type: Boolean },
-    large: { type: Boolean },
-    xLarge: { type: Boolean },
-    block: { type: Boolean },
-    className: { type: String, default: undefined },
-    size: { type: [String, Number], default: undefined },
-  },
-  setup(props) {
-    const computes = {
-      defaultPosition: computed((): boolean => {
-        return !props.top && !props.bottom && !props.right && !props.left;
-      }),
-    };
-    return { ...computes };
-  },
-});
+const props = withDefaults(
+  defineProps<{
+    icon: string;
+    text: string;
+    color?: string;
+    disabled?: boolean;
+    loading?: boolean;
+    bottom?: boolean;
+    left?: boolean;
+    top?: boolean;
+    right?: boolean;
+    small?: boolean;
+    xSmall?: boolean;
+    large?: boolean;
+    xLarge?: boolean;
+    block?: boolean;
+    className?: string;
+    size?: string | number;
+  }>(),
+  { color: "primary", className: undefined, size: undefined },
+);
+
+const defaultPosition = computed(
+  (): boolean => !props.top && !props.bottom && !props.right && !props.left,
+);
 </script>

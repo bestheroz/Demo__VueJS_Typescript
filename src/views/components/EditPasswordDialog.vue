@@ -1,16 +1,13 @@
 <template>
   <div>
-    <v-bottom-sheet v-model="syncedDialog" inset scrollable max-width="30vw">
+    <v-bottom-sheet v-model="dialog" inset scrollable max-width="30vw">
       <v-card class="pb-4">
-        <dialog-title
-          text="비밀번호 변경"
-          @click:close="syncedDialog = false"
-        />
+        <DialogTitle text="비밀번호 변경" @click:close="dialog = false" />
         <v-card-text>
-          <ValidationObserver ref="observer">
+          <validation-observer ref="observer">
             <v-row>
               <v-col cols="12">
-                <ValidationProvider
+                <validation-provider
                   v-slot="{ errors }"
                   name="이전 비밀번호"
                   vid="oldPassword"
@@ -26,10 +23,10 @@
                     @click:append="show1 = !show1"
                     class="required"
                   />
-                </ValidationProvider>
+                </validation-provider>
               </v-col>
               <v-col cols="12">
-                <ValidationProvider
+                <validation-provider
                   v-slot="{ errors }"
                   name="비밀번호"
                   vid="password"
@@ -45,10 +42,10 @@
                     @click:append="show2 = !show2"
                     class="required"
                   />
-                </ValidationProvider>
+                </validation-provider>
               </v-col>
               <v-col cols="12">
-                <ValidationProvider
+                <validation-provider
                   v-slot="{ errors }"
                   name="비밀번호 확인"
                   rules="required|confirmed:password|max:20"
@@ -64,11 +61,11 @@
                     @click:append="show3 = !show3"
                     class="required"
                   />
-                </ValidationProvider>
+                </validation-provider>
               </v-col>
             </v-row>
-          </ValidationObserver>
-          <button-with-icon
+          </validation-observer>
+          <ButtonWithIcon
             block
             text="저장"
             icon="mdi-content-save"
@@ -81,57 +78,51 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { patchApi } from "@/utils/apis";
 import { ValidationObserver } from "vee-validate";
 import DialogTitle from "@/components/title/DialogTitle.vue";
 import ButtonWithIcon from "@/components/button/ButtonWithIcon.vue";
-import { defineComponent, reactive, ref, toRefs } from "@vue/composition-api";
-import setupSyncedDialog from "@/composition/setupSyncedDialog";
+import { ref } from "vue";
 import { SHA512 } from "crypto-js";
+import { useVModels } from "@vueuse/core";
 
-export default defineComponent({
-  components: { ButtonWithIcon, DialogTitle },
-  props: {
-    dialog: {
-      required: true,
-      type: Boolean,
-    },
-  },
-  setup(props, { emit }) {
-    const syncedDialog = setupSyncedDialog(props, emit);
-    const state = reactive({
-      loading: false,
-      oldPassword: "",
-      password: "",
-      password2: "",
-      show1: false,
-      show2: false,
-      show3: false,
-    });
-    const methods = {
-      save: async (): Promise<void> => {
-        const isValid = await observer.value?.validate();
-        if (!isValid) {
-          return;
-        }
+const props = defineProps<{
+  dialog: boolean;
+}>();
 
-        state.loading = true;
-        const response = await patchApi<{
-          oldPassword: string;
-          newPassword: string;
-        }>("mine/password", {
-          oldPassword: SHA512(state.oldPassword).toString(),
-          newPassword: SHA512(state.password).toString(),
-        });
-        state.loading = false;
-        if (response.success) {
-          syncedDialog.syncedDialog.value = false;
-        }
-      },
-    };
-    const observer = ref<null | InstanceType<typeof ValidationObserver>>(null);
-    return { ...syncedDialog, ...toRefs(state), ...methods, observer };
-  },
-});
+const emits = defineEmits<{
+  (e: "update:dialog", v: boolean): void;
+}>();
+
+const { dialog } = useVModels(props, emits);
+
+const loading = ref(false);
+const oldPassword = ref("");
+const password = ref("");
+const password2 = ref("");
+const show1 = ref(false);
+const show2 = ref(false);
+const show3 = ref(false);
+
+async function save(): Promise<void> {
+  const isValid = await observer.value?.validate();
+  if (!isValid) {
+    return;
+  }
+
+  loading.value = true;
+  const response = await patchApi<{
+    oldPassword: string;
+    newPassword: string;
+  }>("mine/password", {
+    oldPassword: SHA512(oldPassword.value).toString(),
+    newPassword: SHA512(password.value).toString(),
+  });
+  loading.value = false;
+  if (response.success) {
+    dialog.value = false;
+  }
+}
+const observer = ref();
 </script>

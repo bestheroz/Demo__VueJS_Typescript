@@ -1,73 +1,73 @@
 <template>
   <div>
-    <v-bottom-sheet v-model="syncedDialog" inset scrollable>
+    <v-bottom-sheet v-model="dialog" inset scrollable>
       <v-card class="pb-4">
-        <dialog-title
-          v-model="vModel.available"
+        <DialogTitle
+          v-model="value.available"
           :is-new="isNew"
           prefix="관리자"
           :suffix="noneWriteAuthority ? '보기' : ''"
           with-switch
           :disabled-switch="noneWriteAuthority"
-          @click:close="syncedDialog = false"
+          @click:close="dialog = false"
         />
         <v-card-text>
           <v-form :readonly="noneWriteAuthority">
-            <ValidationObserver ref="observer">
+            <validation-observer ref="observer">
               <v-row>
                 <v-col cols="12" md="3">
-                  <ValidationProvider
+                  <validation-provider
                     v-slot="{ errors }"
                     name="관리자 아이디"
-                    rules="required|max:50"
+                    rules="required|max:20"
                   >
                     <v-text-field
-                      v-model="vModel.loginId"
+                      v-model="value.loginId"
                       label="관리자 아이디"
-                      :counter="50"
+                      :counter="20"
                       :error-messages="loginIdErrorText || errors"
                       :success-messages="loginIdSuccessText"
                       :append-icon="loginIdAppendIcon"
                       class="required"
                       :loading="loading"
-                      @input="debounceCheckExistsLoginId"
+                      @input="checkExistsLoginId"
                     />
-                  </ValidationProvider>
+                  </validation-provider>
                 </v-col>
                 <v-col cols="12" md="3">
-                  <ValidationProvider
+                  <validation-provider
                     v-slot="{ errors }"
                     name="관리자 이름"
-                    rules="required|max:100"
+                    rules="required|max:20"
                   >
                     <v-text-field
-                      v-model="vModel.name"
+                      v-model="value.name"
                       label="관리자 이름"
-                      :counter="100"
+                      :counter="20"
                       :error-messages="errors"
                       class="required"
                     />
-                  </ValidationProvider>
+                  </validation-provider>
                 </v-col>
                 <v-col cols="12" md="3">
-                  <ValidationProvider
+                  <validation-provider
                     v-slot="{ errors }"
                     name="역할"
                     rules="required"
                   >
-                    <v-input :value="vModel.role.id" class="d-none" />
-                    <role-selections
-                      v-model="vModel.role"
+                    <v-input :value="value.role.id" class="d-none" />
+                    <RoleSelections
+                      v-model="value.role"
                       :error-messages="errors"
                       :param-available="true"
                       :disabled="noneWriteAuthority"
                       required
                     />
-                  </ValidationProvider>
+                  </validation-provider>
                 </v-col>
                 <v-col cols="12" md="3">
-                  <datetime-picker
-                    v-model="vModel.expired"
+                  <DatetimePicker
+                    v-model="value.expired"
                     label="만료일"
                     full-width
                     :disabled="noneWriteAuthority"
@@ -75,7 +75,7 @@
                   />
                 </v-col>
                 <v-col cols="12" md="3" v-if="isNew">
-                  <ValidationProvider
+                  <validation-provider
                     v-slot="{ errors }"
                     name="비밀번호"
                     vid="password"
@@ -90,10 +90,10 @@
                       :type="show1 ? 'text' : 'password'"
                       @click:append="show1 = !show1"
                     />
-                  </ValidationProvider>
+                  </validation-provider>
                 </v-col>
                 <v-col cols="12" md="3" v-if="!noneWriteAuthority">
-                  <ValidationProvider
+                  <validation-provider
                     v-if="isNew"
                     v-slot="{ errors }"
                     name="비밀번호 확인"
@@ -110,9 +110,9 @@
                       @click:append="show2 = !show2"
                       class="required"
                     />
-                  </ValidationProvider>
+                  </validation-provider>
                   <v-btn
-                    v-else-if="$store.getters.roleId !== vModel.role.id"
+                    v-else-if="roleId !== value.role.id"
                     color="primary"
                     outlined
                     @click="resetPasswordDialog = true"
@@ -121,13 +121,13 @@
                   </v-btn>
                 </v-col>
               </v-row>
-            </ValidationObserver>
-            <button-with-icon
+            </validation-observer>
+            <ButtonWithIcon
               block
               text="저장"
               icon="mdi-content-save"
               :disabled="
-                !loginIdSuccessText && originalLoginId !== vModel.loginId
+                !loginIdSuccessText && originalLoginId !== value.loginId
               "
               :loading="saving"
               @click="save"
@@ -135,24 +135,24 @@
             />
           </v-form>
         </v-card-text>
-        <created-updated-bar
-          :created-by="vModel.createdBy"
-          :created-date-time="vModel.created"
-          :updated-by="vModel.updatedBy"
-          :updated-date-time="vModel.updated"
+        <CreatedUpdatedBar
+          :created-by="value.createdBy"
+          :created-date-time="value.created"
+          :updated-by="value.updatedBy"
+          :updated-date-time="value.updated"
         />
       </v-card>
     </v-bottom-sheet>
 
-    <reset-password-dialog
+    <ResetPasswordDialog
       :dialog.sync="resetPasswordDialog"
-      :admin-id="vModel.id"
-      v-if="resetPasswordDialog"
+      :admin-id="value.id"
+      v-if="resetPasswordDialog && value.id"
     />
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { getApi, patchApi, postApi } from "@/utils/apis";
 import DatetimePicker from "@/components/picker/DatetimePicker.vue";
 import { ValidationObserver } from "vee-validate";
@@ -162,174 +162,145 @@ import type { Admin } from "@/definitions/models";
 import CreatedUpdatedBar from "@/components/history/CreatedUpdatedBar.vue";
 import ButtonWithIcon from "@/components/button/ButtonWithIcon.vue";
 import RoleSelections from "@/views/management/role/RoleSelections.vue";
-import { debounce, DebouncedFunc } from "lodash-es";
-import setupEditDialog from "@/composition/setupEditDialog";
-import {
-  computed,
-  defineComponent,
-  onBeforeMount,
-  PropType,
-  reactive,
-  ref,
-  toRefs,
-} from "@vue/composition-api";
-import store from "@/store";
+import useEditDialog from "@/composition/useEditDialog";
+import { computed, onBeforeMount, ref } from "vue";
+import { useAuthorityStore } from "@/stores/authority";
+import { useAdminStore } from "@/stores/admin";
+import { useCodesStore } from "@/stores/codes";
 import { SHA512 } from "crypto-js";
+import { useDebounceFn } from "@vueuse/core";
 
-export default defineComponent({
-  components: {
-    RoleSelections,
-    ButtonWithIcon,
-    CreatedUpdatedBar,
-    DialogTitle,
-    DatetimePicker,
-    ResetPasswordDialog,
-  },
-  props: {
-    value: {
-      type: Object as PropType<Admin>,
-      required: true,
-    },
-    dialog: {
-      required: true,
-      type: Boolean,
-    },
-  },
-  setup(props, { emit }) {
-    const editDialog = setupEditDialog<Admin>(props, emit, "admins/");
-    const state = reactive({
-      saving: false,
-      password: "",
-      password2: "",
-      show1: false,
-      show2: false,
-      resetPasswordDialog: false,
-      existsLoginId: false,
-      originalLoginId: "",
-      checked: true,
-    });
-    const computes = {
-      debounce: computed(
-        (): DebouncedFunc<() => Promise<void>> =>
-          debounce(methods.checkExistsLoginId, 500),
-      ),
-      noneWriteAuthority: computed(
-        (): boolean =>
-          !store.getters.isSuperAdmin &&
-          (!store.getters.writeAuthority ||
-            store.getters.roleId === editDialog.vModel.value.role.id ||
-            !editDialog.vModel.value.role.available) &&
-          !editDialog.isNew.value,
-      ),
-      loginIdErrorText: computed((): string[] | undefined => {
-        if (!state.checked) {
-          return undefined;
-        }
-        if (editDialog.vModel.value.loginId === state.originalLoginId) {
-          return undefined;
-        }
-        return state.existsLoginId
-          ? ["이미 사용중인 아이디 입니다."]
-          : undefined;
-      }),
-      loginIdSuccessText: computed((): string[] | undefined => {
-        if (!state.checked) {
-          return undefined;
-        }
-        if (editDialog.vModel.value.loginId === state.originalLoginId) {
-          return undefined;
-        }
-        return state.existsLoginId ? undefined : ["사용 가능한 아이디 입니다."];
-      }),
-      loginIdAppendIcon: computed((): string | unknown => {
-        if (computes.loginIdSuccessText.value) {
-          return "mdi-check-circle";
-        }
-        if (computes.loginIdErrorText.value) {
-          return "mdi-alert-circle";
-        }
-        return undefined;
-      }),
-    };
-    const methods = {
-      save: async (): Promise<void> => {
-        const isValid = await observer.value?.validate();
-        if (!isValid) {
-          return;
-        }
-        editDialog.isNew.value
-          ? await methods.create()
-          : await methods.update();
-      },
-      create: async (): Promise<void> => {
-        state.saving = true;
-        const response = await postApi<Admin>("admins/", {
-          ...{
-            ...editDialog.vModel.value,
-            password: state.password
-              ? SHA512(state.password).toString()
-              : undefined,
-          },
-        });
-        state.saving = false;
-        if (response.success) {
-          await store.dispatch("reloadAdminCodes");
-          editDialog.syncedDialog.value = false;
-          emit("created", response.data);
-        }
-      },
-      update: async (): Promise<void> => {
-        state.saving = true;
-        const response = await patchApi<Admin>(
-          `admins/${editDialog.vModel.value.id}`,
-          {
-            ...{
-              ...editDialog.vModel.value,
-              password: state.password
-                ? SHA512(state.password).toString()
-                : undefined,
-            },
-          },
-        );
-        state.saving = false;
-        if (response.success) {
-          if (editDialog.vModel.value.id === store.getters.admin.id) {
-            await store.dispatch("reIssueAccessToken");
-          }
-          await store.dispatch("reloadAdminCodes");
-          editDialog.syncedDialog.value = false;
-          emit("updated", response.data);
-        }
-      },
-      debounceCheckExistsLoginId: (): void => {
-        if (editDialog.vModel.value.loginId === state.originalLoginId) {
-          return;
-        }
-        editDialog.loading.value = true;
-        state.checked = false;
-        computes.debounce.value();
-      },
-      checkExistsLoginId: async (): Promise<void> => {
-        editDialog.loading.value = true;
-        const response = await getApi<boolean>(
-          `admins/exists-login-id?loginId=${editDialog.vModel.value.loginId}`,
-        );
-        editDialog.loading.value = false;
-        state.checked = true;
-        state.existsLoginId = response.data;
-      },
-    };
-    onBeforeMount(() => {
-      state.originalLoginId = editDialog.vModel.value.loginId;
-    });
-    const observer = ref<null | InstanceType<typeof ValidationObserver>>(null);
-    return {
-      ...editDialog,
-      ...toRefs(state),
-      ...computes,
-      ...methods,
-      observer,
-    };
-  },
+const { superAdminFlag, writeAuthority } = useAuthorityStore();
+const { id, roleId, reIssueAccessToken } = useAdminStore();
+const { reloadAdminCodes } = useCodesStore();
+
+const props = defineProps<{
+  value: Admin;
+  dialog: boolean;
+}>();
+
+const emits = defineEmits<{
+  (e: "created", v: Admin): void;
+  (e: "updated", v: Admin): void;
+  (e: "update:dialog", v: boolean): void;
+  (e: "input", v: Admin): void;
+}>();
+
+const { value, dialog, loading, isNew } = useEditDialog<Admin>(
+  props,
+  emits,
+  "admins/",
+);
+
+const saving = ref(false);
+const password = ref("");
+const password2 = ref("");
+const show1 = ref(false);
+const show2 = ref(false);
+const resetPasswordDialog = ref(false);
+const existsLoginId = ref(false);
+const originalLoginId = ref("");
+const checked = ref(true);
+
+const debouncedCheckExistsLoginId = useDebounceFn(async (): Promise<void> => {
+  loading.value = true;
+  const response = await getApi<boolean>(
+    `admins/exists-login-id?loginId=${value.value.loginId}`,
+  );
+  loading.value = false;
+  checked.value = true;
+  existsLoginId.value = response.data;
+}, 500);
+
+const noneWriteAuthority = computed(
+  (): boolean =>
+    !superAdminFlag &&
+    (!writeAuthority ||
+      roleId === value.value.role.id ||
+      !value.value.role.available) &&
+    !isNew.value,
+);
+
+const loginIdErrorText = computed((): string[] | undefined => {
+  if (!checked.value) {
+    return undefined;
+  }
+  if (value.value.loginId === originalLoginId.value) {
+    return undefined;
+  }
+  return existsLoginId.value ? ["사용할 수 없는 아이디입니다."] : undefined;
 });
+
+const loginIdSuccessText = computed((): string[] | undefined => {
+  if (!checked.value) {
+    return undefined;
+  }
+  if (value.value.loginId === originalLoginId.value) {
+    return undefined;
+  }
+  return existsLoginId.value ? undefined : ["사용 가능한 아이디 입니다."];
+});
+
+const loginIdAppendIcon = computed((): string | unknown => {
+  if (loginIdSuccessText.value) {
+    return "mdi-check-circle";
+  }
+  if (loginIdErrorText.value) {
+    return "mdi-alert-circle";
+  }
+  return undefined;
+});
+
+async function save(): Promise<void> {
+  const isValid = await observer.value?.validate();
+  if (!isValid) {
+    return;
+  }
+  isNew.value ? await create() : await update();
+}
+async function create(): Promise<void> {
+  saving.value = true;
+  const response = await postApi<Admin>("admins/", {
+    ...{
+      ...value.value,
+      password: password.value ? SHA512(password.value).toString() : undefined,
+    },
+  });
+  saving.value = false;
+  if (response.success) {
+    await reloadAdminCodes();
+    dialog.value = false;
+    emits("created", response.data);
+  }
+}
+async function update(): Promise<void> {
+  saving.value = true;
+  const response = await patchApi<Admin>(`admins/${value.value.id}`, {
+    ...{
+      ...value.value,
+      password: password.value ? SHA512(password.value).toString() : undefined,
+    },
+  });
+  saving.value = false;
+  if (response.success) {
+    if (value.value.id === id) {
+      await reIssueAccessToken();
+    }
+    await reloadAdminCodes();
+    dialog.value = false;
+    emits("updated", response.data);
+  }
+}
+function checkExistsLoginId(): void {
+  if (value.value.loginId === originalLoginId.value) {
+    return;
+  }
+  loading.value = true;
+  checked.value = false;
+  debouncedCheckExistsLoginId();
+}
+onBeforeMount(() => {
+  originalLoginId.value = value.value.loginId;
+});
+const observer = ref();
 </script>

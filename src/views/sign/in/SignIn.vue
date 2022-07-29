@@ -10,8 +10,8 @@
       <!-- sign in form -->
       <v-card-text>
         <v-form ref="form">
-          <ValidationObserver ref="observer">
-            <ValidationProvider
+          <validation-observer ref="observer">
+            <validation-provider
               v-slot="{ errors, valid }"
               name="ID"
               rules="required"
@@ -27,8 +27,8 @@
                 @keyup.enter="submit"
                 @input="resetErrors"
               />
-            </ValidationProvider>
-            <ValidationProvider
+            </validation-provider>
+            <validation-provider
               v-slot="{ errors, valid }"
               name="Password"
               rules="required"
@@ -46,7 +46,7 @@
                 @keyup.enter="submit"
                 @click:append="showPassword = !showPassword"
               />
-            </ValidationProvider>
+            </validation-provider>
 
             <v-btn
               :loading="loading"
@@ -62,131 +62,120 @@
               class="error--text"
               v-text="errorProviderMessages"
             />
-          </ValidationObserver>
+          </validation-observer>
         </v-form>
       </v-card-text>
     </v-card>
   </div>
 </template>
 
-<script lang="ts">
-import envs from "@/constants/envs";
+<script setup lang="ts">
 import { ApiDataResult, axiosInstance } from "@/utils/apis";
 import { toastCloseAll } from "@/utils/alerts";
-import { defaultAdminConfig } from "@/definitions/defaults";
 import { getYourConfig, routerReplace } from "@/utils/commands";
 import { AxiosResponse } from "axios";
 import { ValidationObserver } from "vee-validate";
-import {
-  defineComponent,
-  nextTick,
-  onBeforeMount,
-  onMounted,
-  onUnmounted,
-  reactive,
-  ref,
-  toRefs,
-} from "@vue/composition-api";
+import { onBeforeMount, onMounted, onUnmounted, ref } from "vue";
 import Vuetify from "@/plugins/vuetify";
-import store from "@/store";
 import { SHA512 } from "crypto-js";
+import { storeToRefs } from "pinia";
+import { useConfigStore } from "@/stores/config";
+import { useAuthorityStore } from "@/stores/authority";
+import { useAdminStore } from "@/stores/admin";
+import { useCodesStore } from "@/stores/codes";
+import { useIntervalFn } from "@vueuse/core";
+import envs from "@/constants/envs";
 
-export default defineComponent({
-  setup() {
-    const state = reactive({
-      loginId: "1",
-      password: "1",
-      loading: false,
-      errorProvider: false,
-      errorProviderMessages: "",
-      showPassword: false,
-      interval: null as number | null,
-      reloadable: true,
-    });
-    const methods = {
-      submit: async (): Promise<void> => {
-        methods.resetErrors();
-        const inValid = await observer.value?.validate();
-        if (!inValid) {
-          return;
-        }
+const { setConfig, resetDefaultConfig } = useConfigStore();
+const { reloadRole, clearAuthority } = useAuthorityStore();
+const { saveToken, clearAdmin } = useAdminStore();
 
-        state.loading = true;
-        const response = await axiosInstance.post<
-          { loginId: string; password: string },
-          AxiosResponse<
-            ApiDataResult<{
-              accessToken: string;
-              refreshToken: string;
-            }>
-          >
-        >("api/sign-in", {
-          loginId: state.loginId,
-          password: SHA512(state.password || "").toString(),
-        });
-        state.loading = false;
-        if (response.data.success && response.data.data) {
-          state.reloadable = false;
-          store.commit("saveToken", {
-            accessToken: response.data.data.accessToken,
-            refreshToken: response.data.data.refreshToken,
-          });
-          await store.dispatch("reloadRole");
-          store.commit(
-            "setConfig",
-            (await getYourConfig()) || defaultAdminConfig(),
-          );
-          await store.dispatch("reloadAdminCodes");
-          state.reloadable = true;
-          toastCloseAll();
-          await routerReplace("/");
-        } else {
-          state.errorProvider = true;
-          state.errorProviderMessages = response.data.message;
-        }
-      },
+const codesStore = useCodesStore();
+const { adminCodes } = storeToRefs(codesStore);
+const { reloadAdminCodes } = codesStore;
 
-      resetErrors(): void {
-        state.errorProvider = false;
-        state.errorProviderMessages = "";
-      },
-    };
-    onUnmounted(() => {
-      nextTick(() => {
-        state.interval && clearInterval(state.interval);
-        state.interval = null;
-      });
-    });
-    onBeforeMount(() => {
-      Vuetify.framework.theme.dark = false;
-    });
-    onMounted(async () => {
-      if (
-        window.localStorage.getItem("refreshToken") &&
-        window.localStorage.getItem("accessToken")
-      ) {
-        await routerReplace("/");
-        return;
-      }
-      state.interval = window.setInterval(() => {
-        if (
-          state.reloadable &&
-          window.localStorage.getItem("refreshToken") &&
-          window.localStorage.getItem("accessToken")
-        ) {
-          window.location.reload();
-        }
-      }, 1_000);
+const loginId = ref("");
+const password = ref("");
+const loading = ref(false);
+const errorProvider = ref(false);
+const errorProviderMessages = ref("");
+const showPassword = ref(false);
+const reloadable = ref(true);
 
-      store.commit("clearAdmin");
-      await store.dispatch("reloadConfig");
-      store.commit("setRole", null);
-      store.commit("setAdminCodes", null);
-      window.localStorage.clear();
-      window.sessionStorage.clear();
+async function submit(): Promise<void> {
+  resetErrors();
+  const inValid = await observer.value?.validate();
+  if (!inValid) {
+    return;
+  }
+
+  loading.value = true;
+  const response = await axiosInstance.post<
+    { loginId: string; password: string },
+    AxiosResponse<
+      ApiDataResult<{
+        accessToken: string;
+        refreshToken: string;
+      }>
+    >
+  >("api/sign-in", {
+    loginId: loginId.value,
+    password: SHA512(password.value).toString(),
+  });
+  loading.value = false;
+  if (response.data.success && response.data.data) {
+    reloadable.value = false;
+    saveToken({
+      accessToken: response.data.data.accessToken,
+      refreshToken: response.data.data.refreshToken,
     });
-    const observer = ref<null | InstanceType<typeof ValidationObserver>>(null);
-    return { ...toRefs(state), ...methods, observer, envs };
-  },
+    await reloadRole();
+    setConfig(await getYourConfig());
+    await reloadAdminCodes();
+    reloadable.value = true;
+    toastCloseAll();
+    await routerReplace("/");
+  } else {
+    errorProvider.value = true;
+    errorProviderMessages.value = response.data.message;
+  }
+}
+
+function resetErrors(): void {
+  errorProvider.value = false;
+  errorProviderMessages.value = "";
+}
+
+onUnmounted(() => {
+  pause();
 });
+onBeforeMount(() => {
+  Vuetify.framework.theme.dark = false;
+});
+const { pause } = useIntervalFn(() => {
+  if (
+    reloadable.value &&
+    window.localStorage.getItem("refreshToken") &&
+    window.localStorage.getItem("accessToken")
+  ) {
+    window.location.reload();
+  }
+}, 1_000);
+onMounted(async () => {
+  if (
+    window.localStorage.getItem("refreshToken") &&
+    window.localStorage.getItem("accessToken")
+  ) {
+    await routerReplace("/");
+    return;
+  }
+
+  clearAdmin();
+  await resetDefaultConfig();
+  clearAuthority();
+  adminCodes.value = [];
+  window.localStorage.clear();
+  window.sessionStorage.clear();
+});
+const observer = ref();
 </script>

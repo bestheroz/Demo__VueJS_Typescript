@@ -40,67 +40,52 @@
   </div>
 </template>
 
-<script lang="ts">
-import { debounce, DebouncedFunc, uniqueId } from "lodash-es";
-import {
-  computed,
-  defineComponent,
-  reactive,
-  toRefs,
-  watch,
-} from "@vue/composition-api";
+<script setup lang="ts">
+import { uniqueId } from "lodash-es";
+import { computed, ref } from "vue";
+import { watchDebounced } from "@vueuse/core";
 
-export default defineComponent({
-  props: {
-    value: { type: String, required: true },
-    width: { type: [String, Number], default: "25rem" },
-    tooltipWidth: { type: [String, Number], default: "25rem" },
+const props = withDefaults(
+  defineProps<{
+    value: string;
+    width?: string | number;
+    tooltipWidth?: string | number;
+  }>(),
+  { width: "25rem", tooltipWidth: "25rem" },
+);
+
+const show = ref(false);
+
+const textEllipsisTargetId = uniqueId("text-ellipsis-target-");
+
+function makeTextEllipsis() {
+  Promise.resolve()
+    .then(() => {
+      document
+        .querySelectorAll<HTMLElement>(textEllipsisTargetId)
+        .forEach((item) => item.classList.remove("text-ellipsis"));
+    })
+    .then(() => {
+      document
+        .querySelectorAll<HTMLElement>(textEllipsisTargetId)
+        .forEach((item) => {
+          item.style.maxWidth = item.offsetWidth + "px";
+          item.classList.add("text-ellipsis");
+        });
+    });
+}
+
+const maxWidth = computed((): string =>
+  typeof props.width === "string" ? props.width : `${props.width}px`,
+);
+
+watchDebounced(
+  () => props.value,
+  () => {
+    makeTextEllipsis();
   },
-  setup(props) {
-    const state = reactive({ show: false });
-    const computes = {
-      textEllipsisTargetId: computed((): string =>
-        uniqueId("text-ellipsis-target-"),
-      ),
-      debounce: computed((): DebouncedFunc<() => Record<string, never>> => {
-        return debounce(methods.debounceTextEllipsis, 100);
-      }),
-      maxWidth: computed((): string =>
-        typeof props.width === "string" ? props.width : `${props.width}px`,
-      ),
-    };
-    const methods = {
-      debounceTextEllipsis: (): void => {
-        Promise.resolve()
-          .then(() => {
-            document
-              .querySelectorAll<HTMLElement>(
-                `.${computes.textEllipsisTargetId.value}`,
-              )
-              .forEach((item) => item.classList.remove("text-ellipsis"));
-          })
-          .then(() => {
-            document
-              .querySelectorAll<HTMLElement>(
-                `.${computes.textEllipsisTargetId.value}`,
-              )
-              .forEach((item) => {
-                item.style.maxWidth = item.offsetWidth + "px";
-                item.classList.add("text-ellipsis");
-              });
-          });
-      },
-    };
-    watch(
-      () => props.value,
-      () => {
-        computes.debounce.value && computes.debounce.value();
-      },
-      { immediate: true },
-    );
-    return { ...toRefs(state), ...computes, ...methods };
-  },
-});
+  { debounce: 100 },
+);
 </script>
 <style lang="scss">
 .v-application {

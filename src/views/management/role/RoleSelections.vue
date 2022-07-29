@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-select
-      v-model="vModel"
+      v-model="value"
       :items="items"
       item-text="name"
       :label="label"
@@ -15,64 +15,42 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { getApi } from "@/utils/apis";
 import type { Role } from "@/definitions/models";
+
+import { onBeforeMount, ref } from "vue";
+import { useVModel } from "@vueuse/core";
 import { defaultRole } from "@/definitions/defaults";
 
-import {
-  defineComponent,
-  onBeforeMount,
-  PropType,
-  reactive,
-  toRefs,
-} from "@vue/composition-api";
-import setupVModel from "@/composition/setupVModel";
-
-export default defineComponent({
-  props: {
-    value: {
-      type: Object as PropType<Role>,
-      required: true,
-      default: () => defaultRole(),
-    },
-    errorMessages: {
-      type: Array as PropType<string[]>,
-      default: undefined,
-    },
-    label: {
-      type: String,
-      default: "역할",
-    },
-    clearable: {
-      type: Boolean,
-    },
-    required: {
-      type: Boolean,
-    },
-    disabled: {
-      type: Boolean,
-    },
-    paramAvailable: {
-      type: Boolean,
-    },
-  },
-  setup(props, { emit }) {
-    const vModel = setupVModel<Role>(props, emit);
-    const state = reactive({ items: [] as Role[], loading: false });
-    onBeforeMount(async () => {
-      state.loading = true;
-      const response = await getApi<Role[]>(
-        `roles/selections/?available=${
-          !props.disabled && props.paramAvailable !== undefined
-            ? props.paramAvailable
-            : ""
-        }`,
-      );
-      state.items = response.data || [];
-      state.loading = false;
-    });
-    return { ...vModel, ...toRefs(state) };
-  },
+const props = withDefaults(
+  defineProps<{
+    value: Role;
+    errorMessages?: string[];
+    label?: string;
+    clearable?: boolean;
+    required?: boolean;
+    disabled?: boolean;
+    paramAvailable?: boolean;
+  }>(),
+  { value: () => defaultRole(), errorMessages: undefined, label: "역할" },
+);
+const emits = defineEmits<{
+  (e: "input", v: Role): void;
+}>();
+const value = useVModel(props, "value", emits, { eventName: "input" });
+const items = ref([] as Role[]);
+const loading = ref(false);
+onBeforeMount(async () => {
+  loading.value = true;
+  const response = await getApi<Role[]>(
+    `roles/selections/?available=${
+      !props.disabled && props.paramAvailable !== undefined
+        ? props.paramAvailable
+        : ""
+    }`,
+  );
+  items.value = response.data ?? [];
+  loading.value = false;
 });
 </script>

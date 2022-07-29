@@ -20,6 +20,7 @@
     "preserveConstEnums": true,
     "forceConsistentCasingInFileNames": true,
     "noImplicitReturns": false,
+    "noImplicitAny": false,
     "removeComments": true,
     "sourceMap": true,
     "baseUrl": ".",

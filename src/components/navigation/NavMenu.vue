@@ -1,30 +1,33 @@
 <template>
   <v-list nav dense class="py-0">
     <!-- menu level 1 -->
-    <nav-menu-item
+    <NavMenuItem
       v-for="drawer in drawers"
       :key="drawer.id"
       :drawer="drawer"
       :depth="depth"
     >
       <template>
-        <nav-menu :drawers="drawer.children" :depth="depth + 1" />
+        <component
+          :is="NavMenu"
+          :drawers="drawer.children"
+          :depth="depth + 1"
+        />
       </template>
-    </nav-menu-item>
+    </NavMenuItem>
   </v-list>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
+import NavMenu from "@/components/navigation/NavMenu.vue";
 import NavMenuItem from "@/components/navigation/NavMenuItem.vue";
 import { Drawer } from "@/definitions/types";
-import { defineComponent, PropType } from "@vue/composition-api";
 
-export default defineComponent({
-  name: "NavMenu",
-  components: { NavMenuItem },
-  props: {
-    drawers: { type: Array as PropType<Drawer[]>, default: () => [] },
-    depth: { type: Number, default: 0 },
-  },
-});
+withDefaults(
+  defineProps<{
+    drawers?: Drawer[] | null;
+    depth?: number;
+  }>(),
+  { drawers: () => [], depth: 0 },
+);
 </script>

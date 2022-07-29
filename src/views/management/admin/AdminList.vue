@@ -1,13 +1,13 @@
 <template>
   <div>
-    <page-title @click="showAddDialog" :button-loading="saving">
+    <PageTitle @click="showAddDialog" :button-loading="saving">
       <template #more-buttons>
         <v-btn
           @click="excel"
           color="primary"
           outlined
           x-large
-          v-if="$store.getters.excelAuthority"
+          v-if="hasExcelAuthority"
         >
           <v-icon> mdi-file-excel</v-icon>
           엑셀다운로드
@@ -17,19 +17,19 @@
           새로고침
         </v-btn>
       </template>
-    </page-title>
+    </PageTitle>
     <v-card>
       <v-card-text>
         <v-row no-gutters>
           <v-col cols="12" sm="7">
-            <data-table-filter :filters="filters" :output.sync="filterOutput" />
+            <DataTableFilter :filters="filters" :output.sync="filterOutput" />
           </v-col>
           <v-spacer />
           <v-col cols="12" sm="3">
             <v-text-field
               v-model="search"
               solo
-              label="검색 (관리자 아이디, 관리자 이름)"
+              label="검색 (#KEY, 관리자 아이디, 관리자 이름)"
               prepend-inner-icon="mdi-magnify"
               clearable
               outlined
@@ -58,10 +58,10 @@
             />
           </template>
           <template #[`item.available`]="{ item }">
-            <checkbox-marker :value="item.available" />
+            <CheckboxMarker :value="item.available" />
           </template>
           <template #[`item.availableSignIn`]="{ item }">
-            <checkbox-marker
+            <CheckboxMarker
               :value="
                 item.available &&
                 item.role.available &&
@@ -70,184 +70,199 @@
             />
           </template>
           <template #[`item.expired`]="{ item }">
-            {{ item.expired | formatDatetime }}
+            {{ formatDatetime(item.expired) }}
           </template>
-          <template #[`item.updated`]="{ item }">
-            {{ item.updated | formatDatetime }}
-          </template>
-          <template #[`item.updatedBy`]="{ item }">
-            {{ item.updatedBy | formatAdminNm }}
+          <template #[`item.actions`]="{ item }" v-if="hasDeleteAuthority">
+            <v-btn icon @click="remove(item)" v-if="id !== item.id">
+              <v-icon color="error"> mdi-delete-outline </v-icon>
+            </v-btn>
           </template>
         </v-data-table>
       </v-card-text>
     </v-card>
-    <admin-edit-dialog
+    <AdminEditDialog
       v-model="editItem"
       :dialog.sync="dialog"
-      @created="onCreated"
-      @updated="onUpdated"
+      @created="fetchList"
+      @updated="fetchList"
       v-if="dialog"
     />
   </div>
 </template>
 
-<script lang="ts">
-import type { Filter, SelectItem } from "@/definitions/types";
-import { downloadExcelApi, getApi } from "@/utils/apis";
+<script setup lang="ts">
+import dayjs from "dayjs";
+import envs from "@/constants/envs";
+import type { Filter, PageResult, SelectItem } from "@/definitions/types";
+import { deleteApi, downloadExcelApi, getApi } from "@/utils/apis";
 import AdminEditDialog from "@/views/management/admin/AdminEditDialog.vue";
 import { defaultAdmin } from "@/definitions/defaults";
 import type { Admin, Role } from "@/definitions/models";
 import PageTitle from "@/components/title/PageTitle.vue";
-import { BooleanTypes } from "@/definitions/selections";
+import { BooleanTypes, FILTER_TYPE } from "@/definitions/selections";
 import DataTableFilter from "@/components/datatable/DataTableFilter.vue";
-import {
-  computed,
-  defineComponent,
-  onMounted,
-  reactive,
-  toRefs,
-  watch,
-} from "@vue/composition-api";
-import setupReadonly from "@/composition/setupReadonly";
-import setupListDialog from "@/composition/setupListDialog";
+import { computed, onMounted, ref } from "vue";
+import { confirmDelete } from "@/utils/alerts";
+import useListDialog from "@/composition/useListDialog";
 import { DataTableHeader } from "vuetify";
-import setupDatatable from "@/composition/setupDatatable";
+import useDatatable from "@/composition/useDatatable";
 import qs from "qs";
 import CheckboxMarker from "@/components/datatable/CheckboxMarker.vue";
+import { formatDatetime } from "@/utils/formatter";
+import { watchDebounced } from "@vueuse/core";
+import { useAuthorityStore } from "@/stores/authority";
+import { useAdminStore } from "@/stores/admin";
 
-export default defineComponent({
-  components: { CheckboxMarker, DataTableFilter, PageTitle, AdminEditDialog },
-  props: {
-    height: {
-      type: [Number, String],
-      default: undefined,
+defineProps<{
+  height?: number | string;
+}>();
+
+const { hasDeleteAuthority, hasExcelAuthority } = useAuthorityStore();
+const { id } = useAdminStore();
+
+const { editItem, dialog, showEditDialog, showAddDialog } =
+  useListDialog<Admin>(defaultAdmin);
+
+const {
+  pagination,
+  items,
+  totalItems,
+  loading,
+  search,
+  filterOutput,
+  queryString,
+} = useDatatable<Admin>();
+
+const saving = ref(false);
+const roles = ref([] as SelectItem<number>[]);
+
+async function fetchList(): Promise<void> {
+  items.value = [];
+  totalItems.value = 0;
+  loading.value = true;
+
+  const response = await getApi<PageResult<Admin>>(
+    `admins/?${queryString.value}`,
+  );
+  loading.value = false;
+  items.value = response.data.content || ([] as Admin[]);
+  totalItems.value = response.data.totalElements;
+}
+
+const headers = computed((): DataTableHeader[] => {
+  let headers: DataTableHeader[] = [
+    {
+      text: "#key",
+      align: "start",
+      value: "id",
+      width: "6rem",
     },
-  },
-
-  setup() {
-    const listDialog = setupListDialog<Admin>(defaultAdmin);
-    const datatable = setupDatatable<Admin>("admins/");
-
-    const state = reactive({
-      saving: false,
-      roles: [] as SelectItem<number>[],
-    });
-
-    const computes = {
-      headers: computed((): DataTableHeader[] => [
-        {
-          text: "#key",
-          align: "start",
-          value: "id",
-        },
-        {
-          text: "관리자 아이디",
-          align: "start",
-          value: "loginId",
-        },
-        {
-          text: "관리자 이름",
-          align: "start",
-          value: "name",
-        },
-        {
-          text: "역할",
-          align: "center",
-          value: "role.name",
-        },
-        {
-          text: "만료일",
-          align: "center",
-          value: "expired",
-          width: "11.5rem",
-        },
-        {
-          text: "사용 가능",
-          align: "center",
-          value: "available",
-          width: "6rem",
-        },
-        {
-          text: "로그인 가능",
-          align: "center",
-          value: "availableSignIn",
-          width: "6rem",
-          sortable: false,
-        },
-        {
-          text: "작업 일시",
-          align: "center",
-          value: "updated",
-          width: "11.5rem",
-        },
-        {
-          text: "작업자",
-          align: "start",
-          value: "updatedBy",
-          width: "8rem",
-        },
-      ]),
-      filters: computed((): Filter[] => [
-        {
-          type: "checkbox",
-          text: "권한",
-          key: "roleIdList",
-          items: state.roles.map((v) => {
-            return { ...v, checked: false };
-          }),
-        },
-        {
-          type: "checkbox",
-          text: "사용 가능",
-          key: "availableList",
-          items: BooleanTypes.map((v) => {
-            return { ...v, checked: false };
-          }),
-          single: true,
-        },
-      ]),
-      queryStringForExcel: computed((): string =>
-        qs.stringify({
-          search: datatable.search.value,
-          ...datatable.filterOutput.value,
-          ...datatable.pagination.value,
-          page: 1,
-          itemsPerPage: 99999999,
-        }),
-      ),
-    };
-    const methods = {
-      excel: async (): Promise<void> => {
-        state.saving = true;
-        await downloadExcelApi(
-          `excel/admins?${computes.queryStringForExcel.value}`,
-        );
-        state.saving = false;
-      },
-    };
-    onMounted(async () => {
-      const response = await getApi<Role[]>("roles/selections/");
-      state.roles = response.data.map((v) => {
-        return { value: v.id || 0, text: v.name };
-      });
-    });
-
-    watch(
-      () => datatable.queryString.value,
-      () => datatable.fetchList.value(),
+    {
+      text: "관리자 아이디",
+      align: "start",
+      value: "loginId",
+    },
+    {
+      text: "관리자 이름",
+      align: "start",
+      value: "name",
+    },
+    {
+      text: "역할",
+      align: "center",
+      value: "role.name",
+    },
+    {
+      text: "만료일",
+      align: "center",
+      value: "expired",
+      width: "11.5rem",
+    },
+    {
+      text: "사용 가능",
+      align: "center",
+      value: "available",
+      width: "5rem",
+    },
+    {
+      text: "로그인 가능",
+      align: "center",
+      value: "availableSignIn",
+      width: "5rem",
+      sortable: false,
+    },
+  ];
+  if (hasDeleteAuthority) {
+    headers = [
+      ...headers,
       {
-        immediate: true,
+        text: "Action",
+        align: "center",
+        value: "actions",
+        sortable: false,
+        width: "5rem",
       },
-    );
-
-    return {
-      ...datatable,
-      ...listDialog,
-      ...setupReadonly(),
-      ...toRefs(state),
-      ...computes,
-      ...methods,
-    };
-  },
+    ];
+  }
+  return headers;
 });
+
+const filters = computed((): Filter[] => [
+  {
+    type: FILTER_TYPE.CHECKBOX,
+    text: "권한",
+    key: "roleIdList",
+    items: roles.value.map((v) => {
+      return { ...v, checked: false };
+    }),
+  },
+  {
+    type: FILTER_TYPE.CHECKBOX,
+    text: "사용 가능",
+    key: "availableList",
+    items: BooleanTypes.map((v) => {
+      return { ...v, checked: false };
+    }),
+    single: true,
+  },
+]);
+const queryStringForExcel = computed((): string =>
+  qs.stringify({
+    search: search.value,
+    ...filterOutput.value,
+    ...pagination.value,
+    page: 1,
+    itemsPerPage: 99999999,
+  }),
+);
+async function excel(): Promise<void> {
+  saving.value = true;
+  await downloadExcelApi(`excel/admins?${queryStringForExcel.value}`);
+  saving.value = false;
+}
+async function remove(value: Admin): Promise<void> {
+  const result = await confirmDelete(`${value.loginId}를 지우시겠습니까? `);
+  if (result) {
+    saving.value = true;
+    const response = await deleteApi<Admin>(`admins/${value.id}`);
+    saving.value = false;
+    if (response.success) {
+      await fetchList();
+    }
+  }
+}
+onMounted(async () => {
+  const response = await getApi<Role[]>("roles/selections/");
+  roles.value = response.data.map((v) => {
+    return { value: v.id || 0, text: v.name };
+  });
+});
+
+watchDebounced(
+  () => queryString.value,
+  async () => await fetchList(),
+  {
+    debounce: 200,
+  },
+);
 </script>

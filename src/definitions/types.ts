@@ -43,9 +43,9 @@ export interface Drawer {
   children: Drawer[] | null;
 }
 
-export type FilterItemType = string | number | boolean;
-
+export type FilterItemType = string | number | boolean | DateTime;
 export interface FilterItem<T> {
+  key?: "after" | "before";
   text: string;
   chipText?: string | number | boolean | null;
   value: T;
@@ -53,7 +53,7 @@ export interface FilterItem<T> {
 }
 
 export interface Filter {
-  type: "checkbox" | "text" | "dateStartEndPicker";
+  type: string;
   text: string;
   key: string;
   items: FilterItem<FilterItemType>[];
@@ -61,6 +61,7 @@ export interface Filter {
   single?: boolean;
   required?: boolean;
   object?: unknown;
+  timerOption?: "minute" | "second";
 }
 
 export type FilterOutput = Record<string, (string | number | boolean)[]>;

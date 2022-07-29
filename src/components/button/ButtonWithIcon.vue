@@ -17,21 +17,20 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "@vue/composition-api";
-
-export default defineComponent({
-  props: {
-    icon: { required: true, type: String },
-    text: { required: true, type: String },
-    color: { default: "primary", type: String },
-    disabled: { type: Boolean },
-    loading: { type: Boolean },
-    small: { type: Boolean },
-    xSmall: { type: Boolean },
-    large: { type: Boolean },
-    xLarge: { type: Boolean },
-    block: { type: Boolean },
-  },
-});
+<script setup lang="ts">
+withDefaults(
+  defineProps<{
+    icon: string;
+    text: string;
+    color?: string;
+    disabled?: boolean;
+    loading?: boolean;
+    small?: boolean;
+    xSmall?: boolean;
+    large?: boolean;
+    xLarge?: boolean;
+    block?: boolean;
+  }>(),
+  { color: "primary" },
+);
 </script>

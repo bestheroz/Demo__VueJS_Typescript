@@ -1,15 +1,9 @@
 <template>
   <div class="w-full">
-    <admin-list />
+    <AdminList />
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import AdminList from "@/views/management/admin/AdminList.vue";
-
-import { defineComponent } from "@vue/composition-api";
-
-export default defineComponent({
-  components: { AdminList },
-});
 </script>

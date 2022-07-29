@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-navigation-drawer
-      v-model="vModel"
+      v-model="value"
       fixed
       right
       hide-overlay
@@ -12,7 +12,7 @@
       <div class="d-flex align-center pa-2">
         <div class="text-h6">Settings</div>
         <v-spacer />
-        <v-btn icon @click="vModel = false">
+        <v-btn icon @click="value = false">
           <v-icon>mdi-close</v-icon>
         </v-btn>
       </div>
@@ -22,182 +22,101 @@
       <div class="pa-2">
         <div class="font-weight-bold my-1">Global Theme</div>
         <v-btn-toggle
-          :value="$store.getters.globalTheme"
+          v-model="globalTheme"
           color="primary"
           mandatory
           class="mb-2"
         >
-          <v-btn
-            x-large
-            @click="$store.dispatch('setGlobalTheme', 'light')"
-            value="light"
-          >
-            Light
-          </v-btn>
-          <v-btn
-            x-large
-            @click="$store.dispatch('setGlobalTheme', 'dark')"
-            value="dark"
-          >
-            Dark
-          </v-btn>
+          <v-btn x-large value="light"> Light </v-btn>
+          <v-btn x-large value="dark"> Dark </v-btn>
         </v-btn-toggle>
 
         <div class="font-weight-bold my-1">Toolbar Theme</div>
         <v-btn-toggle
-          :value="$store.getters.toolbarTheme"
+          v-model="toolbarTheme"
           color="primary"
           mandatory
           class="mb-2"
         >
-          <v-btn
-            x-large
-            @click="$store.dispatch('setToolbarTheme', 'global')"
-            value="global"
-          >
-            Global
-          </v-btn>
-          <v-btn
-            x-large
-            @click="$store.dispatch('setToolbarTheme', 'light')"
-            value="light"
-          >
-            Light
-          </v-btn>
-          <v-btn
-            x-large
-            @click="$store.dispatch('setToolbarTheme', 'dark')"
-            value="dark"
-          >
-            Dark
-          </v-btn>
+          <v-btn x-large value="global"> Global </v-btn>
+          <v-btn x-large value="light"> Light </v-btn>
+          <v-btn x-large value="dark"> Dark </v-btn>
         </v-btn-toggle>
 
         <div class="font-weight-bold my-1">Menu Theme</div>
         <v-btn-toggle
-          :value="$store.getters.menuTheme"
+          v-model="menuTheme"
           color="primary"
           mandatory
           class="mb-2"
         >
-          <v-btn
-            x-large
-            @click="$store.dispatch('setMenuTheme', 'global')"
-            value="global"
-          >
-            Global
-          </v-btn>
-          <v-btn
-            x-large
-            @click="$store.dispatch('setMenuTheme', 'light')"
-            value="light"
-          >
-            Light
-          </v-btn>
-          <v-btn
-            x-large
-            @click="$store.dispatch('setMenuTheme', 'dark')"
-            value="dark"
-          >
-            Dark
-          </v-btn>
+          <v-btn x-large value="global"> Global </v-btn>
+          <v-btn x-large value="light"> Light </v-btn>
+          <v-btn x-large value="dark"> Dark </v-btn>
         </v-btn-toggle>
 
         <div class="font-weight-bold my-1">Toolbar Style</div>
         <v-btn-toggle
-          :value="$store.getters.isToolbarDetached"
+          v-model="toolbarDetached"
           color="primary"
           mandatory
           class="mb-2"
         >
-          <v-btn
-            x-large
-            @click="$store.dispatch('setToolbarDetached', false)"
-            :value="false"
-          >
-            Full
-          </v-btn>
-          <v-btn
-            x-large
-            @click="$store.dispatch('setToolbarDetached', true)"
-            :value="true"
-          >
-            Solo
-          </v-btn>
+          <v-btn x-large :value="false"> Full </v-btn>
+          <v-btn x-large :value="true"> Solo </v-btn>
         </v-btn-toggle>
 
         <div class="font-weight-bold my-1">Content Layout</div>
         <v-btn-toggle
-          :value="$store.getters.isContentBoxed"
+          v-model="contentBoxed"
           color="primary"
           mandatory
           class="mb-2"
         >
-          <v-btn
-            x-large
-            @click="$store.dispatch('setContentBoxed', false)"
-            :value="false"
-          >
-            Fluid
-          </v-btn>
-          <v-btn
-            x-large
-            @click="$store.dispatch('setContentBoxed', true)"
-            :value="true"
-          >
-            Boxed
-          </v-btn>
+          <v-btn x-large :value="false"> Fluid </v-btn>
+          <v-btn x-large :value="true"> Boxed </v-btn>
         </v-btn-toggle>
 
         <div class="font-weight-bold my-1">Primary Color</div>
 
-        <v-color-picker
-          :value="$store.getters.primaryColor"
-          mode="hexa"
-          :swatches="swatches"
-          @input="setPrimaryColor"
-        />
+        <v-color-picker v-model="primaryColor" mode="hexa" show-swatches />
         <v-btn
           v-text="'Reset All'"
           block
           large
           color="primary"
           class="my-4"
-          @click="$store.dispatch('reloadConfig')"
+          @click="resetDefaultConfig"
         />
       </div>
     </v-navigation-drawer>
   </div>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent } from "@vue/composition-api";
-import setupVModel from "@/composition/setupVModel";
-import store from "@/store";
+<script setup lang="ts">
+import { useVModel } from "@vueuse/core";
+import { storeToRefs } from "pinia";
+import { uploadConfig } from "@/utils/commands";
+import { useConfigStore } from "@/stores/config";
 
-export default defineComponent({
-  props: {
-    value: {
-      type: Boolean,
-      required: true,
-    },
-  },
-  setup(props, { emit }) {
-    const vModel = setupVModel<boolean>(props, emit);
-    const computes = {
-      swatches: computed((): string[][] => [
-        ["#0096c7", "#31944f"],
-        ["#EE4f12", "#46BBB1"],
-        ["#ee44aa", "#55BB46"],
-      ]),
-    };
-    const methods = {
-      setPrimaryColor: (primaryColor: string): void => {
-        store.dispatch("setPrimaryColor", primaryColor);
-      },
-    };
-    return { ...vModel, ...computes, ...methods };
-  },
+const props = defineProps<{ value: boolean }>();
+const emits = defineEmits<{
+  (e: "input", v: boolean): void;
+}>();
+const value = useVModel(props, "value", emits, { eventName: "input" });
+
+const configStore = useConfigStore();
+const {
+  globalTheme,
+  primaryColor,
+  menuTheme,
+  toolbarTheme,
+  toolbarDetached,
+  contentBoxed,
+} = storeToRefs(configStore);
+const { resetDefaultConfig } = configStore;
+configStore.$subscribe((_mutation, state) => {
+  uploadConfig(state);
 });
 </script>
 

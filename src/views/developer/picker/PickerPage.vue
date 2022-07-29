@@ -12,7 +12,7 @@
             </v-subheader>
           </v-col>
           <v-col cols="4" class="text-right">
-            <date-picker v-model="date" clearable required />
+            <DatePicker v-model="date" clearable required />
           </v-col>
           <v-col cols="5">
             <span>
@@ -30,7 +30,7 @@
             </v-subheader>
           </v-col>
           <v-col cols="4" class="text-right">
-            <date-picker v-model="dateParseISOString" />
+            <DatePicker v-model="dateParseISOString" />
           </v-col>
           <v-col cols="5">
             <span>
@@ -48,7 +48,7 @@
             </v-subheader>
           </v-col>
           <v-col cols="4" class="text-right">
-            <date-picker v-model="dateParseNumber" />
+            <DatePicker v-model="dateParseNumber" />
           </v-col>
           <v-col cols="5">
             <span>
@@ -90,7 +90,7 @@
             </v-subheader>
           </v-col>
           <v-col cols="4" class="text-right">
-            <datetime-picker v-model="date3" required clearable use-seconds />
+            <DatetimePicker v-model="date3" required clearable use-seconds />
           </v-col>
           <v-col cols="5">
             <span>
@@ -107,7 +107,7 @@
       <v-card-text>
         <v-row>
           <v-col cols="4" class="text-right" offset="3">
-            <date-start-end-picker :start.sync="start1" :end.sync="end1" />
+            <DateStartEndPicker :start.sync="start1" :end.sync="end1" />
           </v-col>
           <v-col cols="5">
             {{ start1 }}
@@ -121,7 +121,7 @@
       <v-card-text>
         <v-row>
           <v-col cols="4" class="text-right" offset="3">
-            <datetime-start-end-picker :start.sync="start2" :end.sync="end2" />
+            <DatetimeStartEndPicker :start.sync="start2" :end.sync="end2" />
           </v-col>
           <v-col cols="5">
             {{ start2 }}
@@ -129,7 +129,7 @@
             {{ end2 }}
           </v-col>
           <v-col cols="4" class="text-right" offset="3">
-            <datetime-start-end-picker
+            <DatetimeStartEndPicker
               :start.sync="start3"
               :end.sync="end3"
               use-seconds
@@ -148,54 +148,34 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import DatePicker from "@/components/picker/DatePicker.vue";
 import dayjs from "dayjs";
 import DatetimePicker from "@/components/picker/DatetimePicker.vue";
 import DateStartEndPicker from "@/components/picker/DateStartEndPicker.vue";
 import DatetimeStartEndPicker from "@/components/picker/DatetimeStartEndPicker.vue";
 import { DateTime } from "@/definitions/types";
-import {
-  computed,
-  defineComponent,
-  reactive,
-  toRefs,
-} from "@vue/composition-api";
+import { computed, ref } from "vue";
 
-export default defineComponent({
-  components: {
-    DatetimeStartEndPicker,
-    DateStartEndPicker,
-    DatetimePicker,
-    DatePicker,
-  },
-  setup() {
-    const state = reactive({
-      date: new Date() as DateTime,
-      dateParseISOString: dayjs().toISOString(),
-      dateParseNumber: dayjs().toDate().getTime(),
-      date2: new Date() as DateTime,
-      date3: new Date() as DateTime,
-      start1: dayjs().add(-1, "day").toDate() as DateTime,
-      end1: dayjs().add(1, "day").toDate() as DateTime,
-      start2: dayjs().add(-1, "day").startOf("day").toDate() as DateTime,
-      end2: dayjs().add(1, "day").endOf("day").toDate() as DateTime,
-      start3: dayjs().add(-1, "day").startOf("day").toDate() as DateTime,
-      end3: dayjs().add(1, "day").endOf("day").toDate() as DateTime,
-    });
-    const computes = {
-      now: computed((): Date => new Date()),
-    };
-    const methods = {
-      getType: (val: DateTime): string => {
-        return typeof val === "object"
-          ? val instanceof Date
-            ? "Date"
-            : "object"
-          : typeof val;
-      },
-    };
-    return { ...toRefs(state), ...computes, ...methods };
-  },
-});
+const date = ref(new Date() as DateTime);
+const dateParseISOString = ref(dayjs().toISOString());
+const dateParseNumber = ref(dayjs().toDate().getTime());
+const date2 = ref(new Date() as DateTime);
+const date3 = ref(new Date() as DateTime);
+const start1 = ref(dayjs().add(-1, "day").toDate() as DateTime);
+const end1 = ref(dayjs().add(1, "day").toDate() as DateTime);
+const start2 = ref(dayjs().add(-1, "day").startOf("day").toDate() as DateTime);
+const end2 = ref(dayjs().add(1, "day").endOf("day").toDate() as DateTime);
+const start3 = ref(dayjs().add(-1, "day").startOf("day").toDate() as DateTime);
+const end3 = ref(dayjs().add(1, "day").endOf("day").toDate() as DateTime);
+
+const now = computed((): Date => new Date());
+
+function getType(val: DateTime): string {
+  return typeof val === "object"
+    ? val instanceof Date
+      ? "Date"
+      : "object"
+    : typeof val;
+}
 </script>

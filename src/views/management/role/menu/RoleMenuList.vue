@@ -3,7 +3,7 @@
     <v-card flat :loading="loading">
       <v-row dense>
         <v-col sm="12" md="6">
-          <role-menu-nested-draggable
+          <RoleMenuNestedDraggable
             v-model="items"
             :role-id="roleId"
             v-if="roleId"
@@ -17,13 +17,10 @@
               column
               @change="onChangeSelectedChip"
             >
-              <role-menu-menu-item
+              <RoleMenuMenuItem
                 v-model="selected"
                 :menus="menus"
-                :disabled="
-                  $store.getters.writeAuthority &&
-                  roleId === $store.getters.roleId
-                "
+                :disabled="hasWriteAuthority && adminStore.roleId === roleId"
               />
             </v-chip-group>
           </v-card-text>
@@ -33,193 +30,159 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { getApi, postApi } from "@/utils/apis";
 import type { Menu, RoleMenuMap } from "@/definitions/models";
 import { MENU_TYPE } from "@/definitions/selections";
 import RoleMenuMenuItem from "@/views/management/role/menu/RoleMenuMenuItem.vue";
 import RoleMenuNestedDraggable from "@/views/management/role/menu/RoleMenuNestedDraggable.vue";
 import { defaultRoleMenuMap } from "@/definitions/defaults";
-import {
-  computed,
-  defineComponent,
-  reactive,
-  toRefs,
-  watch,
-} from "@vue/composition-api";
-import setupList from "@/composition/setupList";
-import setupReadonly from "@/composition/setupReadonly";
-import store from "@/store";
+import { computed, ref, watch } from "vue";
+import useList from "@/composition/useList";
+import { useAuthorityStore } from "@/stores/authority";
+import { useAdminStore } from "@/stores/admin";
 
-export default defineComponent({
-  components: { RoleMenuNestedDraggable, RoleMenuMenuItem },
-  props: {
-    roleId: { type: Number, default: undefined },
-  },
-  setup(props) {
-    const list = setupList<RoleMenuMap>(`roles/${props.roleId}/maps/`);
+const { hasWriteAuthority, reloadRole } = useAuthorityStore();
+const adminStore = useAdminStore();
 
-    const state = reactive({
-      menus: [] as Menu[],
-      selected: [] as number[],
-    });
+const props = withDefaults(
+  defineProps<{
+    roleId?: number;
+  }>(),
+  { roleId: undefined },
+);
+const { items, loading } = useList<RoleMenuMap>();
 
-    const computes = {
-      flattMenus: computed((): Menu[] =>
-        methods.getMenusFromChildren(state.menus),
-      ),
-      flatItems: computed((): RoleMenuMap[] =>
-        methods.getItemsWithChildren(list.items.value),
-      ),
-    };
+const menus = ref([] as Menu[]);
+const selected = ref([] as number[]);
 
-    const methods = {
-      getList: async (): Promise<void> => {
-        state.menus = await methods.getMenus(props.roleId);
+const flattMenus = computed((): Menu[] => getMenusFromChildren(menus.value));
 
-        if (state.menus.length === 0 || !props.roleId) {
-          list.items.value = [];
-          state.selected = [];
-          return;
-        }
-        list.loading.value = true;
-        const response = await getApi<RoleMenuMap[]>(
-          `roles/${props.roleId}/maps/`,
-        );
-        list.loading.value = false;
-        list.items.value = response.data;
-        state.selected =
-          computes.flatItems.value
-            .filter((item) =>
-              computes.flattMenus.value.some(
-                (menu) => menu.id === item.menu.id,
-              ),
-            )
-            .map((item) => item.menu.id || 0) || [];
-      },
+const flatItems = computed((): RoleMenuMap[] =>
+  getItemsWithChildren(items.value),
+);
 
-      getMenus: async (roleId: number): Promise<Menu[]> => {
-        if (props.roleId === store.getters.roleId) {
-          const response = await getApi<Menu[]>(`menus/?roleId=${roleId}`);
-          return response.data || [];
-        } else {
-          const response = await getApi<Menu[]>(`menus/?childRoleId=${roleId}`);
-          return response.data || [];
-        }
-      },
-      onChangeSelectedChip: (selected: number[]): void => {
-        // 삭제!
-        list.items.value = methods.removeNotSelectedChildrenItem(
-          selected,
-          list.items.value,
-        );
+async function fetchList(): Promise<void> {
+  menus.value = await getMenus(props.roleId);
 
-        for (const selectedId of selected.filter((selectedId) =>
-          computes.flatItems.value.every((item) => item.menu.id !== selectedId),
-        )) {
-          const foundMenu = computes.flattMenus.value.find(
-            (m) => m.id === selectedId,
-          );
-          if (foundMenu) {
-            list.items.value = [
-              ...list.items.value,
-              {
-                ...(list.items.value.find(
-                  (item) => item.menu.id === selectedId,
-                ) || {
-                  ...defaultRoleMenuMap(),
-                  menu: { ...foundMenu, children: [] },
-                }),
-              } as RoleMenuMap,
-            ];
-          }
-        }
-      },
+  if (menus.value.length === 0 || !props.roleId) {
+    items.value = [];
+    selected.value = [];
+    return;
+  }
+  loading.value = true;
+  const response = await getApi<RoleMenuMap[]>(`roles/${props.roleId}/maps/`);
+  loading.value = false;
+  items.value = response.data;
+  selected.value =
+    flatItems.value
+      .filter((item) =>
+        flattMenus.value.some((menu) => menu.id === item.menu.id),
+      )
+      .map((item) => item.menu.id || 0) ?? [];
+}
 
-      removeNotSelectedChildrenItem: (
-        selected: number[],
-        items: RoleMenuMap[],
-      ): RoleMenuMap[] => {
-        const filtered = items.filter((item) =>
-          selected.includes(item.menu.id || 0),
-        );
-        for (const item of filtered.filter(
-          (item) => item.menu.type === MENU_TYPE.GROUP,
-        )) {
-          item.children = methods.removeNotSelectedChildrenItem(
-            selected,
-            item.children || [],
-          );
-        }
-        return filtered;
-      },
+async function getMenus(roleId: number): Promise<Menu[]> {
+  if (props.roleId === roleId) {
+    const response = await getApi<Menu[]>(`menus/?roleId=${roleId}`);
+    return response.data ?? [];
+  } else {
+    const response = await getApi<Menu[]>(`menus/?childRoleId=${roleId}`);
+    return response.data ?? [];
+  }
+}
 
-      saveItems: async (): Promise<void> => {
-        const response = await postApi<RoleMenuMap[]>(
-          `roles/${props.roleId}/maps/save-all/`,
-          list.items.value,
-        );
-        if (response.success && response.data) {
-          list.items.value = response.data;
-          if (props.roleId === store.getters.roleId) {
-            store.dispatch("reloadRole").then();
-          }
-        }
-      },
+function onChangeSelectedChip(selected: number[]): void {
+  // 삭제!
+  items.value = removeNotSelectedChildrenItem(selected, items.value);
 
-      getMenusFromChildren: (menus: Menu[]): Menu[] => {
-        let result = [] as Menu[];
-        for (const menu of menus) {
-          if (menu.type === MENU_TYPE.GROUP) {
-            result = [
-              ...result,
-              menu,
-              ...methods.getMenusFromChildren(menu.children),
-            ];
-          } else {
-            result = [...result, menu];
-          }
-        }
-        return result;
-      },
+  for (const selectedId of selected.filter((selectedId) =>
+    flatItems.value.every((item) => item.menu.id !== selectedId),
+  )) {
+    const foundMenu = flattMenus.value.find((m) => m.id === selectedId);
+    if (foundMenu) {
+      items.value = [
+        ...items.value,
+        {
+          ...(items.value.find((item) => item.menu.id === selectedId) || {
+            ...defaultRoleMenuMap(),
+            menu: { ...foundMenu, children: [] },
+          }),
+        } as RoleMenuMap,
+      ];
+    }
+  }
+}
 
-      getItemsWithChildren: (roleMenus: RoleMenuMap[]): RoleMenuMap[] => {
-        let result = [] as RoleMenuMap[];
-        for (const roleMenu of roleMenus) {
-          if (roleMenu.menu.type === MENU_TYPE.GROUP) {
-            result = [
-              ...result,
-              roleMenu,
-              ...methods.getItemsWithChildren(roleMenu.children || []),
-            ];
-          } else {
-            result = [...result, roleMenu];
-          }
-        }
-        return result;
-      },
-    };
-
-    watch(
-      () => props.roleId,
-      (val: number) => {
-        if (!val) {
-          return;
-        }
-        methods.getList();
-      },
-      {
-        immediate: true,
-      },
+function removeNotSelectedChildrenItem(
+  selected: number[],
+  items: RoleMenuMap[],
+): RoleMenuMap[] {
+  const filtered = items.filter((item) => selected.includes(item.menu.id || 0));
+  for (const item of filtered.filter(
+    (item) => item.menu.type === MENU_TYPE.GROUP,
+  )) {
+    item.children = removeNotSelectedChildrenItem(
+      selected,
+      item.children ?? [],
     );
+  }
+  return filtered;
+}
 
-    return {
-      ...list,
-      ...setupReadonly(),
-      ...toRefs(state),
-      ...computes,
-      ...methods,
-    };
+async function saveItems(): Promise<void> {
+  const response = await postApi<RoleMenuMap[]>(
+    `roles/${props.roleId}/maps/save-all/`,
+    items.value,
+  );
+  if (response.success && response.data) {
+    items.value = response.data;
+    if (props.roleId === adminStore.roleId) {
+      await reloadRole();
+    }
+  }
+}
+
+function getMenusFromChildren(menus: Menu[]): Menu[] {
+  let result = [] as Menu[];
+  for (const menu of menus) {
+    if (menu.type === MENU_TYPE.GROUP) {
+      result = [...result, menu, ...getMenusFromChildren(menu.children)];
+    } else {
+      result = [...result, menu];
+    }
+  }
+  return result;
+}
+
+function getItemsWithChildren(roleMenus: RoleMenuMap[]): RoleMenuMap[] {
+  let result = [] as RoleMenuMap[];
+  for (const roleMenu of roleMenus) {
+    if (roleMenu.menu.type === MENU_TYPE.GROUP) {
+      result = [
+        ...result,
+        roleMenu,
+        ...getItemsWithChildren(roleMenu.children ?? []),
+      ];
+    } else {
+      result = [...result, roleMenu];
+    }
+  }
+  return result;
+}
+
+watch(
+  () => props.roleId,
+  async (val: number): Promise<void> => {
+    if (!val) {
+      return;
+    }
+    await fetchList();
   },
-});
+  {
+    immediate: true,
+  },
+);
+
+defineExpose({ fetchList, saveItems });
 </script>

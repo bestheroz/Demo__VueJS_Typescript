@@ -6,11 +6,11 @@
       <v-switch class="d-none" />
       <slot name="utils"></slot>
       <v-switch
-        v-model="vModel"
-        :label="getSwitchLabel(vModel, switchText)"
+        v-model="value"
+        :label="getSwitchLabel(value, switchText)"
         inset
         color="primary"
-        :disabled="disabledSwitch || !$store.getters.writeAuthority"
+        :disabled="disabledSwitch || !hasWriteAuthority"
         class="pr-4"
         v-if="withSwitch"
       />
@@ -19,7 +19,7 @@
           <v-btn
             icon
             fab
-            @click="$emit('click:close')"
+            @click="emits('click:close')"
             v-bind="attrs"
             v-on="on"
           >
@@ -32,72 +32,47 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { getSwitchLabel } from "@/utils/formatter";
-import {
-  computed,
-  defineComponent,
-  PropType,
-  reactive,
-  toRefs,
-} from "@vue/composition-api";
-import store from "@/store";
-import setupVModel from "@/composition/setupVModel";
+import { computed } from "vue";
+import { useVModel } from "@vueuse/core";
+import { useAuthorityStore } from "@/stores/authority";
 
-export default defineComponent({
-  props: {
-    value: {
-      type: Boolean,
-    },
-    withSwitch: {
-      type: Boolean,
-    },
-    switchText: {
-      type: Array as PropType<string[]>,
-      default: undefined,
-    },
-    disabledSwitch: {
-      type: Boolean,
-    },
-    prefix: {
-      type: String,
-      default: undefined,
-    },
-    text: {
-      type: String,
-      default: undefined,
-    },
-    isNew: {
-      type: Boolean,
-    },
-    suffix: {
-      type: String,
-      default: undefined,
-    },
-  },
-  setup(props, { emit }) {
-    const vModel = setupVModel<boolean>(props, emit);
-    const state = reactive({ getSwitchLabel: getSwitchLabel });
-    const computes = {
-      title: computed((): string => {
-        if (props.text) {
-          return props.text;
-        } else if (props.prefix) {
-          return `${props.prefix} ${
-            props.suffix
-              ? props.suffix
-              : store.getters.writeAuthority
-              ? props.isNew
-                ? "등록"
-                : "수정"
-              : "보기"
-          } `;
-        } else {
-          return "";
-        }
-      }),
-    };
-    return { ...vModel, ...toRefs(state), ...computes };
-  },
+const { hasWriteAuthority } = useAuthorityStore();
+
+const props = defineProps<{
+  value?: boolean;
+  withSwitch?: boolean;
+  switchText?: string[];
+  disabledSwitch?: boolean;
+  prefix?: string;
+  text?: string;
+  isNew?: boolean;
+  suffix?: string;
+}>();
+
+const emits = defineEmits<{
+  (e: "input", v: boolean): void;
+  (e: "click:close"): void;
+}>();
+
+const value = useVModel(props, "value", emits, { eventName: "input" });
+
+const title = computed((): string => {
+  if (props.text) {
+    return props.text;
+  } else if (props.prefix) {
+    return `${props.prefix} ${
+      props.suffix
+        ? props.suffix
+        : hasWriteAuthority
+        ? props.isNew
+          ? "등록"
+          : "수정"
+        : "보기"
+    } `;
+  } else {
+    return "";
+  }
 });
 </script>

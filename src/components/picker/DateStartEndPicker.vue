@@ -2,15 +2,17 @@
   <div>
     <v-row no-gutters v-if="fullWidth">
       <v-col cols="6">
-        <date-picker
+        <DatePicker
           ref="refStart"
-          v-model="syncedStart"
-          :label="defaultLabelForStart"
+          v-model="start"
+          :label="startLabel"
+          :placeholder="startPlaceholder"
           :message="startMessage"
           :required="required"
           :disabled="disabled || startDisabled"
           :dense="dense"
           :hide-details="hideDetails"
+          :hide-label="hideLabel"
           :clearable="clearable"
           :hide-hint="hideHint"
           :max="maxDate"
@@ -19,15 +21,17 @@
         />
       </v-col>
       <v-col cols="6">
-        <date-picker
+        <DatePicker
           ref="refEnd"
-          v-model="syncedEnd"
-          :label="defaultLabelForEnd"
+          v-model="end"
+          :label="endLabel"
+          :placeholder="endPlaceholder"
           :message="endMessage"
           :required="required"
           :disabled="disabled || endDisabled"
           :dense="dense"
           :hide-details="hideDetails"
+          :hide-label="hideLabel"
           :clearable="clearable"
           :hide-hint="hideHint"
           :min="minDate"
@@ -38,29 +42,33 @@
     </v-row>
     <v-row no-gutters v-else>
       <v-col cols="12" style="display: inline-flex">
-        <date-picker
+        <DatePicker
           ref="refStart"
-          v-model="syncedStart"
-          :label="defaultLabelForStart"
+          v-model="start"
+          :label="startLabel"
+          :placeholder="startPlaceholder"
           :message="startMessage"
           :required="required"
           :disabled="disabled || startDisabled"
           :dense="dense"
           :hide-details="hideDetails"
+          :hide-label="hideLabel"
           :clearable="clearable"
           :hide-hint="hideHint"
           :max="maxDate"
           start-type
         />
-        <date-picker
+        <DatePicker
           ref="refEnd"
-          v-model="syncedEnd"
-          :label="defaultLabelForEnd"
+          v-model="end"
+          :label="endLabel"
+          :placeholder="endPlaceholder"
           :message="endMessage"
           :required="required"
           :disabled="disabled || endDisabled"
           :dense="dense"
           :hide-details="hideDetails"
+          :hide-label="hideLabel"
           :clearable="clearable"
           :hide-hint="hideHint"
           :min="minDate"
@@ -71,90 +79,74 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import DatePicker from "@/components/picker/DatePicker.vue";
 import dayjs from "dayjs";
 import { DateTime } from "@/definitions/types";
-import { computed, defineComponent, PropType, ref } from "@vue/composition-api";
+import { computed, ref } from "vue";
+import { useVModels } from "@vueuse/core";
 
-export default defineComponent({
-  components: { DatePicker },
-  props: {
-    start: {
-      type: [String, Number, Date, Object] as PropType<DateTime>,
-      default: undefined,
-    },
-    end: {
-      type: [String, Number, Date, Object] as PropType<DateTime>,
-      default: undefined,
-    },
-    startLabel: { type: String, default: undefined },
-    endLabel: { type: String, default: undefined },
-    startMessage: { type: String, default: undefined },
-    endMessage: { type: String, default: undefined },
-    required: { type: Boolean },
-    disabled: { type: Boolean },
-    startDisabled: { type: Boolean },
-    endDisabled: { type: Boolean },
-    dense: { type: Boolean },
-    hideDetails: { type: Boolean },
-    clearable: { type: Boolean },
-    fullWidth: { type: Boolean },
-    hideHint: { type: Boolean },
+const props = withDefaults(
+  defineProps<{
+    start?: DateTime;
+    end?: DateTime;
+    startLabel?: string;
+    endLabel?: string;
+    startPlaceholder?: string;
+    endPlaceholder?: string;
+    startMessage?: string;
+    endMessage?: string;
+    required?: boolean;
+    disabled?: boolean;
+    startDisabled?: boolean;
+    endDisabled?: boolean;
+    dense?: boolean;
+    hideDetails?: boolean;
+    hideLabel?: boolean;
+    clearable?: boolean;
+    fullWidth?: boolean;
+    hideHint?: boolean;
+  }>(),
+  {
+    start: null,
+    end: null,
+    startLabel: "From",
+    endLabel: "To",
+    startPlaceholder: undefined,
+    endPlaceholder: undefined,
+    startMessage: undefined,
+    endMessage: undefined,
   },
-  setup(props, { emit }) {
-    const computes = {
-      syncedStart: computed({
-        get(): DateTime {
-          return props.start as DateTime;
-        },
-        set(value: DateTime) {
-          emit("update:start", value);
-        },
-      }),
-      syncedEnd: computed({
-        get(): DateTime {
-          return props.end as DateTime;
-        },
-        set(value: DateTime) {
-          emit("update:end", value);
-        },
-      }),
-      DATEPICKER_FORMAT: computed((): string => "YYYY-MM-DD"),
-      defaultLabelForStart: computed(
-        (): string => props.startLabel || "시작 날짜",
-      ),
-      defaultLabelForEnd: computed((): string => props.endLabel || "종료 날짜"),
+);
 
-      minDate: computed((): string | undefined => {
-        if (!computes.syncedStart.value) {
-          return undefined;
-        }
-        return dayjs(computes.syncedStart.value).format(
-          computes.DATEPICKER_FORMAT.value,
-        );
-      }),
+const emits = defineEmits<{
+  (e: "update:start", v: DateTime): void;
+  (e: "update:end", v: DateTime): void;
+}>();
+const { start, end } = useVModels(props, emits);
 
-      maxDate: computed((): string | undefined => {
-        if (!computes.syncedEnd.value) {
-          return undefined;
-        }
-        return dayjs(computes.syncedEnd.value).format(
-          computes.DATEPICKER_FORMAT.value,
-        );
-      }),
-    };
-    const methods = {
-      validate: async (): Promise<boolean> => {
-        return (
-          !!(await refStart.value?.validate()) &&
-          !!(await refEnd.value?.validate())
-        );
-      },
-    };
-    const refStart = ref<null | InstanceType<typeof DatePicker>>(null);
-    const refEnd = ref<null | InstanceType<typeof DatePicker>>(null);
-    return { ...computes, ...methods, refStart, refEnd };
-  },
+const DATEPICKER_FORMAT = "YYYY-MM-DD";
+
+const minDate = computed((): string | undefined => {
+  if (!start.value) {
+    return undefined;
+  }
+  return dayjs(start.value).format(DATEPICKER_FORMAT);
 });
+
+const maxDate = computed((): string | undefined => {
+  if (!end.value) {
+    return undefined;
+  }
+  return dayjs(end.value).format(DATEPICKER_FORMAT);
+});
+async function validate(): Promise<boolean> {
+  return (
+    !!(await refStart.value?.validate()) && !!(await refEnd.value?.validate())
+  );
+}
+const refStart = ref();
+const refEnd = ref();
+
+defineExpose({ validate });
 </script>

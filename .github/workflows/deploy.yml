@@ -18,8 +18,6 @@ jobs:
     steps:
       - uses: actions/checkout@main
 
-      - uses: ./.github/actions/clean
-
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@main
         with:

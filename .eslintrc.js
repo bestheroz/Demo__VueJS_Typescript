@@ -3,7 +3,7 @@ module.exports = {
   parser: "vue-eslint-parser",
   parserOptions: {
     sourceType: "module",
-    ecmaVersion: 2021,
+    ecmaVersion: "latest",
     parser: "@typescript-eslint/parser",
     ecmaFeatures: {
       globalReturn: false,
@@ -18,6 +18,7 @@ module.exports = {
   },
   env: {
     node: true,
+    "vue/setup-compiler-macros": true, // DELETE: vue3 에서 제거
   },
   extends: [
     "plugin:vue/strongly-recommended",

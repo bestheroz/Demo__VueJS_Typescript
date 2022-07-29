@@ -3,7 +3,7 @@
     <div class="text-right mr-4 text--secondary" style="opacity: 0.7">
       <span v-if="createdDateTimeString">
         Created by
-        {{ createdBy | formatAdminNm }}
+        {{ getAdminNm(createdBy) }}
         <v-icon size="1rem" style="vertical-align: initial" class="ml-1">
           mdi-clock-outline
         </v-icon>
@@ -16,7 +16,7 @@
       >
       <span v-if="updatedDateTimeString">
         Updated by
-        {{ updatedBy | formatAdminNm }}
+        {{ getAdminNm(updatedBy) }}
         <v-icon size="1rem" style="vertical-align: initial" class="ml-1">
           mdi-clock-check-outline
         </v-icon>
@@ -26,46 +26,29 @@
   </div>
 </template>
 
-<script lang="ts">
-import { formatDatetime } from "@/utils/formatter";
-import { computed, defineComponent, PropType } from "@vue/composition-api";
+<script setup lang="ts">
+import { formatDatetime, getAdminNm } from "@/utils/formatter";
+import { computed } from "vue";
 import { DateTime } from "@/definitions/types";
 
-export default defineComponent({
-  props: {
-    createdBy: {
-      type: Number,
-      default: undefined,
-    },
-    createdDateTime: {
-      type: [String, Number, Date, Object] as PropType<DateTime>,
-      default: undefined,
-    },
-    updatedBy: {
-      type: Number,
-      default: undefined,
-    },
-    updatedDateTime: {
-      type: [String, Number, Date, Object] as PropType<DateTime>,
-      default: undefined,
-    },
-  },
-  setup(props) {
-    const computes = {
-      createdDateTimeString: computed((): string => {
-        if (!props.createdDateTime) {
-          return "";
-        }
-        return formatDatetime(props.createdDateTime);
-      }),
-      updatedDateTimeString: computed((): string => {
-        if (!props.updatedDateTime) {
-          return "";
-        }
-        return formatDatetime(props.updatedDateTime);
-      }),
-    };
-    return { ...computes };
-  },
+const props = defineProps<{
+  createdBy?: number;
+  createdDateTime?: DateTime;
+  updatedBy?: number;
+  updatedDateTime?: DateTime;
+}>();
+
+const createdDateTimeString = computed((): string => {
+  if (!props.createdDateTime) {
+    return "";
+  }
+  return formatDatetime(props.createdDateTime);
+});
+
+const updatedDateTimeString = computed((): string => {
+  if (!props.updatedDateTime) {
+    return "";
+  }
+  return formatDatetime(props.updatedDateTime);
 });
 </script>

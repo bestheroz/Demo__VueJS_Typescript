@@ -7,8 +7,8 @@
       floating
       class="elevation-1"
       :right="$vuetify.rtl"
-      :light="$store.getters.menuTheme === 'light'"
-      :dark="$store.getters.menuTheme === 'dark'"
+      :light="menuTheme === 'light'"
+      :dark="menuTheme === 'dark'"
     >
       <!-- Navigation menu info -->
       <template #prepend>
@@ -26,23 +26,21 @@
       </template>
 
       <!-- Navigation menu -->
-      <nav-menu :drawers="drawers" v-if="show" />
+      <NavMenu :drawers="drawerList" v-if="drawerList.length > 0" />
     </v-navigation-drawer>
 
     <!-- Toolbar -->
     <v-app-bar
       app
-      :color="$store.getters.isToolbarDetached ? 'surface' : undefined"
-      :flat="$store.getters.isToolbarDetached"
-      :light="$store.getters.toolbarTheme === 'light'"
-      :dark="$store.getters.toolbarTheme === 'dark'"
+      :color="toolbarDetached ? 'surface' : undefined"
+      :flat="toolbarDetached"
+      :light="toolbarTheme === 'light'"
+      :dark="toolbarTheme === 'dark'"
     >
       <v-card
         class="flex-grow-1 d-flex"
-        :class="[
-          $store.getters.isToolbarDetached ? 'pa-1 mt-3 mx-1' : 'pa-0 ma-0',
-        ]"
-        :flat="!$store.getters.isToolbarDetached"
+        :class="[toolbarDetached ? 'pa-1 mt-3 mx-1' : 'pa-0 ma-0']"
+        :flat="!toolbarDetached"
       >
         <div class="d-flex flex-grow-1 align-center">
           <div class="d-flex flex-grow-1 align-center">
@@ -52,15 +50,15 @@
 
             <v-spacer class="d-block d-sm-none" />
 
-            <toolbar-admin />
-            <h4 class="primary--text mt-1" v-text="$store.getters.admin.name" />
+            <ToolbarAdmin />
+            <h4 class="primary--text mt-1" v-text="name" />
           </div>
         </div>
       </v-card>
     </v-app-bar>
 
     <v-main>
-      <v-container class="fill-height" :fluid="!$store.getters.isContentBoxed">
+      <v-container class="fill-height" :fluid="!contentBoxed">
         <v-layout>
           <slot />
           <input type="text" style="width: 0; height: 0" />
@@ -84,46 +82,37 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import ToolbarAdmin from "../components/toolbar/ToolbarAdmin.vue";
 import envs from "@/constants/envs";
 import NavMenu from "@/components/navigation/NavMenu.vue";
 import { Drawer } from "@/definitions/types";
-import {
-  computed,
-  defineComponent,
-  nextTick,
-  onBeforeMount,
-  reactive,
-  toRefs,
-  watch,
-} from "@vue/composition-api";
-import store from "@/store";
+import { computed, onBeforeMount, ref } from "vue";
+import { storeToRefs } from "pinia";
+import { useAuthorityStore } from "@/stores/authority";
+import { useAdminStore } from "@/stores/admin";
+import { useConfigStore } from "@/stores/config";
 
-export default defineComponent({
-  components: { NavMenu, ToolbarAdmin },
-  setup() {
-    const state = reactive({ drawer: true, show: true });
-    const computes = {
-      drawers: computed((): Drawer[] =>
-        ["local", "sandbox"].includes(envs.ENVIRONMENT)
-          ? store.getters.drawers
-          : store.getters.drawers.filter((d: Drawer) => d.id !== 1),
-      ),
-    };
-    onBeforeMount(async () => {
-      if (store.getters.drawers.length === 0) {
-        await store.dispatch("reloadRole");
-      }
-    });
-    watch(
-      () => computes.drawers.value,
-      () => {
-        state.show = false;
-        nextTick(() => (state.show = true));
-      },
-    );
-    return { ...toRefs(state), ...computes, envs };
-  },
+const authorityStore = useAuthorityStore();
+const { drawers } = storeToRefs(authorityStore);
+const { reloadRole } = authorityStore;
+
+const { name } = storeToRefs(useAdminStore());
+
+const { toolbarTheme, menuTheme, toolbarDetached, contentBoxed } = storeToRefs(
+  useConfigStore(),
+);
+
+const drawer = ref(true);
+
+const drawerList = computed((): Drawer[] =>
+  ["local", "sandbox"].includes(envs.ENVIRONMENT)
+    ? drawers.value
+    : drawers.value.filter((d: Drawer) => d.id !== 1),
+);
+onBeforeMount(async () => {
+  if (drawers.value.length === 0) {
+    await reloadRole();
+  }
 });
 </script>

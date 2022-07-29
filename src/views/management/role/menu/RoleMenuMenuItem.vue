@@ -7,11 +7,12 @@
     >
       <v-chip
         :value="menu.id"
-        :outlined="!vModel.includes(menu.id)"
-        :color="vModel.includes(menu.id) ? 'primary' : 'secondary'"
+        :outlined="!value.includes(menu.id)"
+        :color="value.includes(menu.id) ? 'primary' : 'secondary'"
         class="px-4"
         label
-        :disabled="disabled || !$store.getters.writeAuthority"
+        :disabled="disabled || !hasWriteAuthority"
+        v-if="menu.id"
       >
         <v-icon
           v-text="menu.icon"
@@ -21,8 +22,9 @@
         />
         {{ menu.name }}
       </v-chip>
-      <role-menu-menu-item
-        v-model="vModel"
+      <component
+        :is="RoleMenuMenuItem"
+        v-model="value"
         :menus="menu.children"
         :depth="depth + 1"
         :disabled="disabled"
@@ -31,34 +33,25 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { MENU_TYPE } from "@/definitions/selections";
 import { Menu } from "@/definitions/models";
-import { defineComponent, PropType } from "@vue/composition-api";
-import setupVModel from "@/composition/setupVModel";
+import { useVModel } from "@vueuse/core";
+import RoleMenuMenuItem from "@/views/management/role/menu/RoleMenuMenuItem.vue";
+import { useAuthorityStore } from "@/stores/authority";
 
-export default defineComponent({
-  name: "RoleMenuMenuItem",
-  props: {
-    value: {
-      type: Array as PropType<number[]>,
-      required: true,
-    },
-    menus: {
-      type: Array as PropType<Menu[]>,
-      required: true,
-    },
-    depth: {
-      type: Number,
-      default: 0,
-    },
-    disabled: {
-      type: Boolean,
-    },
-  },
-  setup(props, { emit }) {
-    const vModel = setupVModel<number[]>(props, emit);
-    return { ...vModel, MENU_TYPE };
-  },
-});
+const { hasWriteAuthority } = useAuthorityStore();
+const props = withDefaults(
+  defineProps<{
+    value: number[];
+    menus: Menu[];
+    depth?: number;
+    disabled?: boolean;
+  }>(),
+  { depth: 0 },
+);
+const emits = defineEmits<{
+  (e: "input", v: number[]): void;
+}>();
+const value = useVModel(props, "value", emits, { eventName: "input" });
 </script>

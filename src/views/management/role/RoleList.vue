@@ -1,124 +1,113 @@
 <template>
   <div>
-    <page-title @click="showAddDialog" :button-loading="saving">
+    <PageTitle @click="showAddDialog" :button-loading="saving">
       <template #more-buttons>
         <v-btn
           @click="saveAll"
           color="primary"
           outlined
           x-large
-          v-if="$store.getters.writeAuthority"
+          v-if="hasWriteAuthority"
         >
-          <v-icon> mdi-sort </v-icon> 순서저장
+          <v-icon> mdi-sort</v-icon>
+          순서저장
         </v-btn>
-        <v-btn @click="getList" color="primary" outlined x-large>
-          <v-icon> mdi-refresh </v-icon> 새로고침
+        <v-btn @click="fetchList" color="primary" outlined x-large>
+          <v-icon> mdi-refresh</v-icon>
+          새로고침
         </v-btn>
       </template>
-    </page-title>
+    </PageTitle>
     <v-card :loading="loading || saving">
       <v-card-text>
         <a
-          class="orange--text"
-          v-text="`${items[0].name}(Yours)`"
-          v-if="!$store.getters.isSuperAdmin"
+          class="warning--text"
+          v-text="accountRoleName"
+          v-if="!superAdminFlag"
         />
-        <role-nested-draggable
+        <RoleNestedDraggable
           v-model="items"
-          @click:edit="(item) => showEditDialog(item)"
-          @click:delete="(item) => onDelete(item)"
-          v-if="$store.getters.isSuperAdmin"
+          @click:edit="showEditDialog"
+          @remove-role="deleteRole"
+          v-if="superAdminFlag"
         />
-        <role-nested-draggable
+        <RoleNestedDraggable
           v-model="items[0].children"
-          @click:edit="(item) => showEditDialog(item)"
-          @click:delete="(item) => onDelete(item)"
+          @click:edit="showEditDialog"
+          @remove-role="deleteRole"
           v-else-if="items && items.length > 0"
         />
       </v-card-text>
     </v-card>
-    <role-edit-dialog
+    <RoleEditDialog
       v-model="editItem"
       :dialog.sync="dialog"
-      @created="onCreated"
-      @updated="onUpdated"
+      @created="fetchList"
+      @updated="fetchList"
       v-if="dialog"
     />
   </div>
 </template>
 
-<script lang="ts">
-import { deleteApi, postApi } from "@/utils/apis";
+<script setup lang="ts">
+import { deleteApi, getApi, postApi } from "@/utils/apis";
 import { confirmDelete } from "@/utils/alerts";
 import RoleEditDialog from "@/views/management/role/RoleEditDialog.vue";
 import { defaultRole } from "@/definitions/defaults";
 import type { Role } from "@/definitions/models";
 import PageTitle from "@/components/title/PageTitle.vue";
 import RoleNestedDraggable from "@/views/management/role/RoleNestedDraggable.vue";
-import {
-  defineComponent,
-  onMounted,
-  reactive,
-  toRefs,
-} from "@vue/composition-api";
-import setupList from "@/composition/setupList";
-import setupListDialog from "@/composition/setupListDialog";
-import store from "@/store";
+import { computed, onMounted, ref } from "vue";
+import useList from "@/composition/useList";
+import useListDialog from "@/composition/useListDialog";
+import { useAuthorityStore } from "@/stores/authority";
 
-export default defineComponent({
-  components: { RoleNestedDraggable, PageTitle, RoleEditDialog },
-  props: {
-    height: {
-      type: [Number, String],
-      default: undefined,
-    },
-  },
-  setup() {
-    const list = store.getters.isSuperAdmin
-      ? setupList<Role>("roles/")
-      : setupList<Role>("mine/roles/");
-    const listDialog = setupListDialog<Role>(defaultRole);
+const { hasWriteAuthority, superAdminFlag } = useAuthorityStore();
+const { items, loading, totalItems } = useList<Role>();
 
-    const state = reactive({
-      saving: false,
-      drag: false,
-    });
-    const methods = {
-      onCreated: (): void => {
-        list.getList();
-      },
-      onUpdated: (): void => {
-        list.getList();
-      },
-      onDelete: async (value: Role): Promise<void> => {
-        const result = await confirmDelete(`역할명: ${value.name}`);
-        if (result) {
-          state.saving = true;
-          const response = await deleteApi<Role>(`roles/${value.id}`);
-          state.saving = false;
-          if (response.success) {
-            list.getList();
-          }
-        }
-      },
-      saveAll: async (): Promise<void> => {
-        state.saving = true;
-        const response = await postApi<Role[]>(
-          "roles/save-all/",
-          list.items.value,
-        );
-        state.saving = false;
-        if (response.success) {
-          list.items.value = response.data || [];
-        }
-      },
-    };
+const { editItem, dialog, showEditDialog, showAddDialog } =
+  useListDialog<Role>(defaultRole);
 
-    onMounted(() => {
-      list.getList();
-    });
+const saving = ref(false);
 
-    return { ...list, ...listDialog, ...toRefs(state), ...methods };
-  },
+const accountRoleName = computed((): string => {
+  return items.value[0]?.name ? items.value[0].name + "(yours)" : "";
+});
+
+async function fetchList(): Promise<void> {
+  items.value = [];
+  totalItems.value = 0;
+  loading.value = true;
+  const response = await getApi<Role[]>(
+    superAdminFlag ? "roles/" : "mine/roles/",
+  );
+  loading.value = false;
+  items.value = response.data ?? ([] as Role[]);
+  totalItems.value = response.data?.length || 0;
+}
+
+async function saveAll(): Promise<void> {
+  saving.value = true;
+  const response = await postApi<Role[]>("roles/save-all/", items.value);
+  saving.value = false;
+  if (response.success) {
+    items.value = response.data ?? [];
+  }
+}
+
+async function deleteRole(value: Role): Promise<void> {
+  const result = await confirmDelete(`역할 : ${value.name}`);
+  if (result) {
+    saving.value = true;
+    const response = await deleteApi<number[]>(`roles/${value.id}`);
+    saving.value = false;
+    if (response.success) {
+      await fetchList();
+    }
+  }
+}
+
+onMounted(async (): Promise<void> => {
+  await fetchList();
 });
 </script>

@@ -4,13 +4,18 @@ import envs from "@/constants/envs";
 import { ApiDataResult, axiosInstance, deleteApi, getApi } from "@/utils/apis";
 import { AdminConfig, RoleMenuMap } from "@/definitions/models";
 import { Drawer, SelectItem } from "@/definitions/types";
-import { defaultAdminConfig } from "@/definitions/defaults";
+import { defaultAdminConfig, defaultRoleMenuMap } from "@/definitions/defaults";
 import { cloneDeep, debounce } from "lodash-es";
-import store from "@/store";
+import store from "@/stores";
 import { toastError } from "@/utils/alerts";
 import dayjs from "dayjs";
 import jwt_decode from "jwt-decode";
+import { useAdminStore } from "@/stores/admin";
+import { useAuthorityStore } from "@/stores/authority";
+import { storeToRefs } from "pinia";
 
+const { clearAdmin, reIssueAccessToken } = useAdminStore(store);
+const { flatAuthorities } = storeToRefs(useAuthorityStore(store));
 export async function routerReplace(path: string): Promise<void> {
   if (router.currentRoute.path !== path) {
     await router.replace(path);
@@ -24,7 +29,7 @@ export async function routerPush(path: string): Promise<void> {
 }
 
 export async function goSignInPage(): Promise<void> {
-  store.commit("clearAdmin");
+  clearAdmin();
   await routerReplace("/sign-in");
 }
 
@@ -71,7 +76,7 @@ export async function getNewToken(): Promise<
 const uploadConfigHandler = debounce((config: AdminConfig) => {
   try {
     axiosInstance
-      .post<AdminConfig, ApiDataResult<AdminConfig>>("/api/mine/config", config)
+      .post<AdminConfig, ApiDataResult<AdminConfig>>("api/mine/config", config)
       .then();
   } catch (e) {
     console.error(e);
@@ -89,7 +94,7 @@ export async function getYourConfig(): Promise<AdminConfig> {
 
 export async function getAdminCodes(): Promise<SelectItem<number>[]> {
   const response = await getApi<SelectItem<number>[]>("admins/codes/");
-  return response.data || [];
+  return response.data;
 }
 
 export async function signOut(): Promise<void> {
@@ -104,22 +109,24 @@ export async function signOut(): Promise<void> {
 export function getCurrentAuthority(
   path = router.currentRoute.fullPath,
 ): RoleMenuMap {
-  return store.getters.flatAuthorities.find(
-    (roleMenuMap: RoleMenuMap) => roleMenuMap.menu.url === path,
+  return (
+    flatAuthorities.value.find(
+      (roleMenuMap: RoleMenuMap) => roleMenuMap.menu.url === path,
+    ) ?? defaultRoleMenuMap()
   );
 }
 
 export function getDrawersFromRoleMenuMaps(
   roleMenuMaps: RoleMenuMap[],
 ): Drawer[] {
-  return (roleMenuMaps || []).map((roleMenuMap) => {
+  return (roleMenuMaps ?? []).map((roleMenuMap) => {
     return {
       id: roleMenuMap.menu.id || 0,
       name: roleMenuMap.menu.name,
       type: roleMenuMap.menu.type,
       icon: roleMenuMap.menu.icon,
       url: roleMenuMap.menu.url,
-      children: getDrawersFromRoleMenuMaps(roleMenuMap.children || []),
+      children: getDrawersFromRoleMenuMaps(roleMenuMap.children ?? []),
     };
   });
 }
@@ -133,8 +140,8 @@ export function getFlatRoleMenuMaps(
   const cloneRoleMenuMaps = cloneDeep(roleMenuMaps);
   let result: RoleMenuMap[] = [];
   for (const roleMenuMap of cloneRoleMenuMaps) {
-    if ((roleMenuMap.children || []).length > 0) {
-      result = [...result, ...getFlatRoleMenuMaps(roleMenuMap.children || [])];
+    if ((roleMenuMap.children ?? []).length > 0) {
+      result = [...result, ...getFlatRoleMenuMaps(roleMenuMap.children ?? [])];
       roleMenuMap.children = [];
     }
     result = [...result, roleMenuMap];
@@ -155,7 +162,7 @@ export async function getValidatedAccessToken(): Promise<string> {
         dayjs(),
       )
     ) {
-      await store.dispatch("reIssueAccessToken");
+      await reIssueAccessToken();
       accessToken = window.localStorage.getItem("accessToken");
     }
   } catch (e: unknown) {

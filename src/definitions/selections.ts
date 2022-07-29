@@ -20,3 +20,12 @@ export const BooleanTypes: SelectItem<boolean>[] = [
   { value: true, text: "예" },
   { value: false, text: "아니요" },
 ];
+
+export const FILTER_TYPE = {
+  CHECKBOX: "CHECKBOX",
+  TEXT: "TEXT",
+  DATE_PICKER: "DATE_PICKER",
+  DATETIME_PICKER: "DATETIME_PICKER",
+  DATE_START_END_PICKER: "DATE_START_END_PICKER",
+  DATETIME_START_END_PICKER: "DATETIME_START_END_PICKER",
+};

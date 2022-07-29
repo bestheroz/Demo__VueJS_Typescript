@@ -40,7 +40,7 @@ export function defaultAdmin(): Admin {
     loginId: "",
     name: "",
     expired: dayjs().add(1, "years").endOf("day"),
-    available: true,
+    available: false,
     role: defaultRole(),
   };
 }
@@ -60,7 +60,7 @@ export function defaultCode(): Code {
     type: "",
     value: "",
     text: "",
-    available: true,
+    available: false,
     displayOrder: null,
   };
 }
@@ -68,7 +68,7 @@ export function defaultCode(): Code {
 export function defaultRole(): Role {
   return {
     name: "",
-    available: true,
+    available: false,
     children: [],
     maps: [],
   };

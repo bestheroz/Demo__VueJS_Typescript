@@ -27,46 +27,48 @@
         <slot name="more-buttons" />
       </v-list>
     </v-menu>
-    <button-icon-tooltip
+    <ButtonIconTooltip
       :text="buttonText"
       :icon="buttonIcon"
       :loading="buttonLoading"
       class-name="px-2 mr-1"
       large
       @click="$emit('click')"
-      v-if="!hideButton && $store.getters.writeAuthority"
+      v-if="!hideButton && hasWriteAuthority"
     />
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import ButtonIconTooltip from "@/components/button/ButtonIconTooltip.vue";
 import { RoleMenuMap } from "@/definitions/models";
-import store from "@/store";
-import { computed, defineComponent } from "@vue/composition-api";
+import { computed } from "vue";
 import router from "@/router";
+import { storeToRefs } from "pinia";
+import { useAuthorityStore } from "@/stores/authority";
 
-export default defineComponent({
-  components: { ButtonIconTooltip },
-  props: {
-    title: { type: String, default: undefined },
-    buttonText: { type: String, default: "추가" },
-    buttonLoading: { type: Boolean },
-    buttonIcon: { type: String, default: "mdi-plus" },
-    hideMoreActions: { type: Boolean },
-    hideButton: { type: Boolean },
-  },
-  setup(props) {
-    const computes = {
-      computedTitle: computed(
-        (): string =>
-          props.title ||
-          store.getters.flatAuthorities.find(
-            (f: RoleMenuMap) => f.menu.url === router.app.$route.path,
-          ).menu.name,
-      ),
-    };
-    return { ...computes };
-  },
-});
+const authorityStore = useAuthorityStore();
+const { hasWriteAuthority } = authorityStore;
+const { flatAuthorities } = storeToRefs(authorityStore);
+
+const props = withDefaults(
+  defineProps<{
+    title?: string;
+    buttonText?: string;
+    buttonLoading?: boolean;
+    buttonIcon?: string;
+    hideMoreActions?: boolean;
+    hideButton?: boolean;
+  }>(),
+  { title: undefined, buttonText: "추가", buttonIcon: "mdi-plus" },
+);
+
+const computedTitle = computed(
+  (): string =>
+    props.title ??
+    flatAuthorities.value.find(
+      (f: RoleMenuMap) => f.menu.url === router.app.$route.path,
+    )?.menu.name ??
+    "",
+);
 </script>

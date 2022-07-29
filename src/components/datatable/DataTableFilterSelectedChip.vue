@@ -3,98 +3,109 @@
     <v-menu rounded="lg" v-model="isOpen" offset-y>
       <template #activator="{ on }">
         <v-chip
-          :close="!vModel.required"
+          :close="!value.required"
           @click:close="emptySelectFilters"
           outlined
-          :color="vModel.required ? 'error' : 'primary'"
+          :color="value.required ? 'error' : 'primary'"
           v-on="on"
           class="pa-2"
           v-show="chipLabel"
           label
+          style="z-index: 9"
+          @mouseenter="emits('close-on-click-change', false)"
+          @mouseleave="emits('close-on-click-change', true)"
         >
           {{ chipLabel }}
         </v-chip>
       </template>
       <v-card
-        v-if="isOpen && filtered.items.length > 0 && filtered.type !== 'text'"
+        v-if="
+          isOpen &&
+          filtered.items.length > 0 &&
+          filtered.type !== FILTER_TYPE.TEXT
+        "
       >
-        <data-table-filter-items
-          v-model="vModel"
+        <DataTableFilterItems
+          v-model="value"
           from-chip
           @closed="isOpen = false"
-          @change="$emit('change')"
+          @change="emits('change')"
         />
       </v-card>
     </v-menu>
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import type { Filter } from "@/definitions/types";
 import DataTableFilterItems from "@/components/datatable/DataTableFilterItems.vue";
-import {
-  computed,
-  defineComponent,
-  PropType,
-  reactive,
-  toRefs,
-} from "@vue/composition-api";
-import setupVModel from "@/composition/setupVModel";
+import { computed, ref } from "vue";
+import { useVModel } from "@vueuse/core";
+import { FILTER_TYPE } from "@/definitions/selections";
 
-export default defineComponent({
-  components: { DataTableFilterItems },
-  props: {
-    value: { required: true, type: Object as PropType<Filter> },
-  },
-  setup(props, { emit }) {
-    const vModel = setupVModel<Filter>(props, emit);
-    const state = reactive({ isOpen: false });
-    const computes = {
-      filtered: computed((): Filter => {
-        return {
-          ...vModel.vModel.value,
-          items: vModel.vModel.value.items.filter((i) => i.checked),
-        };
-      }),
-      chipLabel: computed((): string | undefined => {
-        if (computes.filtered.value.items.length > 0) {
-          if (
-            ["dateStartEndPicker", "text"].includes(
-              computes.filtered.value.type,
-            )
-          ) {
-            return `${computes.filtered.value.text} = ["${
-              computes.filtered.value.items[0].chipText ||
-              computes.filtered.value.items[0].value
-            }"]`;
-          } else {
-            return `${
-              computes.filtered.value.text
-            } = ["${computes.filtered.value.items
-              .map((i) => i.text)
-              /* eslint-disable quotes */
-              .join('", "')}"]`;
-          }
-        }
-        return undefined;
-      }),
-    };
-    const methods = {
-      emptySelectFilters: (): void => {
-        vModel.vModel.value = {
-          ...vModel.vModel.value,
-          items: vModel.vModel.value.items.map((item) => {
-            if (vModel.vModel.value.type === "text") {
-              return { ...item, checked: false, value: "" };
-            } else {
-              return { ...item, checked: false };
-            }
-          }),
-        };
-        emit("change");
-      },
-    };
-    return { ...vModel, ...toRefs(state), ...computes, ...methods };
-  },
+const props = defineProps<{
+  value: Filter;
+}>();
+
+const emits = defineEmits<{
+  (e: "change"): void;
+  (e: "close-on-click-change", value: boolean): void;
+  (e: "input", v: Filter): void;
+}>();
+const value = useVModel(props, "value", emits, { eventName: "input" });
+const isOpen = ref(false);
+
+const filtered = computed((): Filter => {
+  return {
+    ...value.value,
+    items: value.value.items.filter((i) => i.checked),
+  };
 });
+const chipLabel = computed((): string | undefined => {
+  if (filtered.value.items.length > 0) {
+    if (filtered.value.type === FILTER_TYPE.TEXT) {
+      return `${filtered.value.text} = ["${
+        filtered.value.items[0].chipText || filtered.value.items[0].value
+      }"]`;
+    } else if (
+      [
+        FILTER_TYPE.DATE_START_END_PICKER,
+        FILTER_TYPE.DATETIME_START_END_PICKER,
+      ].includes(filtered.value.type)
+    ) {
+      return `${filtered.value.text} = [${
+        filtered.value.items.find((i) => i.key === "after")?.chipText ?? ""
+      } ~ ${
+        filtered.value.items.find((i) => i.key === "before")?.chipText ?? ""
+      }]`;
+    } else if (
+      [FILTER_TYPE.DATE_PICKER, FILTER_TYPE.DATETIME_PICKER].includes(
+        filtered.value.type,
+      )
+    ) {
+      return `${filtered.value.text} = ["${
+        filtered.value.items.find((i) => i.key === "before")?.chipText
+      }"]`;
+    } else {
+      return `${filtered.value.text} = ["${filtered.value.items
+        .map((i) => i.text)
+        /* eslint-disable quotes */
+        .join('", "')}"]`;
+    }
+  }
+  return undefined;
+});
+function emptySelectFilters(): void {
+  value.value = {
+    ...value.value,
+    items: value.value.items.map((item) => {
+      if (value.value.type === FILTER_TYPE.CHECKBOX) {
+        return { ...item, checked: false };
+      } else {
+        return { ...item, checked: false, value: "", chipText: "" };
+      }
+    }),
+  };
+  emits("change");
+}
 </script>

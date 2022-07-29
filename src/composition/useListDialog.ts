@@ -1,4 +1,4 @@
-import { reactive, toRefs, UnwrapRef } from "@vue/composition-api";
+import { reactive, toRefs, UnwrapRef } from "vue";
 import { cloneDeep } from "lodash-es";
 
 export default function <T>(initItemFunc: CallableFunction) {

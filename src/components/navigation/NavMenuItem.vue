@@ -44,18 +44,12 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import type { Drawer } from "@/definitions/types";
 import { MENU_TYPE } from "@/definitions/selections";
-import { defineComponent, PropType } from "@vue/composition-api";
 
-export default defineComponent({
-  props: {
-    drawer: { type: Object as PropType<Drawer>, required: true },
-    depth: { type: Number, required: true },
-  },
-  setup() {
-    return { MENU_TYPE };
-  },
-});
+defineProps<{
+  drawer: Drawer;
+  depth: number;
+}>();
 </script>

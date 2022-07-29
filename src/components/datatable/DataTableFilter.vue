@@ -1,6 +1,10 @@
 <template>
   <div>
-    <v-menu rounded="lg" :close-on-content-click="false">
+    <v-menu
+      rounded="lg"
+      :close-on-content-click="false"
+      :close-on-click="closeOnClick"
+    >
       <template #activator="{ on, attrs }">
         <v-chip
           :color="filteredLength === 0 ? 'secondary' : 'primary'"
@@ -18,7 +22,7 @@
       </template>
       <v-card min-width="400" class="mt-6">
         <v-row no-gutters>
-          <v-col width="auto">
+          <div>
             <v-list-item-group v-model="index" mandatory>
               <v-list-item
                 v-for="filter in cloneFilters"
@@ -34,10 +38,10 @@
                 </v-list-item-icon>
               </v-list-item>
             </v-list-item-group>
-          </v-col>
+          </div>
 
-          <v-col width="auto">
-            <data-table-filter-items
+          <v-col>
+            <DataTableFilterItems
               v-model="cloneFilters[index]"
               @change="onChangeFilter"
             />
@@ -52,98 +56,94 @@
         :key="filter.key"
         class="d-inline-flex ml-1 mt-0 mb-1"
       >
-        <data-table-filter-selected-chip
+        <DataTableFilterSelectedChip
           v-model="cloneFilters[_index]"
           @change="onChangeFilter"
+          @close-on-click-change="closeOnClickChange"
         />
       </span>
     </template>
   </div>
 </template>
 
-<script lang="ts">
-import type { Filter } from "@/definitions/types";
+<script setup lang="ts">
+import type { Filter, FilterItemType } from "@/definitions/types";
 import DataTableFilterItems from "@/components/datatable/DataTableFilterItems.vue";
 import DataTableFilterSelectedChip from "@/components/datatable/DataTableFilterSelectedChip.vue";
-import {
-  computed,
-  defineComponent,
-  PropType,
-  reactive,
-  toRefs,
-  watch,
-} from "@vue/composition-api";
+import { computed, onMounted, ref } from "vue";
+import { watchDebounced } from "@vueuse/core";
 
-export default defineComponent({
-  components: { DataTableFilterSelectedChip, DataTableFilterItems },
-  props: {
-    filters: { type: Array as PropType<Filter[]>, required: true },
-  },
-  setup(props, { emit }) {
-    const state = reactive({ cloneFilters: [] as Filter[], index: 0 });
-    const computes = {
-      filteredLength: computed(
-        (): number =>
-          state.cloneFilters
-            .map((f) => f.items.some((i) => i.checked))
-            .filter((f) => f).length,
-      ),
+const props = defineProps<{ filters: Filter[] }>();
+
+const emits = defineEmits<{
+  (e: "update:output", output: { [k: string]: FilterItemType[] }): void;
+}>();
+
+const closeOnClick = ref(true);
+const cloneFilters = ref([] as Filter[]);
+const index = ref(0);
+
+const filteredLength = computed(
+  (): number =>
+    cloneFilters.value
+      .map((f) => f.items.some((i) => i.checked))
+      .filter((f) => f).length,
+);
+function resetFilter(): void {
+  cloneFilters.value = [];
+  changeCloneFilters(props.filters);
+}
+
+function closeOnClickChange(value: boolean): void {
+  closeOnClick.value = value;
+}
+
+function changeCloneFilters(val: Filter[]): void {
+  cloneFilters.value = val.map((f) => {
+    const cloneItems =
+      cloneFilters.value.find((c) => c.key === f.key)?.items ?? [];
+    return {
+      ...f,
+      items: f.items.map((i) => {
+        return {
+          ...i,
+          checked:
+            cloneItems.find((ci) => ci.value === i.value)?.checked || i.checked,
+        };
+      }),
     };
-    const methods = {
-      resetFilter: (): void => {
-        state.cloneFilters = [];
-        methods.changeCloneFilters(props.filters);
-      },
-      changeCloneFilters: (val: Filter[]): void => {
-        state.cloneFilters = [
-          ...val.map((f) => {
-            const cloneItems =
-              state.cloneFilters.find((c) => c.key === f.key)?.items || [];
+  });
+}
+function onChangeFilter(): void {
+  emits(
+    "update:output",
+    Object.fromEntries(
+      Object.entries(
+        cloneFilters.value
+          .filter((v) => v.items.some((i) => i.checked))
+          .map((v) => {
             return {
-              ...f,
-              items: [
-                ...f.items.map((i) => {
-                  return {
-                    ...i,
-                    checked:
-                      cloneItems.find((ci) => ci.value === i.value)?.checked ||
-                      i.checked,
-                  };
-                }),
-              ],
+              key: v.key,
+              value: v.items.filter((i) => i.checked).map((i) => i.value),
             };
           }),
-        ];
-      },
-      onChangeFilter: (): void => {
-        emit(
-          "update:output",
-          Object.fromEntries(
-            Object.entries(
-              state.cloneFilters
-                .filter((v) => v.items.some((i) => i.checked))
-                .map((v) => {
-                  return {
-                    key: v.key,
-                    value: v.items.filter((i) => i.checked).map((i) => i.value),
-                  };
-                }),
-            ).map(([, v]) => {
-              return [v.key, v.value];
-            }),
-          ),
-        );
-      },
-    };
-    watch(
-      () => props.filters,
-      (val: Filter[]) => {
-        methods.changeCloneFilters(val);
-        methods.onChangeFilter();
-      },
-      { immediate: true },
-    );
-    return { ...toRefs(state), ...computes, ...methods };
+      ).map(([, v]) => {
+        return [v.key, v.value];
+      }),
+    ),
+  );
+}
+watchDebounced(
+  () => props.filters,
+  (val: Filter[]) => {
+    changeCloneFilters(val);
+    onChangeFilter();
   },
+  { debounce: 200 },
+);
+onMounted(() => {
+  changeCloneFilters(props.filters);
+  onChangeFilter();
 });
+defineExpose({ resetFilter });
 </script>

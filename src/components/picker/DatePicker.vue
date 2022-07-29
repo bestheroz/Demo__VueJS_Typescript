@@ -1,23 +1,24 @@
 <template>
   <div>
-    <ValidationObserver ref="observer">
+    <validation-observer ref="observer">
       <v-dialog
         ref="refDialog"
         v-model="dialog"
         :return-value.sync="pickerString"
         :width="470"
         @keydown.esc="dialog = false"
-        @keydown.enter="$refs.refDialog.save(pickerString)"
+        @keydown.enter="save"
       >
         <template #activator="{ on }">
-          <ValidationProvider
-            :name="label"
+          <validation-provider
+            :name="hideLabel ? placeholder : label"
             :rules="required ? 'required' : ''"
             v-slot="{ errors }"
           >
             <v-text-field
               :value="textFieldString"
-              :label="defaultLabel"
+              :label="hideLabel ? undefined : label"
+              :placeholder="placeholder"
               :hint="hideHint ? undefined : hint"
               persistent-hint
               :messages="message"
@@ -28,14 +29,14 @@
               :dense="dense"
               :hide-details="hideDetails"
               :clearable="clearable"
-              @click:clear="pickerString = null"
+              @click:clear="() => emits('input', null)"
               :error-messages="errors"
               :append-outer-icon="startType ? 'mdi-tilde' : undefined"
               :class="classSet"
               :style="style"
               v-on="on"
             />
-          </ValidationProvider>
+          </validation-provider>
         </template>
         <v-date-picker
           v-model="pickerString"
@@ -51,166 +52,130 @@
           </v-btn>
           <div class="flex-grow-1"></div>
           <v-btn outlined @click="dialog = false"> 취소</v-btn>
-          <v-btn outlined @click="$refs.refDialog.save(pickerString)">
-            확인
-          </v-btn>
+          <v-btn outlined @click="save"> 확인 </v-btn>
         </v-date-picker>
       </v-dialog>
-    </ValidationObserver>
+    </validation-observer>
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import envs from "@/constants/envs";
 import dayjs from "dayjs";
 import { ValidationObserver } from "vee-validate";
 import { DateTime } from "@/definitions/types";
-import {
-  computed,
-  defineComponent,
-  PropType,
-  reactive,
-  ref,
-  toRefs,
-  watch,
-} from "@vue/composition-api";
-import setupVModel from "@/composition/setupVModel";
+import { computed, ref, watch } from "vue";
+import { useVModel } from "@vueuse/core";
+import { formatDate } from "@/utils/formatter";
 
-export default defineComponent({
-  props: {
-    value: {
-      type: [String, Number, Date, Object] as PropType<DateTime>,
-      default: undefined,
-    },
-    label: { type: String, default: undefined },
-    message: { type: String, default: undefined },
-    required: { type: Boolean },
-    disabled: { type: Boolean },
-    dense: { type: Boolean },
-    hideDetails: { type: Boolean },
-    clearable: { type: Boolean },
-    startType: { type: Boolean },
-    endType: { type: Boolean },
-    fullWidth: { type: Boolean },
-    hideHint: { type: Boolean },
-    max: { type: String, default: undefined },
-    min: { type: String, default: undefined },
+const props = withDefaults(
+  defineProps<{
+    value?: DateTime;
+    label?: string;
+    placeholder?: string;
+    message?: string;
+    required?: boolean;
+    disabled?: boolean;
+    dense?: boolean;
+    hideDetails?: boolean;
+    clearable?: boolean;
+    startType?: boolean;
+    endType?: boolean;
+    fullWidth?: boolean;
+    hideHint?: boolean;
+    hideLabel?: boolean;
+    max?: string;
+    min?: string;
+  }>(),
+  {
+    value: null,
+    label: "날짜 선택",
+    placeholder: undefined,
+    message: undefined,
+    max: undefined,
+    min: undefined,
   },
-  setup(props, { emit }) {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    const vModel = setupVModel<DateTime>(props, emit);
-    const state = reactive({
-      pickerString: null as string | null,
-      dialog: false,
-      valid: false,
-    });
-    const computes = {
-      DATEPICKER_FORMAT: computed((): string => "YYYY-MM-DD"),
-      defaultLabel: computed((): string => props.label || "날짜 선택"),
+);
 
-      style: computed((): string | undefined => {
-        if (props.fullWidth) {
-          return undefined;
-        }
-        let defaultWidth = 9.5;
-        props.startType && (defaultWidth += 2);
-        return `max-width: ${defaultWidth}rem;`;
-      }),
+const emits = defineEmits<{
+  (e: "input", value: DateTime): void;
+}>();
 
-      classSet: computed((): string | undefined => {
-        let result = "";
-        if (props.endType) {
-          result += " ml-3";
-        }
-        if (props.required) {
-          result += " required";
-        }
-        return result;
-      }),
+const value = useVModel(props, "value", emits, { eventName: "input" });
+const pickerString = ref(null as string | null);
+const dialog = ref(false);
 
-      hint: computed((): string | undefined =>
-        vModel.vModel.value && dayjs(vModel.vModel.value).isValid()
-          ? dayjs(vModel.vModel.value).toISOString()
-          : undefined,
-      ),
+const DATEPICKER_FORMAT = "YYYY-MM-DD";
 
-      disableToday: computed((): boolean => {
-        if (!props.min && !props.max) {
-          return false;
-        }
-        return props.endType
-          ? dayjs().isBefore(dayjs(props.min, computes.DATEPICKER_FORMAT.value))
-          : dayjs().isAfter(dayjs(props.max, computes.DATEPICKER_FORMAT.value));
-      }),
-
-      textFieldString: computed((): string => {
-        if (
-          !state.pickerString ||
-          !dayjs(state.pickerString, computes.DATEPICKER_FORMAT.value).isValid()
-        ) {
-          return "";
-        }
-        return dayjs(
-          state.pickerString,
-          computes.DATEPICKER_FORMAT.value,
-        ).format(computes.DATEPICKER_FORMAT.value);
-      }),
-    };
-    const methods = {
-      setToday: (): void => {
-        state.pickerString = dayjs().format(computes.DATEPICKER_FORMAT.value);
-      },
-      validate: async (): Promise<boolean> => {
-        return !!(await observer.value?.validate());
-      },
-    };
-    watch(
-      () => vModel.vModel.value,
-      (val: DateTime, oldVal: DateTime) => {
-        if (
-          !val ||
-          !dayjs(val).isValid() ||
-          val === oldVal ||
-          (oldVal &&
-            dayjs(oldVal).isValid() &&
-            dayjs(val).diff(dayjs(oldVal)) === 0)
-        ) {
-          return;
-        }
-        state.pickerString = dayjs(val).format(
-          computes.DATEPICKER_FORMAT.value,
-        );
-      },
-      { immediate: true },
-    );
-    watch(
-      () => computes.textFieldString.value,
-      (val: string) => {
-        if (dayjs(val, envs.DATE_FORMAT_STRING).isValid()) {
-          emit(
-            "input",
-            props.endType
-              ? dayjs(val, envs.DATE_FORMAT_STRING)?.endOf("day")?.toISOString()
-              : dayjs(val, envs.DATE_FORMAT_STRING)
-                  ?.startOf("day")
-                  ?.toISOString(),
-          );
-        } else {
-          emit("input", null);
-        }
-      },
-      { immediate: true },
-    );
-    const observer = ref<null | InstanceType<typeof ValidationObserver>>(null);
-    return {
-      ...vModel,
-      ...toRefs(state),
-      ...computes,
-      ...methods,
-      observer,
-      envs,
-    };
-  },
+const style = computed((): string | undefined => {
+  if (props.fullWidth) {
+    return undefined;
+  }
+  let defaultWidth = 9.5;
+  props.startType && (defaultWidth += 2);
+  return `max-width: ${defaultWidth}rem;`;
 });
+
+const classSet = computed((): string | undefined => {
+  let result = "";
+  if (props.endType) {
+    result += " ml-3";
+  }
+  if (props.required) {
+    result += " required";
+  }
+  return result;
+});
+
+const hint = computed((): string | undefined =>
+  value.value && dayjs(value.value).isValid()
+    ? dayjs(value.value).toISOString()
+    : undefined,
+);
+
+const disableToday = computed((): boolean => {
+  if (!props.min && !props.max) {
+    return false;
+  }
+  return props.endType
+    ? dayjs().isBefore(dayjs(props.min, DATEPICKER_FORMAT))
+    : dayjs().isAfter(dayjs(props.max, DATEPICKER_FORMAT));
+});
+
+const textFieldString = computed((): string => {
+  return formatDate(pickerString.value);
+});
+
+function setToday(): void {
+  pickerString.value = dayjs().format(DATEPICKER_FORMAT);
+}
+async function validate(): Promise<boolean> {
+  return !!(await observer.value?.validate());
+}
+async function save() {
+  if (await validate()) {
+    refDialog.value?.save(pickerString.value);
+    if (textFieldString.value) {
+      emits(
+        "input",
+        props.endType
+          ? dayjs(textFieldString.value).endOf("day").toISOString()
+          : dayjs(textFieldString.value).startOf("day").toISOString(),
+      );
+    } else {
+      emits("input", null);
+    }
+    dialog.value = false;
+  }
+}
+watch(
+  () => value.value,
+  (val: DateTime) => {
+    pickerString.value = formatDate(val);
+  },
+  { immediate: true },
+);
+const observer = ref();
+const refDialog = ref();
+defineExpose({ validate });
 </script>

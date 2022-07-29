@@ -1,116 +1,104 @@
 <template>
   <div>
-    <v-bottom-sheet v-model="syncedDialog" inset scrollable>
+    <v-bottom-sheet v-model="dialog" inset scrollable>
       <v-card class="pb-4">
-        <dialog-title
-          v-model="vModel.available"
+        <DialogTitle
+          v-model="value.available"
           :is-new="isNew"
           prefix="역할"
           with-switch
-          @click:close="syncedDialog = false"
+          @click:close="dialog = false"
         />
         <v-card-text>
-          <v-form :readonly="!$store.getters.writeAuthority">
-            <ValidationObserver ref="observer">
+          <v-form :readonly="!hasWriteAuthority">
+            <validation-observer ref="observer">
               <v-row>
                 <v-col cols="12" md="6">
-                  <ValidationProvider
+                  <validation-provider
                     v-slot="{ errors }"
                     name="역할명"
                     rules="required|max:50"
                   >
                     <v-text-field
-                      v-model="vModel.name"
+                      v-model="value.name"
                       label="역할명"
                       :counter="50"
                       :error-messages="errors"
                       class="required"
                     />
-                  </ValidationProvider>
+                  </validation-provider>
                 </v-col>
               </v-row>
-            </ValidationObserver>
-            <button-with-icon
+            </validation-observer>
+            <ButtonWithIcon
               block
               text="저장"
               icon="mdi-content-save"
               :loading="loading"
               @click="save"
-              v-if="$store.getters.writeAuthority"
+              v-if="hasWriteAuthority"
             />
           </v-form>
         </v-card-text>
-        <created-updated-bar
-          :created-by="vModel.createdBy"
-          :created-date-time="vModel.created"
-          :updated-by="vModel.updatedBy"
-          :updated-date-time="vModel.updated"
+        <CreatedUpdatedBar
+          :created-by="value.createdBy"
+          :created-date-time="value.created"
+          :updated-by="value.updatedBy"
+          :updated-date-time="value.updated"
         />
       </v-card>
     </v-bottom-sheet>
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { postApi } from "@/utils/apis";
 import { ValidationObserver } from "vee-validate";
 import DialogTitle from "@/components/title/DialogTitle.vue";
 import type { Role } from "@/definitions/models";
 import CreatedUpdatedBar from "@/components/history/CreatedUpdatedBar.vue";
 import ButtonWithIcon from "@/components/button/ButtonWithIcon.vue";
-import {
-  defineComponent,
-  PropType,
-  reactive,
-  ref,
-  toRefs,
-} from "@vue/composition-api";
-import store from "@/store";
-import setupEditDialog from "@/composition/setupEditDialog";
+import { ref } from "vue";
+import useEditDialog from "@/composition/useEditDialog";
+import { useAuthorityStore } from "@/stores/authority";
+import { useAdminStore } from "@/stores/admin";
 
-export default defineComponent({
-  components: { ButtonWithIcon, CreatedUpdatedBar, DialogTitle },
-  props: {
-    value: {
-      type: Object as PropType<Role>,
-      required: true,
-    },
-    dialog: {
-      required: true,
-      type: Boolean,
-    },
-  },
-  setup(props, { emit }) {
-    const editDialog = setupEditDialog<Role>(props, emit, "roles/");
-    const state = reactive({});
-    const methods = {
-      save: async (): Promise<void> => {
-        const isValid = await observer.value?.validate();
-        if (!isValid) {
-          return;
-        }
-        editDialog.isNew.value
-          ? await methods.create()
-          : await editDialog.update();
-      },
+const { superAdminFlag, hasWriteAuthority } = useAuthorityStore();
+const { roleId } = useAdminStore();
+const props = defineProps<{ value: Role; dialog: boolean }>();
 
-      create: async (): Promise<void> => {
-        editDialog.loading.value = true;
-        const response = await postApi<Role>(
-          `roles/?parentId=${
-            store.getters.isSuperAdmin ? "" : store.getters.roleId
-          }`,
-          editDialog.vModel.value,
-        );
-        editDialog.loading.value = false;
-        if (response.success) {
-          editDialog.syncedDialog.value = false;
-          emit("created", response.data);
-        }
-      },
-    };
-    const observer = ref<null | InstanceType<typeof ValidationObserver>>(null);
-    return { ...editDialog, ...toRefs(state), ...methods, observer };
-  },
-});
+const emits = defineEmits<{
+  (e: "updated", v: Role): void;
+  (e: "created", v: Role): void;
+  (e: "update:dialog", v: boolean): void;
+  (e: "input", v: Role): void;
+}>();
+
+const { value, dialog, update, loading, isNew } = useEditDialog<Role>(
+  props,
+  emits,
+  "roles/",
+);
+
+async function save(): Promise<void> {
+  const isValid = await observer.value?.validate();
+  if (!isValid) {
+    return;
+  }
+  isNew.value ? await create() : await update();
+}
+
+async function create(): Promise<void> {
+  loading.value = true;
+  const response = await postApi<Role>(
+    `roles/?parentId=${superAdminFlag ? "" : roleId}`,
+    value.value,
+  );
+  loading.value = false;
+  if (response.success) {
+    dialog.value = false;
+    emits("created", response.data);
+  }
+}
+const observer = ref();
 </script>

@@ -8,62 +8,36 @@
     <h1 :style="`color: ${color}`" v-text="now" />
   </div>
 </template>
-<script lang="ts">
+<script setup lang="ts">
 import dayjs from "dayjs";
 import envs from "@/constants/envs";
-import {
-  defineComponent,
-  nextTick,
-  onMounted,
-  onUnmounted,
-  reactive,
-  toRefs,
-} from "@vue/composition-api";
+import { onMounted, onUnmounted, ref } from "vue";
+import { useIntervalFn } from "@vueuse/core";
 
-export default defineComponent({
-  setup() {
-    const state = reactive({
-      interval: null as number | null,
-      interval2: null as number | null,
-      now: "",
-      color: "",
-    });
+const intervalForNow = useIntervalFn(() => {
+  now.value = dayjs().format("YYYY년 MM월 DD일 HH시 mm분 ss초");
+}, 1_000);
+const intervalForChangeColor = useIntervalFn(() => {
+  color.value = getRandomColor();
+}, 10_000);
+const now = ref("");
+const color = ref("");
 
-    const methods = {
-      getRandomColor: (): string => {
-        const letters = "0123456789ABCDEF";
-        let color = "#";
-        for (let i = 0; i < 6; i++) {
-          color += letters[Math.floor(Math.random() * 16)];
-        }
-        return color;
-      },
-    };
-    onUnmounted(() => {
-      state.interval && clearInterval(state.interval);
-      state.interval = null;
-      nextTick(() => {
-        state.interval && clearInterval(state.interval);
-        state.interval = null;
-      });
-      state.interval2 && clearInterval(state.interval2);
-      state.interval2 = null;
-      nextTick(() => {
-        state.interval2 && clearInterval(state.interval2);
-        state.interval2 = null;
-      });
-    });
-    onMounted(() => {
-      state.now = dayjs().format("YYYY년 MM월 DD일 HH시 mm분 ss초");
-      state.color = methods.getRandomColor();
-      state.interval = window.setInterval(() => {
-        state.now = dayjs().format("YYYY년 MM월 DD일 HH시 mm분 ss초");
-      }, 1000);
-      state.interval2 = window.setInterval(() => {
-        state.color = methods.getRandomColor();
-      }, 10000);
-    });
-    return { ...toRefs(state), ...methods, envs };
-  },
+function getRandomColor(): string {
+  const letters = "0123456789ABCDEF";
+  let color = "#";
+  for (let i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+}
+
+onUnmounted(() => {
+  intervalForNow.pause();
+  intervalForChangeColor.pause();
+});
+onMounted(() => {
+  now.value = dayjs().format("YYYY년 MM월 DD일 HH시 mm분 ss초");
+  color.value = getRandomColor();
 });
 </script>

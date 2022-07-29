@@ -1,6 +1,6 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
 import envs from "@/constants/envs";
-import store from "@/store";
+import store from "@/stores";
 import { toastError, toastSuccess } from "@/utils/alerts";
 import {
   getValidatedAccessToken,
@@ -10,7 +10,9 @@ import {
 import { Code } from "@/definitions/models";
 import dayjs from "dayjs";
 import jwt_decode from "jwt-decode";
+import { useAdminStore } from "@/stores/admin";
 
+const { reIssueAccessToken } = useAdminStore(store);
 export const axiosInstance = axios.create({
   baseURL: envs.API_HOST,
   headers: {
@@ -101,7 +103,7 @@ export async function getApi<T = never, R = T>(
   } else {
     console.error(response);
   }
-  return response.data ?? { success: false, code: "E" };
+  return response?.data ?? { success: false, code: "E" };
 }
 
 export async function postApi<T = never, R = T>(
@@ -180,7 +182,7 @@ export async function getCodesApi(type: string): Promise<Code[]> {
         string,
         AxiosResponse<ApiDataResult<Code[]>>
       >(`api/v1/codes/?type=${type}&available=true`);
-      const result = response.data.data || [];
+      const result = response.data.data ?? [];
       if (result.length > 0) {
         window.sessionStorage.setItem(`code__${type}`, JSON.stringify(result));
       }
@@ -292,7 +294,7 @@ async function apiRefreshToken(error: AxiosError) {
     ) {
       await goSignInPage();
     }
-    await store.dispatch("reIssueAccessToken");
+    await reIssueAccessToken();
   } catch (e) {
     console.error(e);
     await goSignInPage();

@@ -1,14 +1,15 @@
 import Vue from "vue";
 import Router, { Route } from "vue-router";
 import { NavigationGuardNext, RouteConfig } from "vue-router/types/router";
-import store from "@/store";
+import store from "@/stores";
 import { goSignInPage } from "@/utils/commands";
+import { useAdminStore } from "@/stores/admin";
 
 Vue.use(Router);
-
 const requireAuth =
   () => async (_to: Route, _from: Route, next: NavigationGuardNext) => {
-    if (store.getters.loggedIn) {
+    const { loggedIn } = useAdminStore(store);
+    if (loggedIn) {
       return next();
     }
     return goSignInPage();
@@ -47,11 +48,6 @@ const routes = (): RouteConfig[] => {
       path: "/developer/picker",
       beforeEnter: requireAuth(),
       component: () => import("@/views/developer/picker/PickerPage.vue"),
-    },
-    {
-      path: "/developer/text-editor",
-      beforeEnter: requireAuth(),
-      component: () => import("@/views/developer/editor/TextEditorPage.vue"),
     },
   ];
   const error: RouteConfig[] = [

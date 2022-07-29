@@ -9,7 +9,7 @@
   </v-app>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import AuthLayout from "@/layouts/AuthLayout.vue";
 import DefaultLayout from "@/layouts/DefaultLayout.vue";
 import ErrorLayout from "@/layouts/ErrorLayout.vue";
@@ -20,74 +20,75 @@ import {
   getValidatedRefreshToken,
 } from "@/utils/commands";
 import type { RoleMenuMap } from "@/definitions/models";
-import {
-  computed,
-  defineComponent,
-  onBeforeMount,
-  onMounted,
-  watch,
-} from "@vue/composition-api";
+import { computed, onBeforeMount, onMounted, watch } from "vue";
 import router from "@/router";
-import store from "@/store";
+import { storeToRefs } from "pinia";
+import { useAuthorityStore } from "@/stores/authority";
+import { useConfigStore } from "@/stores/config";
 
-export default defineComponent({
-  components: {
-    AuthLayout,
-    DefaultLayout,
-    ErrorLayout,
-  },
-  setup() {
-    const computes = {
-      isRouterLoaded: computed((): boolean => router.app.$route.name !== null),
-      currentLayout: computed(
-        (): string => (router.app.$route.meta?.layout || "default") + "Layout",
-      ),
-    };
+const authorityStore = useAuthorityStore();
+const { currentAuthority } = storeToRefs(authorityStore);
+const { reloadCurrentAuthority } = authorityStore;
 
-    onBeforeMount(async () => {
-      await getValidatedRefreshToken();
-      await getValidatedAccessToken();
-    });
+const { primaryColor, globalTheme } = storeToRefs(useConfigStore());
 
-    onMounted(() => {
-      document.title = envs.PRODUCT_TITLE;
-    });
+const layouts = {
+  default: DefaultLayout,
+  auth: AuthLayout,
+  error: ErrorLayout,
+};
 
-    watch(
-      () => router.app.$route.fullPath,
-      (val: string) => {
-        store.commit("reloadCurrentAuthority", val);
-      },
-    );
-    watch(
-      () => store.getters.currentAuthority,
-      (val: RoleMenuMap) => {
-        const pageTitle = val?.menu?.name;
-        document.title = pageTitle
-          ? `${envs.PRODUCT_TITLE}::${pageTitle}`
-          : envs.PRODUCT_TITLE;
-      },
-      { immediate: true },
-    );
-    watch(
-      () => store.getters.primaryColor,
-      (val: string) => {
-        Vuetify.framework.theme.themes.dark.primary = val;
-        Vuetify.framework.theme.themes.light.primary = val;
-      },
-      { immediate: true },
-    );
-    watch(
-      () => store.getters.globalTheme,
-      (val: string) => {
-        Vuetify.framework.theme.dark = val === "dark";
-      },
-      { immediate: true },
-    );
+const isRouterLoaded = computed((): boolean => router.app.$route.name !== null);
+const currentLayout = computed(
+  () =>
+    layouts[
+      (router.app.$route.meta?.layout || "default") as
+        | "default"
+        | "auth"
+        | "error"
+    ],
+);
 
-    return { ...computes };
-  },
+onBeforeMount(async () => {
+  await getValidatedRefreshToken();
+  await getValidatedAccessToken();
 });
+
+onMounted(() => {
+  document.title = envs.PRODUCT_TITLE;
+});
+
+watch(
+  () => router.app.$route.fullPath,
+  (val: string) => {
+    reloadCurrentAuthority(val);
+  },
+);
+watch(
+  () => currentAuthority.value,
+  (val: RoleMenuMap) => {
+    const pageTitle = val?.menu?.name;
+    document.title = pageTitle
+      ? `${envs.PRODUCT_TITLE}::${pageTitle}`
+      : envs.PRODUCT_TITLE;
+  },
+  { immediate: true },
+);
+watch(
+  () => primaryColor.value,
+  (val: string) => {
+    Vuetify.framework.theme.themes.dark.primary = val;
+    Vuetify.framework.theme.themes.light.primary = val;
+  },
+  { immediate: true },
+);
+watch(
+  () => globalTheme.value,
+  (val: string) => {
+    Vuetify.framework.theme.dark = val === "dark";
+  },
+  { immediate: true },
+);
 </script>
 <style scoped>
 /**

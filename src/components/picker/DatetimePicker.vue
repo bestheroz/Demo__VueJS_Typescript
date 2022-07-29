@@ -1,24 +1,25 @@
 <template>
   <div>
-    <ValidationObserver ref="observer">
+    <validation-observer ref="observer">
       <v-dialog
         ref="refDialog"
         v-model="dialog"
         :return-value.sync="textFieldString"
         :width="470"
         @keydown.esc="dialog = false"
-        @keydown.enter="$refs.refDialog.save(textFieldString)"
-        :disabled="!$store.getters.writeAuthority"
+        @keydown.enter="save"
+        :disabled="!hasWriteAuthority"
       >
         <template #activator="{ on }">
-          <ValidationProvider
-            :name="label"
+          <validation-provider
+            :name="hideLabel ? placeholder : label"
             :rules="required ? 'required' : ''"
             v-slot="{ errors }"
           >
             <v-text-field
               :value="textFieldString"
-              :label="defaultLabel"
+              :label="hideLabel ? undefined : label"
+              :placeholder="placeholder"
               :hint="hideHint ? undefined : hint"
               persistent-hint
               :messages="message"
@@ -29,304 +30,277 @@
               :dense="dense"
               :hide-details="hideDetails"
               :clearable="clearable"
-              @click:clear="onClear"
+              @click:clear="() => emits('input', null)"
               :error-messages="errors"
               :append-outer-icon="startType ? 'mdi-tilde' : undefined"
               :class="classSet"
               :style="style"
               v-on="on"
             />
-          </ValidationProvider>
+          </validation-provider>
         </template>
         <v-date-picker
           v-model="datePickerString"
           :locale="envs.LOCALE"
           landscape
           reactive
-          scrollable
           :max="maxDate"
           :min="minDate"
         >
         </v-date-picker>
         <v-time-picker
+          ref="refTimePicker"
           v-model="timePickerString"
           format="24hr"
           landscape
-          scrollable
           :use-seconds="useSeconds"
           :max="maxTime"
           :min="minTime"
+          @click:hour="selectingHourIfNoneTimerOption"
         >
           <v-btn outlined @click="setNow" :disabled="disableToday">
             지금
           </v-btn>
           <div class="flex-grow-1"></div>
           <v-btn outlined @click="dialog = false"> 취소 </v-btn>
-          <v-btn outlined @click="$refs.refDialog.save(textFieldString)">
-            확인
-          </v-btn>
+          <v-btn outlined @click="save"> 확인 </v-btn>
         </v-time-picker>
       </v-dialog>
-    </ValidationObserver>
+    </validation-observer>
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import envs from "@/constants/envs";
 import dayjs from "dayjs";
 import { ValidationObserver } from "vee-validate";
 import { DateTime } from "@/definitions/types";
-import {
-  computed,
-  defineComponent,
-  PropType,
-  reactive,
-  ref,
-  toRefs,
-  watch,
-} from "@vue/composition-api";
-import setupVModel from "@/composition/setupVModel";
+import { computed, nextTick, ref, watch } from "vue";
+import { useVModel } from "@vueuse/core";
+import { useAuthorityStore } from "@/stores/authority";
 
-export default defineComponent({
-  props: {
-    value: {
-      type: [String, Number, Date, Object] as PropType<DateTime>,
-      default: undefined,
-    },
-    label: { type: String, default: undefined },
-    message: { type: String, default: undefined },
-    required: { type: Boolean },
-    disabled: { type: Boolean },
-    dense: { type: Boolean },
-    hideDetails: { type: Boolean },
-    clearable: { type: Boolean },
-    useSeconds: { type: Boolean },
-    startType: { type: Boolean },
-    endType: { type: Boolean },
-    fullWidth: { type: Boolean },
-    hideHint: { type: Boolean },
-    max: { type: Array as PropType<string[]>, default: undefined },
-    min: { type: Array as PropType<string[]>, default: undefined },
+const { hasWriteAuthority } = useAuthorityStore();
+
+const props = withDefaults(
+  defineProps<{
+    value?: DateTime;
+    label?: string;
+    placeholder?: string;
+    message?: string;
+    required?: boolean;
+    disabled?: boolean;
+    dense?: boolean;
+    hideDetails?: boolean;
+    clearable?: boolean;
+    useSeconds?: boolean;
+    useMinutes?: boolean;
+    startType?: boolean;
+    endType?: boolean;
+    fullWidth?: boolean;
+    hideHint?: boolean;
+    hideLabel?: boolean;
+    max?: string[];
+    min?: string[];
+  }>(),
+  {
+    value: null,
+    label: "날짜 선택",
+    placeholder: undefined,
+    message: undefined,
+    max: undefined,
+    min: undefined,
   },
-  setup(props, { emit }) {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    const vModel = setupVModel<DateTime>(props, emit);
-    const state = reactive({
-      textFieldString: null as string | null,
-      datePickerString: null as string | null,
-      timePickerString: null as string | null,
-      dialog: false,
-      valid: false,
-    });
-    const computes = {
-      DATEPICKER_FORMAT: computed((): string => "YYYY-MM-DD"),
-      DATETIMEPICKER_MINUTE_FORMAT: computed((): string => "YYYY-MM-DD HH:mm"),
-      DATETIMEPICKER_FORMAT: computed((): string => "YYYY-MM-DD HH:mm:ss"),
-      TIMEPICKER_MINUTE_FORMAT: computed((): string => "HH:mm"),
-      TIMEPICKER_FORMAT: computed((): string => "HH:mm:ss"),
-      defaultLabel: computed((): string => props.label || "날짜 선택"),
+);
 
-      maxDate: computed((): string | undefined =>
-        props.max?.length > 0 ? props.max[0] : undefined,
-      ),
+const emits = defineEmits<{
+  (e: "input", value: DateTime): void;
+}>();
 
-      maxTime: computed((): string | undefined =>
-        props.max?.length > 1 ? props.max[1] : undefined,
-      ),
+const value = useVModel(props, "value", emits, { eventName: "input" });
 
-      minDate: computed((): string | undefined =>
-        props.min?.length > 0 ? props.min[0] : undefined,
-      ),
+const textFieldString = ref(null as string | null);
+const datePickerString = ref(null as string | null);
+const timePickerString = ref(null as string | null);
+const dialog = ref(false);
 
-      minTime: computed((): string | undefined =>
-        props.min?.length > 1 ? props.min[1] : undefined,
-      ),
+const DATEPICKER_FORMAT = "YYYY-MM-DD";
+const DATETIMEPICKER_MINUTE_FORMAT = "YYYY-MM-DD HH:mm";
+const DATETIMEPICKER_FORMAT = "YYYY-MM-DD HH:mm:ss";
+const TIMEPICKER_MINUTE_FORMAT = "HH:mm";
+const TIMEPICKER_FORMAT = "HH:mm:ss";
 
-      style: computed((): string | undefined => {
-        if (props.fullWidth) {
-          return undefined;
-        }
-        let defaultWidth = 9.5;
-        defaultWidth +=
-          ((props.useSeconds
-            ? envs.DATETIME_FORMAT_STRING.length
-            : envs.DATETIME_MINUTE_FORMAT_STRING.length) -
-            12) *
-          0.4;
-        props.clearable && (defaultWidth += 1);
-        props.startType && (defaultWidth += 2);
-        return `max-width: ${defaultWidth}rem;`;
-      }),
+const maxDate = computed((): string | undefined =>
+  props.max?.length > 0 ? props.max[0] : undefined,
+);
 
-      classSet: computed((): string | undefined => {
-        let result = "";
-        if (props.endType) {
-          result += " ml-3";
-        }
-        if (props.required) {
-          result += " required";
-        }
-        return result;
-      }),
+const maxTime = computed((): string | undefined =>
+  props.max?.length > 1 ? props.max[1] : undefined,
+);
 
-      hint: computed((): string | undefined =>
-        vModel.vModel.value
-          ? dayjs(vModel.vModel.value).toISOString()
-          : undefined,
-      ),
+const minDate = computed((): string | undefined =>
+  props.min?.length > 0 ? props.min[0] : undefined,
+);
 
-      disableToday: computed((): boolean => {
-        if (!props.min && !props.max) {
-          return false;
-        }
-        if (props.useSeconds) {
-          return props.endType
-            ? dayjs().isBefore(
-                dayjs(
-                  props.min.join(" "),
-                  computes.DATETIMEPICKER_FORMAT.value,
-                ),
-              )
-            : dayjs(
-                props.max.join(" "),
-                computes.DATETIMEPICKER_FORMAT.value,
-              ).isBefore(dayjs());
-        } else {
-          return props.endType
-            ? dayjs().isBefore(
-                dayjs(
-                  props.min.join(" "),
-                  computes.DATETIMEPICKER_MINUTE_FORMAT.value,
-                ),
-              )
-            : dayjs().isAfter(
-                dayjs(
-                  props.max.join(" "),
-                  computes.DATETIMEPICKER_MINUTE_FORMAT.value,
-                ),
-              );
-        }
-      }),
-    };
-    const methods = {
-      watchDatePickerString: (): void => {
-        if (
-          !state.datePickerString ||
-          !state.timePickerString ||
-          !dayjs(
-            `${state.datePickerString} ${state.timePickerString}`,
-            props.useSeconds
-              ? computes.DATETIMEPICKER_FORMAT.value
-              : computes.DATETIMEPICKER_MINUTE_FORMAT.value,
-          ).isValid()
-        ) {
-          state.textFieldString = null;
-          return;
-        }
-        const _dayjs = dayjs(
-          `${state.datePickerString} ${state.timePickerString}`,
-          props.useSeconds
-            ? computes.DATETIMEPICKER_FORMAT.value
-            : computes.DATETIMEPICKER_MINUTE_FORMAT.value,
-        );
-        if (_dayjs) {
-          state.textFieldString = props.useSeconds
-            ? dayjs(
-                `${state.datePickerString} ${state.timePickerString}`,
-                envs.DATETIME_FORMAT_STRING,
-              ).format(computes.DATETIMEPICKER_FORMAT.value)
-            : dayjs(
-                `${state.datePickerString} ${state.timePickerString}`,
-                envs.DATETIME_MINUTE_FORMAT_STRING,
-              ).format(computes.DATETIMEPICKER_MINUTE_FORMAT.value);
-        } else {
-          state.textFieldString = null;
-        }
-      },
-      setNow: (): void => {
-        state.datePickerString = dayjs().format(
-          computes.DATEPICKER_FORMAT.value,
-        );
-        state.timePickerString = props.useSeconds
-          ? dayjs().format(computes.TIMEPICKER_FORMAT.value)
-          : dayjs().format(computes.TIMEPICKER_MINUTE_FORMAT.value);
-      },
+const minTime = computed((): string | undefined =>
+  props.min?.length > 1 ? props.min[1] : undefined,
+);
 
-      onClear: (): void => {
-        state.datePickerString = null;
-        state.timePickerString = null;
-      },
-
-      validate: async (): Promise<boolean> => {
-        return !!(await observer.value?.validate());
-      },
-    };
-    watch(
-      () => vModel.vModel.value,
-      (val: DateTime, oldVal: DateTime) => {
-        if (
-          !val ||
-          !dayjs(val).isValid() ||
-          val === oldVal ||
-          (oldVal &&
-            dayjs(oldVal).isValid() &&
-            dayjs(val).diff(dayjs(oldVal)) === 0)
-        ) {
-          return;
-        }
-        state.datePickerString = dayjs(val).format(
-          computes.DATEPICKER_FORMAT.value,
-        );
-        state.timePickerString = props.useSeconds
-          ? dayjs(val).format(computes.TIMEPICKER_FORMAT.value)
-          : dayjs(val).format(computes.TIMEPICKER_MINUTE_FORMAT.value);
-      },
-      { immediate: true },
-    );
-    watch(
-      () => state.datePickerString,
-      () => {
-        methods.watchDatePickerString();
-      },
-    );
-    watch(
-      () => state.timePickerString,
-      () => {
-        methods.watchDatePickerString();
-      },
-      { immediate: true },
-    );
-    watch(
-      () => state.textFieldString,
-      (val: string | null) => {
-        if (dayjs(val, envs.DATETIME_MINUTE_FORMAT_STRING).isValid()) {
-          emit(
-            "input",
-            props.endType
-              ? props.useSeconds
-                ? dayjs(val, envs.DATETIME_FORMAT_STRING)
-                    ?.endOf("second")
-                    ?.toISOString()
-                : dayjs(val, envs.DATETIME_MINUTE_FORMAT_STRING)
-                    ?.endOf("minute")
-                    ?.toISOString()
-              : props.useSeconds
-              ? dayjs(val, envs.DATETIME_FORMAT_STRING)
-                  ?.startOf("second")
-                  ?.toISOString()
-              : dayjs(val, envs.DATETIME_MINUTE_FORMAT_STRING)
-                  ?.startOf("minute")
-                  ?.toISOString(),
-          );
-        } else {
-          emit("input", null);
-        }
-      },
-      { immediate: true },
-    );
-    const observer = ref<null | InstanceType<typeof ValidationObserver>>(null);
-    return { ...toRefs(state), ...computes, ...methods, observer, envs };
-  },
+const style = computed((): string | undefined => {
+  if (props.fullWidth) {
+    return undefined;
+  }
+  let defaultWidth = 9.5;
+  defaultWidth +=
+    ((props.useSeconds
+      ? envs.DATETIME_FORMAT_STRING.length
+      : envs.DATETIME_MINUTE_FORMAT_STRING.length) -
+      12) *
+    0.4;
+  props.clearable && (defaultWidth += 1);
+  props.startType && (defaultWidth += 2);
+  return `max-width: ${defaultWidth}rem;`;
 });
+
+const classSet = computed((): string | undefined => {
+  let result = "";
+  if (props.endType) {
+    result += " ml-3";
+  }
+  if (props.required) {
+    result += " required";
+  }
+  return result;
+});
+
+const hint = computed((): string | undefined =>
+  value.value ? dayjs(value.value).toISOString() : undefined,
+);
+
+const disableToday = computed((): boolean => {
+  if (!props.min && !props.max) {
+    return false;
+  }
+  if (props.useSeconds) {
+    return props.endType
+      ? dayjs().isBefore(dayjs(props.min.join(" "), DATETIMEPICKER_FORMAT))
+      : dayjs(props.max.join(" "), DATETIMEPICKER_FORMAT).isBefore(dayjs());
+  } else {
+    return props.endType
+      ? dayjs().isBefore(
+          dayjs(props.min.join(" "), DATETIMEPICKER_MINUTE_FORMAT),
+        )
+      : dayjs().isAfter(
+          dayjs(props.max.join(" "), DATETIMEPICKER_MINUTE_FORMAT),
+        );
+  }
+});
+
+function watchDatePickerString(): void {
+  if (
+    !datePickerString.value ||
+    !timePickerString.value ||
+    !dayjs(
+      `${datePickerString.value} ${timePickerString.value}`,
+      props.useSeconds ? DATETIMEPICKER_FORMAT : DATETIMEPICKER_MINUTE_FORMAT,
+    ).isValid()
+  ) {
+    textFieldString.value = null;
+    return;
+  }
+  const _dayjs = dayjs(
+    `${datePickerString} ${timePickerString}`,
+    props.useSeconds ? DATETIMEPICKER_FORMAT : DATETIMEPICKER_MINUTE_FORMAT,
+  );
+  if (_dayjs) {
+    textFieldString.value = props.useSeconds
+      ? dayjs(
+          `${datePickerString.value} ${timePickerString.value}`,
+          envs.DATETIME_FORMAT_STRING,
+        ).format(DATETIMEPICKER_FORMAT)
+      : dayjs(
+          `${datePickerString.value} ${timePickerString.value}`,
+          envs.DATETIME_MINUTE_FORMAT_STRING,
+        ).format(DATETIMEPICKER_MINUTE_FORMAT);
+  } else {
+    textFieldString.value = null;
+  }
+}
+function setNow(): void {
+  datePickerString.value = dayjs().format(DATEPICKER_FORMAT);
+  timePickerString.value = props.useSeconds
+    ? dayjs().format(TIMEPICKER_FORMAT)
+    : dayjs().format(TIMEPICKER_MINUTE_FORMAT);
+}
+function selectingHourIfNoneTimerOption(): void {
+  if (!props.useMinutes && !props.useSeconds) {
+    nextTick(() => {
+      refTimePicker.value.selectingHour = true;
+      timePickerString.value = refTimePicker.value.inputHour + ":00";
+    });
+  }
+}
+async function validate(): Promise<boolean> {
+  return !!(await observer.value?.validate());
+}
+async function save(): Promise<void> {
+  if (await validate()) {
+    refDialog.value?.save(textFieldString.value);
+    if (
+      dayjs(textFieldString.value, envs.DATETIME_MINUTE_FORMAT_STRING).isValid()
+    ) {
+      emits(
+        "input",
+        props.endType
+          ? props.useSeconds
+            ? dayjs(textFieldString.value, envs.DATETIME_FORMAT_STRING)
+                ?.endOf("second")
+                ?.toISOString()
+            : dayjs(textFieldString.value, envs.DATETIME_MINUTE_FORMAT_STRING)
+                ?.endOf("minute")
+                ?.toISOString()
+          : props.useSeconds
+          ? dayjs(textFieldString.value, envs.DATETIME_FORMAT_STRING)
+              ?.startOf("second")
+              ?.toISOString()
+          : dayjs(textFieldString.value, envs.DATETIME_MINUTE_FORMAT_STRING)
+              ?.startOf("minute")
+              ?.toISOString(),
+      );
+    } else {
+      emits("input", null);
+    }
+    dialog.value = false;
+  }
+}
+watch(
+  () => value.value,
+  (val: DateTime) => {
+    datePickerString.value =
+      val && dayjs(val).isValid() ? dayjs(val).format(DATEPICKER_FORMAT) : "";
+    timePickerString.value =
+      val && dayjs(val).isValid()
+        ? props.useSeconds
+          ? dayjs(val).format(TIMEPICKER_FORMAT)
+          : dayjs(val).format(TIMEPICKER_MINUTE_FORMAT)
+        : "";
+  },
+  { immediate: true },
+);
+watch(
+  () => datePickerString.value,
+  () => {
+    watchDatePickerString();
+  },
+);
+watch(
+  () => timePickerString.value,
+  () => {
+    watchDatePickerString();
+  },
+  { immediate: true },
+);
+const observer = ref();
+const refDialog = ref();
+const refTimePicker = ref();
+defineExpose({ save });
 </script>

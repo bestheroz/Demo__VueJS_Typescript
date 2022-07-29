@@ -6,7 +6,7 @@ export function getTextOfSelectItem<T = string>(
   defaultLabel?: string,
 ): string {
   return (
-    (codes || []).find((item) => item.value === value)?.text ||
+    (codes ?? []).find((item) => item.value === value)?.text ||
     defaultLabel ||
     value + "" ||
     ""
