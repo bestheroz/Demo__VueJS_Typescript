@@ -1,13 +1,14 @@
-# demo-admin
+# base-admin
 
-[![Node.js](https://img.shields.io/badge/Node.js-v16-darkgreen.svg?logo=node.js)](https://nodejs.org/)
-[![Npm](https://img.shields.io/badge/npm-v8-blue.svg?logo=npm)](https://nodejs.org/)
-[![Vue.js](https://img.shields.io/badge/Vue.js-v2.6-deepgreen.svg?logo=vue.js)](https://kr.vuejs.org/v2/guide/index.html)
-[![Vuetify](https://img.shields.io/badge/Vuetify-v2.6-blue.svg?logo=vuetify)](https://vuetifyjs.com/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-v4.5-blue.svg?logo=typescript)](https://www.typescriptlang.org/)
-[![javascript](https://img.shields.io/badge/javascript-ESNext-orange.svg)]()
-[![Sentry](https://img.shields.io/badge/Monitorning-Sentry-purple.svg)](https://sentry.io/)
-[![Github Actions](https://img.shields.io/badge/CI/CD-Github%20Actions-black.svg)](https://github.com/features/actions)
+![NodeJS](https://img.shields.io/badge/node.js-v16-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
+![Vue.js](https://img.shields.io/badge/vuejs-v2.7-%2335495e.svg?style=for-the-badge&logo=vuedotjs&logoColor=%234FC08D)
+![Vuetify](https://img.shields.io/badge/Vuetify-v2.6-1867C0?style=for-the-badge&logo=vuetify&logoColor=AEDDFF)
+![TypeScript](https://img.shields.io/badge/typescript-v4.7-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
+![JavaScript](https://img.shields.io/badge/javascript-Esnext-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E)
+![ESLint](https://img.shields.io/badge/ESLint-4B3263?style=for-the-badge&logo=eslint&logoColor=white)
+![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazon-aws&logoColor=white)
+![Sentry](https://img.shields.io/badge/Sentry-%23362D59.svg?style=for-the-badge&logo=sentry&logoColor=white)
+![GitHub Actions](https://img.shields.io/badge/github%20actions-%232671E5.svg?style=for-the-badge&logo=githubactions&logoColor=white)
 
 임시 계정
 
