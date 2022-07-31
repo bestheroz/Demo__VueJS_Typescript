@@ -4,11 +4,12 @@ on:
   push:
     branches: [ignore]
 
+env:
+  CI: true
+
 jobs:
   build-and-deploy:
     runs-on: ${{ matrix.os }}
-    env:
-      CI: true
 
     strategy:
       matrix:
@@ -26,8 +27,6 @@ jobs:
 
       - name: npm install
         run: npm ci
-        env:
-          CI: true
 
       - uses: ./.github/actions/test
 

@@ -3,12 +3,13 @@ name: Test
 on: push
 #    branches-ignore: [main, RC/**]
 
+env:
+  CI: true
+
 jobs:
   npm-test:
     name: npm install & lint
     runs-on: ${{ matrix.os }}
-    env:
-      CI: true
 
     strategy:
       matrix:
