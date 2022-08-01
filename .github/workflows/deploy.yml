@@ -4,9 +4,6 @@ on:
   push:
     branches: [ignore]
 
-env:
-  CI: true
-
 jobs:
   build-and-deploy:
     runs-on: ${{ matrix.os }}
