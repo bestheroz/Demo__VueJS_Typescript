@@ -95,27 +95,31 @@
 
   .dragArea {
     min-height: 30px;
-    border: 2px solid var(--v-info-base);
+    border: 4px solid var(--v-secondary-base);
     .dragArea {
       min-height: 30px;
-      border: 2px solid var(--v-warning-base);
+      border: 4px solid var(--v-primary-base);
       .dragArea {
         min-height: 30px;
-        border: 2px solid var(--v-success-base);
+        border: 4px solid var(--v-info-base);
         .dragArea {
           min-height: 30px;
-          border: 2px solid var(--v-error-base);
+          border: 4px solid var(--v-error-base);
           .dragArea {
             min-height: 30px;
-            border: 2px solid var(--v-success-base);
+            border: 4px solid var(--v-success-base);
             .dragArea {
               min-height: 30px;
-              border: 2px solid var(--v-accent-base);
+              border: 4px solid var(--v-accent-base);
             }
           }
         }
       }
     }
+  }
+
+  .border-dotted {
+    border-style: dotted;
   }
 
   // dark theme

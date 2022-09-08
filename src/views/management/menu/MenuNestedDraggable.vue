@@ -7,6 +7,9 @@
       :group="{ name: 'g1' }"
       :animation="200"
       handle=".drag-handle"
+      :scroll-sensitivity="200"
+      :force-fallback="true"
+      :style="`${value.length === 0 ? 'border-style: dotted' : ''}`"
     >
       <v-list-item dense :key="_menu.id" v-for="_menu in value" class="pr-0">
         <v-list-item-icon

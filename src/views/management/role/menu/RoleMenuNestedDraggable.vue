@@ -1,5 +1,5 @@
 <template>
-  <v-list :class="{ 'ml-8': !rootFlag }">
+  <v-list :class="{ 'ml-9': !rootFlag }">
     <vuedraggable
       class="dragArea"
       tag="div"
@@ -9,6 +9,7 @@
       handle=".drag-handle"
       :scroll-sensitivity="200"
       :force-fallback="true"
+      :style="`${value.length === 0 ? 'border-style: dotted' : ''}`"
     >
       <v-list-item dense :key="item.menu.id" v-for="item in value" class="pr-0">
         <v-row no-gutters>
@@ -27,6 +28,7 @@
             <v-btn-toggle
               v-model="item.authoritiesJson"
               active-class="primary"
+              tile
               multiple
               class="transparent"
               v-if="item.menu.type !== MENU_TYPE.GROUP"
@@ -36,10 +38,10 @@
                 disabled
                 style="
                   background-color: var(--v-primary-base) !important;
-                  color: initial !important;
+                  color: white !important;
                 "
               >
-                <v-icon>mdi-eye</v-icon>
+                보기
               </v-btn>
 
               <v-btn
@@ -47,18 +49,11 @@
                 :disabled="hasWriteAuthority && roleId === adminStore.roleId"
                 :class="
                   item.authoritiesJson.includes(ROLE_AUTHORITY_TYPE.WRITE)
-                    ? 'primary'
-                    : 'transparent'
+                    ? 'white--text'
+                    : 'text--secondary'
                 "
               >
-                <v-icon
-                  :color="
-                    item.authoritiesJson.includes(ROLE_AUTHORITY_TYPE.WRITE)
-                      ? undefined
-                      : 'secondary'
-                  "
-                  >mdi-content-save-outline</v-icon
-                >
+                편집
               </v-btn>
 
               <v-btn
@@ -66,18 +61,11 @@
                 :disabled="hasWriteAuthority && roleId === adminStore.roleId"
                 :class="
                   item.authoritiesJson.includes(ROLE_AUTHORITY_TYPE.DELETE)
-                    ? 'primary'
-                    : 'transparent'
+                    ? 'white--text'
+                    : 'text--secondary'
                 "
               >
-                <v-icon
-                  :color="
-                    item.authoritiesJson.includes(ROLE_AUTHORITY_TYPE.DELETE)
-                      ? undefined
-                      : 'secondary'
-                  "
-                  >mdi-delete-outline</v-icon
-                >
+                삭제
               </v-btn>
 
               <v-btn
@@ -85,18 +73,11 @@
                 :disabled="hasWriteAuthority && roleId === adminStore.roleId"
                 :class="
                   item.authoritiesJson.includes(ROLE_AUTHORITY_TYPE.EXCEL)
-                    ? 'primary'
-                    : 'transparent'
+                    ? 'white--text'
+                    : 'text--secondary'
                 "
               >
-                <v-icon
-                  :color="
-                    item.authoritiesJson.includes(ROLE_AUTHORITY_TYPE.EXCEL)
-                      ? undefined
-                      : 'secondary'
-                  "
-                  >mdi-file-excel-outline</v-icon
-                >
+                엑셀
               </v-btn>
             </v-btn-toggle>
           </v-col>

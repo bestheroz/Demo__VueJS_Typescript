@@ -9,6 +9,7 @@
       handle=".drag-handle"
       :scroll-sensitivity="200"
       :force-fallback="true"
+      :style="`${value.length === 0 ? 'border-style: dotted' : ''}`"
     >
       <v-list-item
         :key="role.id"

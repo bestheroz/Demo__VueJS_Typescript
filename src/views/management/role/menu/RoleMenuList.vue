@@ -22,6 +22,7 @@
                 v-model="selected"
                 :menus="menus"
                 :disabled="hasWriteAuthority && adminStore.roleId === roleId"
+                class="w-full"
               />
             </v-chip-group>
           </v-card-text>
