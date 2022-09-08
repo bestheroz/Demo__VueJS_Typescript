@@ -37,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Filter } from "@/definitions/types";
+import type { Filter, FilterItemType } from "@/definitions/types";
 import DataTableFilterItems from "@/components/datatable/DataTableFilterItems.vue";
 import { computed, ref } from "vue";
 import { useVModel } from "@vueuse/core";
@@ -65,36 +65,43 @@ const chipLabel = computed((): string | undefined => {
   if (filtered.value.items.length > 0) {
     if (filtered.value.type === FILTER_TYPE.TEXT) {
       return `${filtered.value.text} = ["${
-        filtered.value.items[0].chipText || filtered.value.items[0].value
+        filtered.value.items[0].chipText ?? filtered.value.items[0].value
       }"]`;
-    } else if (
-      [
-        FILTER_TYPE.DATE_START_END_PICKER,
-        FILTER_TYPE.DATETIME_START_END_PICKER,
-      ].includes(filtered.value.type)
-    ) {
+    } else if (FILTER_TYPE.DATETIME_START_END_PICKER === filtered.value.type) {
       return `${filtered.value.text} = [${
-        filtered.value.items.find((i) => i.key === "after")?.chipText ?? ""
-      } ~ ${
-        filtered.value.items.find((i) => i.key === "before")?.chipText ?? ""
-      }]`;
+        filtered.value.items[0]?.chipText ?? ""
+      } ~ ${filtered.value.items[1]?.chipText ?? ""}]`;
     } else if (
       [FILTER_TYPE.DATE_PICKER, FILTER_TYPE.DATETIME_PICKER].includes(
         filtered.value.type,
       )
     ) {
-      return `${filtered.value.text} = ["${
-        filtered.value.items.find((i) => i.key === "before")?.chipText
-      }"]`;
+      return `${filtered.value.text} = [${filtered.value.items[0].chipText}]`;
+    } else if (
+      [
+        FILTER_TYPE.DATE_RANGE_PICKER,
+        FILTER_TYPE.DATETIME_RANGE_PICKER,
+      ].includes(filtered.value.type)
+    ) {
+      return `${filtered.value.text} = [${filtered.value.items
+        .filter((v) => v.chipText)
+        .map((v) => v.chipText)
+        .reduce(
+          (prev, val) => (prev.includes(val) ? prev : [...prev, val]),
+          [] as FilterItemType[],
+        )
+        .join(" ~ ")}]`;
     } else {
       return `${filtered.value.text} = ["${filtered.value.items
         .map((i) => i.text)
         /* eslint-disable quotes */
-        .join('", "')}"]`;
+        .join('", "')}
+    "]`;
     }
   }
   return undefined;
 });
+
 function emptySelectFilters(): void {
   value.value = {
     ...value.value,

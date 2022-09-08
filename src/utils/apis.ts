@@ -100,10 +100,11 @@ export async function getApi<T = never, R = T>(
     if (!response.data.success && failAlert) {
       alertResponseMessage(response.data);
     }
+    return response.data;
   } else {
     console.error(response);
+    throw new Error("No data returned from server");
   }
-  return response?.data ?? { success: false, code: "E" };
 }
 
 export async function postApi<T = never, R = T>(
@@ -181,7 +182,7 @@ export async function getCodesApi(type: string): Promise<Code[]> {
       const response = await axiosInstance.get<
         string,
         AxiosResponse<ApiDataResult<Code[]>>
-      >(`api/v1/codes/?type=${type}&available=true`);
+      >(`api/v1/codes/?type=${type}&availableFlag=true`);
       const result = response.data.data ?? [];
       if (result.length > 0) {
         window.sessionStorage.setItem(`code__${type}`, JSON.stringify(result));
@@ -226,27 +227,6 @@ function alertResponseMessage(data: ApiDataResult<unknown>): void {
   } else {
     data.message && toastError(data.message);
   }
-}
-
-export async function uploadFileApi<T = string>(
-  url: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types
-  formData: FormData,
-  alert = false,
-): Promise<ApiDataResult<T>> {
-  const response = await axiosInstance.post<
-    FormData,
-    AxiosResponse<ApiDataResult<T>>
-  >(`${envs.FILE_API_HOST}api/${url}`, formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-  // response.status === 201
-  if (alert) {
-    alertResponseMessage(response.data);
-  }
-  return response.data;
 }
 
 export async function downloadExcelApi(url: string): Promise<void> {

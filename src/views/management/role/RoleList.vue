@@ -27,12 +27,14 @@
         />
         <RoleNestedDraggable
           v-model="items"
+          root-flag
           @click:edit="showEditDialog"
           @remove-role="deleteRole"
           v-if="superAdminFlag"
         />
         <RoleNestedDraggable
           v-model="items[0].children"
+          root-flag
           @click:edit="showEditDialog"
           @remove-role="deleteRole"
           v-else-if="items && items.length > 0"

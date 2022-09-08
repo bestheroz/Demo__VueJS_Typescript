@@ -1,5 +1,5 @@
 <template>
-  <v-list>
+  <v-list :class="{ 'ml-8': !rootFlag }">
     <vuedraggable
       class="dragArea"
       tag="div"
@@ -7,8 +7,10 @@
       :group="{ name: 'g1' }"
       :animation="200"
       handle=".drag-handle"
+      :scroll-sensitivity="200"
+      :force-fallback="true"
     >
-      <v-list-item dense :key="item.menu.id" v-for="item in value">
+      <v-list-item dense :key="item.menu.id" v-for="item in value" class="pr-0">
         <v-row no-gutters>
           <v-col sm="12" lg="5">
             <v-list-item-icon>
@@ -125,6 +127,7 @@ const adminStore = useAdminStore();
 const props = defineProps<{
   value: RoleMenuMap[];
   roleId: number;
+  rootFlag?: boolean;
 }>();
 const emits = defineEmits<{
   (e: "input", v: RoleMenuMap[]): void;

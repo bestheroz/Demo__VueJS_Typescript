@@ -9,10 +9,12 @@
           x-large
           v-if="hasWriteAuthority"
         >
-          <v-icon> mdi-sort </v-icon> 순서저장
+          <v-icon> mdi-sort</v-icon>
+          순서저장
         </v-btn>
         <v-btn @click="fetchList" color="primary" outlined x-large>
-          <v-icon> mdi-refresh </v-icon> 새로고침
+          <v-icon> mdi-refresh</v-icon>
+          새로고침
         </v-btn>
       </template>
     </PageTitle>
@@ -64,7 +66,7 @@
                   </td>
                   <td v-text="item.text" />
                   <td class="text-center">
-                    <CheckboxMarker :value="item.available" />
+                    <CheckboxMarker :value="item.availableFlag" />
                   </td>
                   <td class="text-center">
                     {{ formatDatetime(item.updated) }}
@@ -114,14 +116,14 @@ import { useAuthorityStore } from "@/stores/authority";
 
 const { hasWriteAuthority, hasDeleteAuthority } = useAuthorityStore();
 
-const filterOutput = ref({} as FilterOutput);
+const filterOutput = ref<FilterOutput>({});
 const currentType = computed(() =>
   typeof filterOutput.value.type?.[0] === "string"
     ? filterOutput.value.type[0]
     : "",
 );
 
-const types = ref([] as string[]);
+const types = ref<string[]>([]);
 const saving = ref(false);
 const defaultCheckedType = computed(() => types.value[0]);
 
@@ -215,6 +217,7 @@ async function remove(value: Code): Promise<void> {
     }
   }
 }
+
 function checkFilter(value: string): void {
   filters.value
     .find((f) => f.key === "type")

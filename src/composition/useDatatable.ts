@@ -3,8 +3,10 @@ import { FilterOutput, Pagination } from "@/definitions/types";
 import qs from "qs";
 import useList from "@/composition/useList";
 import { watchDebounced } from "@vueuse/core";
+import { Id } from "@/definitions/models";
 
-export default function <T>(
+export default function <T extends Id>(
+  url?: string,
   pagination = {
     page: 1,
     sortBy: ["id"],
@@ -12,7 +14,13 @@ export default function <T>(
     itemsPerPage: 10,
   } as Pagination,
 ) {
-  const { items, totalItems, loading } = useList<T>();
+  const {
+    items,
+    totalItems,
+    loading,
+    availableFlagSwitchLoadingMarker,
+    patchAvailableFlag,
+  } = useList<T>(url);
 
   const state = reactive({
     pagination: pagination,
@@ -38,6 +46,8 @@ export default function <T>(
     items,
     totalItems,
     loading,
+    availableFlagSwitchLoadingMarker,
+    patchAvailableFlag,
     ...toRefs(state),
     ...computes,
   };

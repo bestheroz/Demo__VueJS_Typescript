@@ -80,7 +80,7 @@ const emits = defineEmits<{
 }>();
 
 const closeOnClick = ref(true);
-const cloneFilters = ref([] as Filter[]);
+const cloneFilters = ref<Filter[]>([]);
 const index = ref(0);
 
 const filteredLength = computed(

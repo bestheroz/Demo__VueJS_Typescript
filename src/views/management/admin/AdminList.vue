@@ -29,7 +29,7 @@
             <v-text-field
               v-model="search"
               solo
-              label="검색 (#KEY, 관리자 아이디, 관리자 이름)"
+              label="검색 (ID, 관리자 아이디, 관리자 이름)"
               prepend-inner-icon="mdi-magnify"
               clearable
               outlined
@@ -57,14 +57,14 @@
               v-text="item.loginId"
             />
           </template>
-          <template #[`item.available`]="{ item }">
-            <CheckboxMarker :value="item.available" />
+          <template #[`item.availableFlag`]="{ item }">
+            <CheckboxMarker :value="item.availableFlag" />
           </template>
           <template #[`item.availableSignIn`]="{ item }">
             <CheckboxMarker
               :value="
-                item.available &&
-                item.role.available &&
+                item.availableFlag &&
+                item.role.availableFlag &&
                 dayjs(item.expired).isAfter(dayjs())
               "
             />
@@ -74,7 +74,7 @@
           </template>
           <template #[`item.actions`]="{ item }" v-if="hasDeleteAuthority">
             <v-btn icon @click="remove(item)" v-if="id !== item.id">
-              <v-icon color="error"> mdi-delete-outline </v-icon>
+              <v-icon color="error"> mdi-delete-outline</v-icon>
             </v-btn>
           </template>
         </v-data-table>
@@ -134,7 +134,7 @@ const {
 } = useDatatable<Admin>();
 
 const saving = ref(false);
-const roles = ref([] as SelectItem<number>[]);
+const roles = ref<SelectItem<number>[]>([]);
 
 async function fetchList(): Promise<void> {
   items.value = [];
@@ -145,14 +145,14 @@ async function fetchList(): Promise<void> {
     `admins/?${queryString.value}`,
   );
   loading.value = false;
-  items.value = response.data.content || ([] as Admin[]);
-  totalItems.value = response.data.totalElements;
+  items.value = response.data?.content ?? ([] as Admin[]);
+  totalItems.value = response.data?.totalElements ?? 0;
 }
 
 const headers = computed((): DataTableHeader[] => {
   let headers: DataTableHeader[] = [
     {
-      text: "#key",
+      text: "ID",
       align: "start",
       value: "id",
       width: "6rem",
@@ -181,7 +181,7 @@ const headers = computed((): DataTableHeader[] => {
     {
       text: "사용 가능",
       align: "center",
-      value: "available",
+      value: "availableFlag",
       width: "5rem",
     },
     {
@@ -219,7 +219,7 @@ const filters = computed((): Filter[] => [
   {
     type: FILTER_TYPE.CHECKBOX,
     text: "사용 가능",
-    key: "availableList",
+    key: "availableFlagList",
     items: BooleanTypes.map((v) => {
       return { ...v, checked: false };
     }),
@@ -235,11 +235,13 @@ const queryStringForExcel = computed((): string =>
     itemsPerPage: 99999999,
   }),
 );
+
 async function excel(): Promise<void> {
   saving.value = true;
   await downloadExcelApi(`excel/admins?${queryStringForExcel.value}`);
   saving.value = false;
 }
+
 async function remove(value: Admin): Promise<void> {
   const result = await confirmDelete(`${value.loginId}를 지우시겠습니까? `);
   if (result) {
@@ -251,6 +253,7 @@ async function remove(value: Admin): Promise<void> {
     }
   }
 }
+
 onMounted(async () => {
   const response = await getApi<Role[]>("roles/selections/");
   roles.value = response.data.map((v) => {

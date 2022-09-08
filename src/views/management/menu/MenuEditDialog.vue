@@ -110,6 +110,7 @@ import ButtonWithIcon from "@/components/button/ButtonWithIcon.vue";
 import useEditDialog from "@/composition/useEditDialog";
 import { ref } from "vue";
 import { useAuthorityStore } from "@/stores/authority";
+import { toastWarning } from "@/utils/alerts";
 
 const { hasWriteAuthority, reloadRole } = useAuthorityStore();
 const props = defineProps<{
@@ -133,6 +134,7 @@ const { dialog, loading, isNew, value } = useEditDialog<Menu>(
 async function save(): Promise<void> {
   const isValid = await observer.value?.validate();
   if (!isValid) {
+    toastWarning("입력된 항목이 유효하지 않습니다. 확인 후 등록해주세요.");
     return;
   }
   isNew.value ? await create() : await update();
@@ -161,7 +163,8 @@ async function update(): Promise<void> {
 }
 
 function linkIconSite(): void {
-  window.open("https://pictogrammers.github.io/@mdi/font/6.5.95/", "_blank");
+  window.open("https://pictogrammers.github.io/@mdi/font/7.0.96/", "_blank");
 }
+
 const observer = ref();
 </script>

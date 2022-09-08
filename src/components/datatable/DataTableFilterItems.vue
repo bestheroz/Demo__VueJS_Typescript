@@ -54,9 +54,8 @@
         :ripple="false"
       >
         <DatePicker
-          :value="before"
+          v-model="datePicker"
           :placeholder="value.text"
-          @input="onUpdatePicker"
           dense
           hide-details
           clearable
@@ -70,9 +69,8 @@
         :ripple="false"
       >
         <DatetimePicker
-          :value="before"
+          v-model="datetimePicker"
           :placeholder="value.text"
-          @input="onUpdatePicker"
           dense
           hide-details
           :use-minutes="value.timerOption === 'minute'"
@@ -84,19 +82,35 @@
         />
       </v-list-item>
       <v-list-item
-        v-else-if="value.type === FILTER_TYPE.DATE_START_END_PICKER"
+        v-if="value.type === FILTER_TYPE.DATE_RANGE_PICKER"
         :ripple="false"
       >
-        <DateStartEndPicker
-          :start="after"
-          :start-placeholder="afterPlaceholder"
-          @update:start="onUpdateStartPicker"
-          :end="before"
-          :end-placeholder="beforePlaceholder"
-          @update:end="onUpdateEndPicker"
+        <DateRangePicker
+          :start.sync="startDateOfRange"
+          :end.sync="endDateOfRange"
+          :placeholder="value.text"
+          dense
           hide-details
-          hide-label
           clearable
+          hide-label
+          hide-hint
+        />
+      </v-list-item>
+      <v-list-item
+        v-else-if="value.type === FILTER_TYPE.DATETIME_RANGE_PICKER"
+        :ripple="false"
+      >
+        <DatetimeRangePicker
+          :start.sync="startDateTimeOfRange"
+          :end.sync="endDateTimeOfRange"
+          :placeholder="value.text"
+          dense
+          hide-details
+          :use-minutes="value.timerOption === 'minute'"
+          :use-seconds="value.timerOption === 'second'"
+          clearable
+          hide-label
+          hide-hint
           full-width
         />
       </v-list-item>
@@ -105,12 +119,10 @@
         :ripple="false"
       >
         <DatetimeStartEndPicker
-          :start="after"
-          :start-placeholder="afterPlaceholder"
-          @update:start="onUpdateStartPicker"
-          :end="before"
-          :end-placeholder="beforePlaceholder"
-          @update:end="onUpdateEndPicker"
+          :start.sync="startDateTime"
+          :start-placeholder="startPlaceholder"
+          :end.sync="endDateTime"
+          :end-placeholder="endPlaceholder"
           hide-details
           hide-label
           :use-minutes="value.timerOption === 'minute'"
@@ -127,14 +139,20 @@
 import type { DateTime, Filter, FilterItem } from "@/definitions/types";
 import { FilterItemType } from "@/definitions/types";
 import { computed, ref, watch } from "vue";
-import DateStartEndPicker from "@/components/picker/DateStartEndPicker.vue";
 import dayjs from "dayjs";
 import DatePicker from "@/components/picker/DatePicker.vue";
 import DatetimePicker from "@/components/picker/DatetimePicker.vue";
 import DatetimeStartEndPicker from "@/components/picker/DatetimeStartEndPicker.vue";
 import { useDebounceFn, useVModel } from "@vueuse/core";
 import { FILTER_TYPE } from "@/definitions/selections";
-import { formatDate, formatDatetime } from "@/utils/formatter";
+import {
+  formatDate,
+  formatDatetime,
+  isValidDateFormat,
+} from "@/utils/formatter";
+import DateRangePicker from "@/components/picker/DateRangePicker.vue";
+import DatetimeRangePicker from "@/components/picker/DatetimeRangePicker.vue";
+import envs from "@/constants/envs";
 
 const props = defineProps<{
   value: Filter;
@@ -152,9 +170,10 @@ const checkedLength = computed(
   (): number => value.value.items.filter((i) => i.checked).length,
 );
 const textFilterRules = {
-  counter: (_value: string) =>
-    _value ? _value.length <= 20 || "Max 20 characters" : true,
+  counter: (value) =>
+    value ? value.length <= 20 || "Max 20 characters" : true,
 };
+
 function onClickCheckbox(filterItem: FilterItem<FilterItemType>): void {
   if (value.value.single) {
     value.value = {
@@ -171,126 +190,241 @@ function onClickCheckbox(filterItem: FilterItem<FilterItemType>): void {
 }
 
 const datePickerType = computed(() =>
-  [FILTER_TYPE.DATE_START_END_PICKER, FILTER_TYPE.DATE_PICKER].includes(
+  [FILTER_TYPE.DATE_PICKER, FILTER_TYPE.DATE_RANGE_PICKER].includes(
     value.value.type,
   ),
 );
 
 const datetimePickerType = computed(() =>
-  [FILTER_TYPE.DATETIME_PICKER, FILTER_TYPE.DATETIME_START_END_PICKER].includes(
-    value.value.type,
-  ),
+  [
+    FILTER_TYPE.DATETIME_PICKER,
+    FILTER_TYPE.DATETIME_RANGE_PICKER,
+    FILTER_TYPE.DATETIME_START_END_PICKER,
+  ].includes(value.value.type),
 );
 
-const DATEPICKER_FORMAT = "YYYY-MM-DD";
-const DATETIMEPICKER_FORMAT = computed((): string =>
-  value.value.timerOption === "second"
-    ? "YYYY-MM-DD HH:mm:ss"
-    : "YYYY-MM-DD HH:mm",
-);
-const after = computed((): DateTime => {
-  if (datePickerType.value || datetimePickerType.value) {
-    const after = value.value.items.find((i) => i.key === "after")?.value;
-    return typeof after !== "boolean" ? after : "";
-  }
-  return "";
-});
-const before = computed((): DateTime => {
-  if (datePickerType.value || datetimePickerType.value) {
-    const before = value.value.items.find((i) => i.key === "before")?.value;
-    return typeof before !== "boolean" ? before : "";
-  }
-  return "";
+const startDateOfRange = computed({
+  get(): DateTime {
+    const start = value.value.items[0]?.value;
+    return typeof start !== "boolean" && isValidDateFormat(start) ? start : "";
+  },
+  set(date: DateTime) {
+    const valid = isValidDateFormat(date);
+    value.value.items.splice(0, 1, {
+      text: startPlaceholder.value,
+      value: valid ? date : "",
+      chipText: valid ? dayjs(date).format(envs.DATE_FORMAT_STRING) : "",
+      checked: valid,
+    });
+    debouncedEmitChange();
+  },
 });
 
-const afterPlaceholder = computed((): string => {
-  if (datePickerType.value || datetimePickerType.value) {
-    return value.value.items.find((i) => i.key === "after")?.text ?? "";
-  }
-  return "";
-});
+const endDateOfRange = computed({
+  get(): DateTime {
+    const end = value.value.items[1]?.value;
+    return typeof end !== "boolean" && isValidDateFormat(end) ? end : "";
+  },
+  set(date: DateTime) {
+    const valid = isValidDateFormat(date);
+    const endChipText = valid
+      ? dayjs(date).format(envs.DATE_FORMAT_STRING)
+      : "";
 
-const beforePlaceholder = computed((): string => {
-  if (datePickerType.value || datetimePickerType.value) {
-    return value.value.items.find((i) => i.key === "before")?.text ?? "";
-  }
-  return "";
-});
-
-function onUpdateStartPicker(_value: DateTime): void {
-  const valid = !!_value && dayjs(_value).isValid();
-  const checked = valid || !!before.value;
-  value.value.items = value.value.items.map((i) =>
-    i.key === "after"
-      ? {
-          ...i,
-          value: _value ? _value : "",
-          chipText: datePickerType.value
-            ? formatDate(_value)
-            : formatDatetime(_value),
-          checked: checked,
-        }
-      : {
-          ...i,
-          checked: checked,
-        },
-  );
-  emits("change");
-}
-
-function onUpdateEndPicker(_value: DateTime): void {
-  const valid = !!_value && dayjs(_value).isValid();
-  const checked = valid || !!after.value;
-  value.value.items = value.value.items.map((i) =>
-    i.key === "before"
-      ? {
-          ...i,
-          value: valid ? _value : "",
-          chipText: datePickerType.value
-            ? formatDate(_value)
-            : formatDatetime(_value),
-          checked: checked,
-        }
-      : {
-          ...i,
-          checked: checked,
-        },
-  );
-  emits("change");
-}
-
-function onUpdatePicker(_value: DateTime): void {
-  const valid = !!value && dayjs(_value).isValid();
-  value.value.items = value.value.items.map((i) => {
-    if (i.key === "before") {
-      return {
-        ...i,
-        value: valid ? _value : "",
-        chipText: datePickerType.value
-          ? formatDate(_value)
-          : formatDatetime(_value),
-        checked: valid,
-      };
-    } else if (i.key === "after") {
-      return {
-        ...i,
-        value: valid
-          ? datePickerType.value
-            ? dayjs(_value, DATEPICKER_FORMAT).endOf("day").toISOString()
-            : dayjs(_value, DATETIMEPICKER_FORMAT.value)
-                .endOf(
-                  !value.value.timerOption ? "hour" : value.value.timerOption,
-                )
-                .toISOString()
+    value.value.items.splice(1, 1, {
+      text: endPlaceholder.value,
+      value: valid ? date : "",
+      chipText:
+        valid && endChipText !== value.value.items[0]?.chipText
+          ? endChipText
           : "",
+      checked: valid,
+    });
+    debouncedEmitChange();
+  },
+});
+
+const startDateTimeOfRange = computed({
+  get(): DateTime {
+    const start = value.value.items[0]?.value;
+    return typeof start !== "boolean" && isValidDateFormat(start) ? start : "";
+  },
+  set(datetime: DateTime) {
+    const valid = isValidDateFormat(datetime);
+    value.value.items.splice(0, 1, {
+      text: startPlaceholder.value,
+      value: valid ? datetime : "",
+      chipText: valid
+        ? dayjs(datetime).format(
+            value.value.timerOption === "second"
+              ? envs.DATETIME_FORMAT_STRING
+              : envs.DATETIME_MINUTE_FORMAT_STRING,
+          )
+        : "",
+      checked: valid,
+    });
+    debouncedEmitChange();
+  },
+});
+
+const endDateTimeOfRange = computed({
+  get(): DateTime {
+    const end = value.value.items[1]?.value;
+    return typeof end !== "boolean" && isValidDateFormat(end) ? end : "";
+  },
+  set(datetime: DateTime) {
+    const valid = isValidDateFormat(datetime);
+    const endChipText = valid
+      ? dayjs(datetime).format(
+          value.value.timerOption === "second"
+            ? envs.DATETIME_FORMAT_STRING
+            : envs.DATETIME_MINUTE_FORMAT_STRING,
+        )
+      : "";
+
+    value.value.items.splice(1, 1, {
+      text: endPlaceholder.value,
+      value: valid ? datetime : "",
+      chipText:
+        valid && endChipText !== value.value.items[0]?.chipText
+          ? endChipText
+          : "",
+      checked: valid,
+    });
+    debouncedEmitChange();
+  },
+});
+
+const startDateTime = computed({
+  get(): DateTime {
+    const start = value.value.items[0]?.value;
+    return typeof start !== "boolean" && isValidDateFormat(start) ? start : "";
+  },
+  set(datetime: DateTime) {
+    const valid = isValidDateFormat(datetime);
+    const checked = valid || !!value.value.items[1]?.value;
+
+    value.value.items = [
+      {
+        text: startPlaceholder.value,
+        value: valid ? datetime : undefined,
+        chipText: valid
+          ? dayjs(datetime).format(
+              value.value.timerOption === "second"
+                ? envs.DATETIME_FORMAT_STRING
+                : envs.DATETIME_MINUTE_FORMAT_STRING,
+            )
+          : "",
+        checked: checked,
+      },
+      {
+        text: endPlaceholder.value,
+        value: endDateTime.value ? endDateTime.value : undefined,
+        chipText: value.value.items[1]?.chipText,
+        checked: checked,
+      },
+    ];
+    emits("change");
+  },
+});
+
+const endDateTime = computed({
+  get(): DateTime {
+    const end = value.value.items[1]?.value;
+    return typeof end !== "boolean" && isValidDateFormat(end) ? end : "";
+  },
+  set(datetime: DateTime) {
+    const valid = isValidDateFormat(datetime);
+    const checked = valid || !!value.value.items[0]?.value;
+    value.value.items = [
+      {
+        text: startPlaceholder.value,
+        value: startDateTime.value ? startDateTime.value : undefined,
+        chipText: value.value.items[0]?.chipText,
+        checked: checked,
+      },
+      {
+        text: endPlaceholder.value,
+        value: valid ? datetime : undefined,
+        chipText: valid
+          ? dayjs(datetime).format(
+              value.value.timerOption === "second"
+                ? envs.DATETIME_FORMAT_STRING
+                : envs.DATETIME_MINUTE_FORMAT_STRING,
+            )
+          : "",
+        checked: checked,
+      },
+    ];
+    emits("change");
+  },
+});
+
+const datePicker = computed({
+  get(): DateTime {
+    const date = value.value.items[0]?.value;
+    return typeof date !== "boolean" && isValidDateFormat(date) ? date : "";
+  },
+  set(date: DateTime) {
+    const valid = isValidDateFormat(date);
+    value.value.items = [
+      {
+        text: startPlaceholder.value,
+        value: valid ? date : "",
+        chipText: formatDate(date),
         checked: valid,
-      };
-    } else {
-      return i;
-    }
-  });
-  emits("change");
-}
+      },
+      {
+        text: endPlaceholder.value,
+        value: valid ? dayjs(date).endOf("day").toISOString() : "",
+        chipText: "",
+        checked: valid,
+      },
+    ];
+    emits("change");
+  },
+});
+
+const datetimePicker = computed({
+  get(): DateTime {
+    const datetime = value.value.items[0]?.value;
+    return typeof datetime !== "boolean" && isValidDateFormat(datetime)
+      ? datetime
+      : "";
+  },
+  set(datetime: DateTime) {
+    const valid = isValidDateFormat(datetime);
+    value.value.items = [
+      {
+        text: startPlaceholder.value,
+        value: valid ? datetime : undefined,
+        chipText: formatDatetime(datetime),
+        checked: valid,
+      },
+      {
+        text: endPlaceholder.value,
+        value: valid
+          ? dayjs(datetime)
+              .endOf(
+                !value.value.timerOption ? "hour" : value.value.timerOption,
+              )
+              .toISOString()
+          : "",
+        chipText: "",
+        checked: valid,
+      },
+    ];
+    emits("change");
+  },
+});
+
+const startPlaceholder = computed((): string => {
+  return value.value.items[0]?.text ?? "";
+});
+
+const endPlaceholder = computed((): string => {
+  return value.value.items[1]?.text ?? "";
+});
 
 function onUpdateTextField(
   value: string,
@@ -298,6 +432,11 @@ function onUpdateTextField(
 ): void {
   fetchList(value, item);
 }
+
+const debouncedEmitChange = useDebounceFn((): void => {
+  emits("change");
+}, 100);
+
 const fetchList = useDebounceFn(
   (value: string, item: FilterItem<FilterItemType>): void => {
     item.value = value;

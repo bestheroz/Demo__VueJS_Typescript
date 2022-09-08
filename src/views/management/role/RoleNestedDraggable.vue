@@ -1,5 +1,5 @@
 <template>
-  <v-list>
+  <v-list :class="{ 'ml-8': !rootFlag }">
     <vuedraggable
       class="dragArea"
       tag="div"
@@ -7,6 +7,8 @@
       :group="{ name: 'g1' }"
       :animation="200"
       handle=".drag-handle"
+      :scroll-sensitivity="200"
+      :force-fallback="true"
     >
       <v-list-item
         :key="role.id"
@@ -14,6 +16,7 @@
         :class="role.id === 1 ? 'd-none' : undefined"
         dense
         style="box-shadow: none"
+        class="pr-0"
       >
         <v-list-item-title class="d-inline" v-if="role.id !== 1">
           <div>
@@ -48,9 +51,12 @@ import { useVModel } from "@vueuse/core";
 import { useAuthorityStore } from "@/stores/authority";
 
 const { hasWriteAuthority } = useAuthorityStore();
-const props = withDefaults(defineProps<{ value: Role[] }>(), {
-  value: () => [],
-});
+const props = withDefaults(
+  defineProps<{ value: Role[]; rootFlag?: boolean }>(),
+  {
+    value: () => [],
+  },
+);
 const emits = defineEmits<{
   (e: "input", v: Role[]): void;
   (e: "click:edit", v: Role): void;

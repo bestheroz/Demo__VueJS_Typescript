@@ -1,12 +1,10 @@
 import { DateTime } from "@/definitions/types";
 
-export interface UpdateDisplayOrder {
-  id: number;
-  displayOrder: number;
+export interface Id {
+  id?: number;
 }
 
-export interface IdCreatedUpdated {
-  id?: number;
+export interface IdCreatedUpdated extends Id {
   createdBy?: number;
   created?: DateTime;
   updatedBy?: number;
@@ -34,7 +32,7 @@ export interface Code extends IdCreatedUpdated {
   type: string;
   value: string;
   text: string;
-  available: boolean;
+  availableFlag: boolean;
   displayOrder: number | null;
 }
 
@@ -47,7 +45,7 @@ export interface RoleMenuMap {
 
 export interface Role extends IdCreatedUpdated {
   name: string;
-  available: boolean;
+  availableFlag: boolean;
   children: Role[];
   maps: RoleMenuMap[];
 }
@@ -56,6 +54,10 @@ export interface Admin extends IdCreatedUpdated {
   loginId: string;
   name: string;
   expired: DateTime;
-  available: boolean;
+  availableFlag: boolean;
   role: Role;
+}
+export interface UpdateDisplayOrder {
+  id: number;
+  displayOrder: number;
 }

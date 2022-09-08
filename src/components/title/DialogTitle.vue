@@ -4,7 +4,6 @@
       {{ title }}
       <v-spacer />
       <v-switch class="d-none" />
-      <slot name="utils"></slot>
       <v-switch
         v-model="value"
         :label="getSwitchLabel(value, switchText)"

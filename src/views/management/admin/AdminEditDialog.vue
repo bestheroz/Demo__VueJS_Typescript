@@ -3,7 +3,7 @@
     <v-bottom-sheet v-model="dialog" inset scrollable>
       <v-card class="pb-4">
         <DialogTitle
-          v-model="value.available"
+          v-model="value.availableFlag"
           :is-new="isNew"
           prefix="관리자"
           :suffix="noneWriteAuthority ? '보기' : ''"
@@ -217,7 +217,7 @@ const noneWriteAuthority = computed(
     !superAdminFlag &&
     (!writeAuthority ||
       roleId === value.value.role.id ||
-      !value.value.role.available) &&
+      !value.value.role.availableFlag) &&
     !isNew.value,
 );
 
@@ -258,6 +258,7 @@ async function save(): Promise<void> {
   }
   isNew.value ? await create() : await update();
 }
+
 async function create(): Promise<void> {
   saving.value = true;
   const response = await postApi<Admin>("admins/", {
@@ -273,6 +274,7 @@ async function create(): Promise<void> {
     emits("created", response.data);
   }
 }
+
 async function update(): Promise<void> {
   saving.value = true;
   const response = await patchApi<Admin>(`admins/${value.value.id}`, {
@@ -291,6 +293,7 @@ async function update(): Promise<void> {
     emits("updated", response.data);
   }
 }
+
 function checkExistsLoginId(): void {
   if (value.value.loginId === originalLoginId.value) {
     return;
@@ -299,6 +302,7 @@ function checkExistsLoginId(): void {
   checked.value = false;
   debouncedCheckExistsLoginId();
 }
+
 onBeforeMount(() => {
   originalLoginId.value = value.value.loginId;
 });

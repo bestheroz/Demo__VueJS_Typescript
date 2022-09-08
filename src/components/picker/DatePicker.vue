@@ -52,7 +52,7 @@
           </v-btn>
           <div class="flex-grow-1"></div>
           <v-btn outlined @click="dialog = false"> 취소</v-btn>
-          <v-btn outlined @click="save"> 확인 </v-btn>
+          <v-btn outlined @click="save"> 확인</v-btn>
         </v-date-picker>
       </v-dialog>
     </validation-observer>
@@ -102,10 +102,8 @@ const emits = defineEmits<{
 }>();
 
 const value = useVModel(props, "value", emits, { eventName: "input" });
-const pickerString = ref(null as string | null);
+const pickerString = ref<string | null>(null);
 const dialog = ref(false);
-
-const DATEPICKER_FORMAT = "YYYY-MM-DD";
 
 const style = computed((): string | undefined => {
   if (props.fullWidth) {
@@ -138,8 +136,8 @@ const disableToday = computed((): boolean => {
     return false;
   }
   return props.endType
-    ? dayjs().isBefore(dayjs(props.min, DATEPICKER_FORMAT))
-    : dayjs().isAfter(dayjs(props.max, DATEPICKER_FORMAT));
+    ? dayjs().isBefore(dayjs(props.min, envs.DATE_FORMAT_STRING))
+    : dayjs().isAfter(dayjs(props.max, envs.DATE_FORMAT_STRING));
 });
 
 const textFieldString = computed((): string => {
@@ -147,11 +145,13 @@ const textFieldString = computed((): string => {
 });
 
 function setToday(): void {
-  pickerString.value = dayjs().format(DATEPICKER_FORMAT);
+  pickerString.value = dayjs().format(envs.DATE_FORMAT_STRING);
 }
+
 async function validate(): Promise<boolean> {
   return !!(await observer.value?.validate());
 }
+
 async function save() {
   if (await validate()) {
     refDialog.value?.save(pickerString.value);
@@ -168,6 +168,7 @@ async function save() {
     dialog.value = false;
   }
 }
+
 watch(
   () => value.value,
   (val: DateTime) => {

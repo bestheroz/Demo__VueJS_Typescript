@@ -9,20 +9,7 @@ import {
 import dayjs from "dayjs";
 import { MENU_TYPE, ROLE_AUTHORITY_TYPE } from "@/definitions/selections";
 import config from "../configs";
-
-export function defaultSignedAdmin(): {
-  id: number;
-  loginId: string;
-  name: string;
-  roleId: number;
-} {
-  return {
-    id: 0,
-    loginId: "",
-    name: "",
-    roleId: 0,
-  };
-}
+import { FilterItem, FilterItemType } from "@/definitions/types";
 
 export function defaultAdminConfig(): AdminConfig {
   return {
@@ -40,7 +27,7 @@ export function defaultAdmin(): Admin {
     loginId: "",
     name: "",
     expired: dayjs().add(1, "years").endOf("day"),
-    available: false,
+    availableFlag: false,
     role: defaultRole(),
   };
 }
@@ -60,7 +47,7 @@ export function defaultCode(): Code {
     type: "",
     value: "",
     text: "",
-    available: false,
+    availableFlag: false,
     displayOrder: null,
   };
 }
@@ -68,7 +55,7 @@ export function defaultCode(): Code {
 export function defaultRole(): Role {
   return {
     name: "",
-    available: false,
+    availableFlag: false,
     children: [],
     maps: [],
   };
@@ -79,5 +66,13 @@ export function defaultRoleMenuMap(): RoleMenuMap {
     menu: defaultMenu(),
     authoritiesJson: [ROLE_AUTHORITY_TYPE.VIEW],
     children: [],
+  };
+}
+
+export function defaultFilterItem(): FilterItem<FilterItemType> {
+  return {
+    text: "",
+    value: undefined,
+    checked: false,
   };
 }

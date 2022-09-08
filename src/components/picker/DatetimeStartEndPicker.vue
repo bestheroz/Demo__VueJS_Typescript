@@ -3,7 +3,6 @@
     <v-row no-gutters v-if="fullWidth">
       <v-col cols="6">
         <DatetimePicker
-          ref="refStart"
           v-model="start"
           :label="startLabel"
           :placeholder="startPlaceholder"
@@ -16,14 +15,13 @@
           :hide-hint="hideHint"
           :hide-label="hideLabel"
           :use-seconds="useSeconds"
-          :max="maxDate"
+          :max="max"
           full-width
           start-type
         />
       </v-col>
       <v-col cols="6">
         <DatetimePicker
-          ref="refEnd"
           v-model="end"
           :label="endLabel"
           :placeholder="endPlaceholder"
@@ -36,7 +34,7 @@
           :hide-hint="hideHint"
           :hide-label="hideLabel"
           :use-seconds="useSeconds"
-          :min="minDate"
+          :min="min"
           full-width
           end-type
         />
@@ -59,7 +57,7 @@
           :hide-label="hideLabel"
           :use-minutes="useMinutes"
           :use-seconds="useSeconds"
-          :max="maxDate"
+          :max="max"
           start-type
         />
         <DatetimePicker
@@ -77,7 +75,7 @@
           :hide-label="hideLabel"
           :use-minutes="useMinutes"
           :use-seconds="useSeconds"
-          :min="minDate"
+          :min="min"
           end-type
         />
       </v-col>
@@ -89,8 +87,10 @@
 import DatetimePicker from "@/components/picker/DatetimePicker.vue";
 import dayjs from "dayjs";
 import { DateTime } from "@/definitions/types";
-import { computed, ref } from "vue";
+import { computed } from "vue";
 import { useVModels } from "@vueuse/core";
+import envs from "@/constants/envs";
+import { isValidDateFormat } from "@/utils/formatter";
 
 const props = withDefaults(
   defineProps<{
@@ -132,41 +132,21 @@ const emits = defineEmits<{
 }>();
 const { start, end } = useVModels(props, emits);
 
-const DATE_FORMAT = "YYYY-MM-DD";
-const MINUTE_TIME_PICKER_FORMAT = "HH:mm";
-const TIMEPICKER_FORMAT = "HH:mm:ss";
+const DATETIMEPICKER_FORMAT = computed((): string =>
+  props.useSeconds
+    ? envs.DATETIME_FORMAT_STRING
+    : envs.DATETIME_MINUTE_FORMAT_STRING,
+);
 
-const minDate = computed((): string[] | undefined => {
-  if (!start.value) {
-    return undefined;
-  }
-  return [
-    dayjs(start.value).format(DATE_FORMAT),
-    props.useSeconds
-      ? dayjs(start.value).format(TIMEPICKER_FORMAT)
-      : dayjs(start.value).format(MINUTE_TIME_PICKER_FORMAT),
-  ];
-});
+const min = computed((): string =>
+  isValidDateFormat(start.value)
+    ? dayjs(start.value).format(DATETIMEPICKER_FORMAT.value)
+    : "",
+);
 
-const maxDate = computed((): string[] | undefined => {
-  if (!end.value) {
-    return undefined;
-  }
-  return [
-    dayjs(end.value).format(DATE_FORMAT),
-    props.useSeconds
-      ? dayjs(end.value).format(TIMEPICKER_FORMAT)
-      : dayjs(end.value).format(MINUTE_TIME_PICKER_FORMAT),
-  ];
-});
-
-async function validate(): Promise<boolean> {
-  return (
-    !!(await refStart.value?.validate()) && !!(await refEnd.value?.validate())
-  );
-}
-const refStart = ref();
-const refEnd = ref();
-
-defineExpose({ validate });
+const max = computed((): string =>
+  isValidDateFormat(end.value)
+    ? dayjs(end.value).format(DATETIMEPICKER_FORMAT.value)
+    : "",
+);
 </script>

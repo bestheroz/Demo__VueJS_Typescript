@@ -40,13 +40,7 @@ const layouts = {
 
 const isRouterLoaded = computed((): boolean => router.app.$route.name !== null);
 const currentLayout = computed(
-  () =>
-    layouts[
-      (router.app.$route.meta?.layout || "default") as
-        | "default"
-        | "auth"
-        | "error"
-    ],
+  () => layouts[router.app.$route.meta?.layout || "default"],
 );
 
 onBeforeMount(async () => {

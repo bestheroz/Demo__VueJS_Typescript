@@ -25,9 +25,11 @@ jobs:
       - name: npm install
         run: npm ci
 
-      - uses: ./.github/actions/test
+      - name: lint
+        run: npm run lint
 
-      - uses: ./.github/actions/build-node
+      - name: build
+        run: npm run build -- --mode ${{ github.ref_name }}
 
       - uses: 8398a7/action-slack@v3
         env:

@@ -1,39 +1,92 @@
-name: Test
-
-on: push
-#    branches-ignore: [main, RC/**]
-
+name: test
+on:
+  push:
+    branches: ['**']
+    tags-ignore: ['**']
 jobs:
-  npm-test:
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        node-version: [16]
-
+  lint:
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@main
+      - name: checkout
+        uses: actions/checkout@main
 
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: setup node
         uses: actions/setup-node@main
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: "npm"
+          node-version: 16
+          cache: 'npm'
 
-      - name: npm install
+      - name: ci
         run: npm ci
 
-      - uses: ./.github/actions/test
+      - name: lint
+        run: npm run lint
 
-      - uses: ./.github/actions/build-node
-
-      - uses: 8398a7/action-slack@v3
+      - name: send slack message
+        uses: 8398a7/action-slack@v3
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           MATRIX_CONTEXT: ${{ toJson(matrix) }}
         with:
           status: ${{ job.status }}
-          fields: ref,repo,workflow,message,author,took
+          fields: repo,message,author,ref,workflow,took
           author_name: ''
-        if: always()
+        if: failure()
+
+  tsc:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@main
+
+      - name: setup node
+        uses: actions/setup-node@main
+        with:
+          node-version: 16
+          cache: 'npm'
+
+      - name: ci
+        run: npm ci
+
+      - name: tsc
+        run: npm run tsc
+
+      - name: send slack message
+        uses: 8398a7/action-slack@v3
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          MATRIX_CONTEXT: ${{ toJson(matrix) }}
+        with:
+          status: ${{ job.status }}
+          fields: repo,message,author,ref,workflow,took
+          author_name: ''
+        if: failure()
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@main
+
+      - name: setup node
+        uses: actions/setup-node@main
+        with:
+          node-version: 16
+          cache: 'npm'
+
+      - name: ci
+        run: npm ci
+
+      - name: build
+        run: npm run build
+
+      - name: send slack message
+        uses: 8398a7/action-slack@v3
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          MATRIX_CONTEXT: ${{ toJson(matrix) }}
+        with:
+          status: ${{ job.status }}
+          fields: repo,message,author,ref,workflow,took
+          author_name: ''
+        if: failure()

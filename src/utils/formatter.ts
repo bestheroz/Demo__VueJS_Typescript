@@ -4,8 +4,10 @@ import dayjs from "dayjs";
 import { truncate } from "lodash-es";
 import { useCodesStore } from "@/stores/codes";
 import { storeToRefs } from "pinia";
+import envs from "@/constants/envs";
 
 const { adminCodes } = storeToRefs(useCodesStore(store));
+
 export function getAdminNm(value: number | undefined | null): string {
   const find = adminCodes.value.find(
     (value1: SelectItem<number>) => value1.value === value,
@@ -13,16 +15,26 @@ export function getAdminNm(value: number | undefined | null): string {
   return find?.text ?? value?.toString() ?? "-";
 }
 
-export function formatDatetime(value: DateTime | undefined | null): string {
-  return value && dayjs(value).isValid()
-    ? dayjs(value).format("YYYY-MM-DD HH:mm:ss")
+export function formatDatetime(value: DateTime): string {
+  return isValidDateFormat(value)
+    ? dayjs(value).format(envs.DATETIME_FORMAT_STRING)
     : "";
 }
 
-export function formatDate(value: DateTime | undefined | null): string {
-  return value && dayjs(value).isValid()
-    ? dayjs(value).format("YYYY-MM-DD")
+export function formatDatetimeMinute(value: DateTime): string {
+  return isValidDateFormat(value)
+    ? dayjs(value).format(envs.DATETIME_MINUTE_FORMAT_STRING)
     : "";
+}
+
+export function formatDate(value: DateTime): string {
+  return isValidDateFormat(value)
+    ? dayjs(value).format(envs.DATE_FORMAT_STRING)
+    : "";
+}
+
+export function isValidDateFormat(value: DateTime): boolean {
+  return !!value && dayjs(value).isValid();
 }
 
 export function getEllipseText(

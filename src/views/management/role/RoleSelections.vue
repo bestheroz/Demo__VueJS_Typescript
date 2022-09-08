@@ -39,12 +39,12 @@ const emits = defineEmits<{
   (e: "input", v: Role): void;
 }>();
 const value = useVModel(props, "value", emits, { eventName: "input" });
-const items = ref([] as Role[]);
+const items = ref<Role[]>([]);
 const loading = ref(false);
 onBeforeMount(async () => {
   loading.value = true;
   const response = await getApi<Role[]>(
-    `roles/selections/?available=${
+    `roles/selections/?availableFlag=${
       !props.disabled && props.paramAvailable !== undefined
         ? props.paramAvailable
         : ""

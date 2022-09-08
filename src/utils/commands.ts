@@ -16,6 +16,7 @@ import { storeToRefs } from "pinia";
 
 const { clearAdmin, reIssueAccessToken } = useAdminStore(store);
 const { flatAuthorities } = storeToRefs(useAuthorityStore(store));
+
 export async function routerReplace(path: string): Promise<void> {
   if (router.currentRoute.path !== path) {
     await router.replace(path);
@@ -170,6 +171,7 @@ export async function getValidatedAccessToken(): Promise<string> {
   }
   return accessToken ?? "";
 }
+
 export async function getValidatedRefreshToken(): Promise<string> {
   const refreshToken = window.localStorage.getItem("refreshToken");
   if (

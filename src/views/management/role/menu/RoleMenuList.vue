@@ -6,6 +6,7 @@
           <RoleMenuNestedDraggable
             v-model="items"
             :role-id="roleId"
+            root-flag
             v-if="roleId"
           />
         </v-col>
@@ -53,8 +54,8 @@ const props = withDefaults(
 );
 const { items, loading } = useList<RoleMenuMap>();
 
-const menus = ref([] as Menu[]);
-const selected = ref([] as number[]);
+const menus = ref<Menu[]>([]);
+const selected = ref<number[]>([]);
 
 const flattMenus = computed((): Menu[] => getMenusFromChildren(menus.value));
 
@@ -83,7 +84,7 @@ async function fetchList(): Promise<void> {
 }
 
 async function getMenus(roleId: number): Promise<Menu[]> {
-  if (props.roleId === roleId) {
+  if (adminStore.roleId === roleId) {
     const response = await getApi<Menu[]>(`menus/?roleId=${roleId}`);
     return response.data ?? [];
   } else {

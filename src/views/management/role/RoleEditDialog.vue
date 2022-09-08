@@ -3,7 +3,7 @@
     <v-bottom-sheet v-model="dialog" inset scrollable>
       <v-card class="pb-4">
         <DialogTitle
-          v-model="value.available"
+          v-model="value.availableFlag"
           :is-new="isNew"
           prefix="역할"
           with-switch
@@ -100,5 +100,6 @@ async function create(): Promise<void> {
     emits("created", response.data);
   }
 }
+
 const observer = ref();
 </script>

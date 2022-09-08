@@ -35,9 +35,9 @@ import { useAdminStore } from "@/stores/admin";
 
 const adminStore = useAdminStore();
 
-const roles = ref([] as Role[]);
+const roles = ref<Role[]>([]);
 const saving = ref(false);
-const filterOutput = ref({} as FilterOutput);
+const filterOutput = ref<FilterOutput>({});
 
 const filters = computed((): Filter[] => [
   {

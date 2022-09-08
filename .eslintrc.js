@@ -42,5 +42,6 @@ module.exports = {
     indent: "off",
     "prettier/prettier": "off",
     "lines-between-class-members": "off",
+    "vue/no-v-text-v-html-on-component": "off",
   },
 };

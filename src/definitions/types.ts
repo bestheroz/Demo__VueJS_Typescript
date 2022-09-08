@@ -44,8 +44,8 @@ export interface Drawer {
 }
 
 export type FilterItemType = string | number | boolean | DateTime;
+
 export interface FilterItem<T> {
-  key?: "after" | "before";
   text: string;
   chipText?: string | number | boolean | null;
   value: T;
@@ -65,3 +65,7 @@ export interface Filter {
 }
 
 export type FilterOutput = Record<string, (string | number | boolean)[]>;
+
+export interface AvailableFlagDTO {
+  availableFlag: boolean;
+}

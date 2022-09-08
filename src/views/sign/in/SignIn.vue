@@ -1,10 +1,7 @@
 <template>
   <div>
     <v-card class="text-center pa-1">
-      <v-card-title
-        class="justify-center text-h4 mb-2"
-        v-text="envs.PRODUCT_TITLE"
-      />
+      <v-card-title class="justify-center text-h4 mb-2">Welcome</v-card-title>
       <v-card-subtitle>Sign in to your account</v-card-subtitle>
 
       <!-- sign in form -->
@@ -84,7 +81,6 @@ import { useAuthorityStore } from "@/stores/authority";
 import { useAdminStore } from "@/stores/admin";
 import { useCodesStore } from "@/stores/codes";
 import { useIntervalFn } from "@vueuse/core";
-import envs from "@/constants/envs";
 
 const { setConfig, resetDefaultConfig } = useConfigStore();
 const { reloadRole, clearAuthority } = useAuthorityStore();
@@ -94,8 +90,8 @@ const codesStore = useCodesStore();
 const { adminCodes } = storeToRefs(codesStore);
 const { reloadAdminCodes } = codesStore;
 
-const loginId = ref("");
-const password = ref("");
+const loginId = ref("1");
+const password = ref("1");
 const loading = ref(false);
 const errorProvider = ref(false);
 const errorProviderMessages = ref("");

@@ -43,13 +43,6 @@ const routes = (): RouteConfig[] => {
       component: () => import("@/views/management/admin/AdminPage.vue"),
     },
   ];
-  const developer: RouteConfig[] = [
-    {
-      path: "/developer/picker",
-      beforeEnter: requireAuth(),
-      component: () => import("@/views/developer/picker/PickerPage.vue"),
-    },
-  ];
   const error: RouteConfig[] = [
     {
       path: "/error",
@@ -81,7 +74,6 @@ const routes = (): RouteConfig[] => {
       },
     },
     ...management,
-    ...developer,
     ...error,
     {
       path: "*",

@@ -3,7 +3,6 @@
     "vue",
     "vue-router",
     "vee-validate",
-    "eslint-plugin-vue",
     "sass-loader"
   ]
 }

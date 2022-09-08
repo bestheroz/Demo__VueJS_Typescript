@@ -1,15 +1,14 @@
 /* eslint @typescript-eslint/no-var-requires: "off" */
+const { VuetifyLoaderPlugin } = require("vuetify-loader");
 
 module.exports = {
   css: {
     extract:
-      /* eslint-disable indent */
       process.env.NODE_ENV === "production"
         ? {
             ignoreOrder: true,
           }
         : false,
-    /* eslint-enable indent */
     loaderOptions: {
       sass: {
         additionalData: "@import '~@/assets/scss/vuetify/variables'",
@@ -36,7 +35,8 @@ module.exports = {
   chainWebpack: (config) => {
     config
       .plugin("NodePolyfillPlugin")
-      .use(require("node-polyfill-webpack-plugin"));
+      .use(require("node-polyfill-webpack-plugin"), [{}]);
+    config.plugin("VuetifyLoaderPlugin").use(new VuetifyLoaderPlugin());
     if (process.env.VUE_APP_ENVIRONMENT === "production") {
       config.plugin("sentryWebpack").use(require("@sentry/webpack-plugin"), [
         {
