@@ -4,11 +4,11 @@
       button-icon="mdi-content-save"
       button-text="저장"
       :button-loading="saving"
-      @click="saveItems"
       :hide-button="roleId === adminStore.roleId"
+      @click="saveItems"
     >
       <template #more-buttons>
-        <v-btn @click="fetchList" color="primary" outlined x-large>
+        <v-btn color="primary" outlined x-large @click="fetchList">
           <v-icon> mdi-refresh </v-icon> 새로고침
         </v-btn>
       </template>

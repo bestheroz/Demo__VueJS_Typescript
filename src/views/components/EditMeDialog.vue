@@ -1,16 +1,18 @@
 <template>
   <div>
-    <v-bottom-sheet v-model="dialog" inset scrollable max-width="40vw">
+    <v-bottom-sheet v-model="dialog" inset scrollable max-width="50vw">
       <v-card class="pb-4">
         <DialogTitle text="내 정보" @click:close="dialog = false" />
         <v-card-text>
           <validation-observer ref="observer">
-            <v-row>
+            <v-row dense>
               <v-col cols="12">
                 <v-text-field
                   :value="item.loginId"
                   label="나의 아이디"
+                  filled
                   disabled
+                  hide-details
                 />
               </v-col>
               <v-col cols="12">
@@ -22,8 +24,10 @@
                   <v-text-field
                     v-model="item.name"
                     label="나의 이름"
+                    filled
                     :counter="100"
                     :error-messages="errors"
+                    hide-details="auto"
                     class="required"
                   />
                 </validation-provider>
@@ -32,7 +36,9 @@
                 <v-text-field
                   :value="item.role.name"
                   label="나의 역할"
+                  filled
                   disabled
+                  hide-details
                 />
               </v-col>
             </v-row>

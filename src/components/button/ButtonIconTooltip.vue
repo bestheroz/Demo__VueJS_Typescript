@@ -9,9 +9,7 @@
       <template #activator="{ on, attrs }">
         <v-btn
           :color="color"
-          @click="$emit('click')"
           v-bind="attrs"
-          v-on="on"
           :disabled="disabled"
           :loading="loading"
           :small="small"
@@ -20,14 +18,16 @@
           :x-large="xLarge"
           :block="block"
           :class="className"
+          @click="$emit('click')"
+          v-on="on"
         >
           <v-icon
-            v-text="icon"
             :size="size"
             :small="small"
             :x-small="xSmall"
             :large="large"
             :x-large="xLarge"
+            v-text="icon"
           />
         </v-btn>
       </template>

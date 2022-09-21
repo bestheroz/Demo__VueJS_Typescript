@@ -2,7 +2,6 @@
   <div>
     <v-btn
       :color="color"
-      @click="$emit('click')"
       :disabled="disabled"
       :loading="loading"
       :small="small"
@@ -10,8 +9,9 @@
       :large="large"
       :x-large="xLarge"
       :block="block"
+      @click="$emit('click')"
     >
-      <v-icon v-text="icon" class="mr-1" />
+      <v-icon class="mr-1" v-text="icon" />
       {{ text }}
     </v-btn>
   </div>

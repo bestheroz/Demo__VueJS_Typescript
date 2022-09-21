@@ -1,18 +1,18 @@
 <template>
   <div>
-    <PageTitle @click="showAddDialog" :button-loading="saving">
+    <PageTitle :button-loading="saving" @click="showAddDialog">
       <template #more-buttons>
         <v-btn
-          @click="excel"
+          v-if="hasExcelAuthority"
           color="primary"
           outlined
           x-large
-          v-if="hasExcelAuthority"
+          @click="excel"
         >
           <v-icon> mdi-file-excel</v-icon>
           엑셀다운로드
         </v-btn>
-        <v-btn @click="fetchList" color="primary" outlined x-large>
+        <v-btn color="primary" outlined x-large @click="fetchList">
           <v-icon> mdi-refresh</v-icon>
           새로고침
         </v-btn>
@@ -64,16 +64,16 @@
             <CheckboxMarker
               :value="
                 item.availableFlag &&
-                item.role.availableFlag &&
-                dayjs(item.expired).isAfter(dayjs())
+                  item.role.availableFlag &&
+                  dayjs(item.expired).isAfter(dayjs())
               "
             />
           </template>
           <template #[`item.expired`]="{ item }">
             {{ formatDatetime(item.expired) }}
           </template>
-          <template #[`item.actions`]="{ item }" v-if="hasDeleteAuthority">
-            <v-btn icon @click="remove(item)" v-if="id !== item.id">
+          <template v-if="hasDeleteAuthority" #[`item.actions`]="{ item }">
+            <v-btn v-if="id !== item.id" icon @click="remove(item)">
               <v-icon color="error"> mdi-delete-outline</v-icon>
             </v-btn>
           </template>
@@ -81,11 +81,11 @@
       </v-card-text>
     </v-card>
     <AdminEditDialog
+      v-if="dialog"
       v-model="editItem"
       :dialog.sync="dialog"
       @created="fetchList"
       @updated="fetchList"
-      v-if="dialog"
     />
   </div>
 </template>

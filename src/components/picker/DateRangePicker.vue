@@ -18,16 +18,17 @@
           :label="hideLabel ? undefined : label"
           :placeholder="placeholder"
           :messages="message"
+          filled
           prepend-inner-icon="mdi-calendar-cursor"
-          @click:prepend-inner="dialog = true"
           readonly
           :disabled="disabled"
           :dense="dense"
-          :hide-details="hideDetails"
+          :hide-details="hideDetails || 'auto'"
           :error-messages="errors"
           :clearable="clearable"
-          @click:clear="[start, end] = [null, null]"
           :class="required ? 'required' : ''"
+          @click:prepend-inner="dialog = true"
+          @click:clear="[start, end] = [null, null]"
           v-on="on"
         />
       </validation-provider>
@@ -40,11 +41,11 @@
       scrollable
       :max="max"
       :min="min"
-      @change="sortPickerArray"
       range
+      @change="sortPickerArray"
     >
       <v-btn outlined @click="setToday"> 오늘</v-btn>
-      <div class="flex-grow-1"></div>
+      <div class="flex-grow-1" />
       <v-btn outlined @click="dialog = false"> 취소</v-btn>
       <v-btn outlined @click="save"> 확인</v-btn>
     </v-date-picker>

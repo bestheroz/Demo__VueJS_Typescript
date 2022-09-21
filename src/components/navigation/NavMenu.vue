@@ -7,13 +7,7 @@
       :drawer="drawer"
       :depth="depth"
     >
-      <template>
-        <component
-          :is="NavMenu"
-          :drawers="drawer.children"
-          :depth="depth + 1"
-        />
-      </template>
+      <component :is="NavMenu" :drawers="drawer.children" :depth="depth + 1" />
     </NavMenuItem>
   </v-list>
 </template>

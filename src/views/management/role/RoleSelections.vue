@@ -2,10 +2,12 @@
   <div>
     <v-select
       v-model="value"
+      filled
       :items="items"
       item-text="name"
       :label="label"
       :error-messages="errorMessages"
+      hide-details="auto"
       :loading="loading"
       :clearable="clearable"
       return-object

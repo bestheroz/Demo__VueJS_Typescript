@@ -12,16 +12,16 @@
       :style="`${value.length === 0 ? 'border-style: dotted' : ''}`"
     >
       <v-list-item
-        :key="role.id"
         v-for="role in value"
+        :key="role.id"
         :class="role.id === 1 ? 'd-none' : undefined"
         dense
         style="box-shadow: none"
         class="pr-0"
       >
-        <v-list-item-title class="d-inline" v-if="role.id !== 1">
+        <v-list-item-title v-if="role.id !== 1" class="d-inline">
           <div>
-            <v-btn icon v-if="hasWriteAuthority">
+            <v-btn v-if="hasWriteAuthority" icon>
               <v-icon class="drag-handle"> mdi-sort</v-icon>
             </v-btn>
             <a

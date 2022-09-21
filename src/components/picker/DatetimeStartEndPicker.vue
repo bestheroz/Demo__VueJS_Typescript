@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-row no-gutters v-if="fullWidth">
+    <v-row v-if="fullWidth" no-gutters>
       <v-col cols="6">
         <DatetimePicker
           v-model="start"
@@ -40,7 +40,7 @@
         />
       </v-col>
     </v-row>
-    <v-row no-gutters v-else>
+    <v-row v-else no-gutters>
       <v-col cols="12" style="display: inline-flex">
         <DatetimePicker
           ref="refStart"

@@ -81,12 +81,12 @@
 
         <v-color-picker v-model="primaryColor" mode="hexa" show-swatches />
         <v-btn
-          v-text="'Reset All'"
           block
           large
           color="primary"
           class="my-4"
           @click="resetDefaultConfig"
+          v-text="'Reset All'"
         />
       </div>
     </v-navigation-drawer>

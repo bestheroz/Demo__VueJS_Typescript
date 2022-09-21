@@ -3,11 +3,11 @@
     <div class="text-h4 pl-1 text--secondary" v-text="computedTitle" />
     <v-spacer />
     <v-menu
+      v-if="!hideMoreActions"
       content-class="page-title-menu"
       bottom
       left
       transition="slide-x-reverse-transition"
-      v-if="!hideMoreActions"
     >
       <template #activator="{ on, attrs }">
         <v-btn
@@ -15,9 +15,9 @@
           x-large
           :loading="buttonLoading"
           v-bind="attrs"
-          v-on="on"
           class="mr-1"
           color="secondary"
+          v-on="on"
         >
           <v-icon>mdi-dots-vertical</v-icon>
         </v-btn>
@@ -28,13 +28,13 @@
       </v-list>
     </v-menu>
     <ButtonIconTooltip
+      v-if="!hideButton && hasWriteAuthority"
       :text="buttonText"
       :icon="buttonIcon"
       :loading="buttonLoading"
       class-name="px-2 mr-1"
       large
       @click="$emit('click')"
-      v-if="!hideButton && hasWriteAuthority"
     />
   </div>
 </template>

@@ -4,10 +4,10 @@
       <v-row dense>
         <v-col sm="12" md="6">
           <RoleMenuNestedDraggable
+            v-if="roleId"
             v-model="items"
             :role-id="roleId"
             root-flag
-            v-if="roleId"
           />
         </v-col>
         <v-col sm="12" md="6">

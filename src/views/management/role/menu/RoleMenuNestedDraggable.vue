@@ -11,14 +11,14 @@
       :force-fallback="true"
       :style="`${value.length === 0 ? 'border-style: dotted' : ''}`"
     >
-      <v-list-item dense :key="item.menu.id" v-for="item in value" class="pr-0">
+      <v-list-item v-for="item in value" :key="item.menu.id" dense class="pr-0">
         <v-row no-gutters>
           <v-col sm="12" lg="5">
             <v-list-item-icon>
-              <v-icon v-text="item.menu.icon" style="top: 4px" />
+              <v-icon style="top: 4px" v-text="item.menu.icon" />
             </v-list-item-icon>
             <v-list-item-title class="d-inline">
-              <v-btn icon v-if="hasWriteAuthority" small>
+              <v-btn v-if="hasWriteAuthority" icon small>
                 <v-icon class="drag-handle"> mdi-sort </v-icon>
               </v-btn>
               {{ item.menu.name }}
@@ -26,12 +26,12 @@
           </v-col>
           <v-col sm="12" lg="7" class="text-right">
             <v-btn-toggle
+              v-if="item.menu.type !== MENU_TYPE.GROUP"
               v-model="item.authoritiesJson"
               active-class="primary"
               tile
               multiple
               class="transparent"
-              v-if="item.menu.type !== MENU_TYPE.GROUP"
             >
               <v-btn
                 :value="ROLE_AUTHORITY_TYPE.VIEW"
@@ -81,7 +81,7 @@
               </v-btn>
             </v-btn-toggle>
           </v-col>
-          <v-col cols="12" v-if="item.menu.type === MENU_TYPE.GROUP">
+          <v-col v-if="item.menu.type === MENU_TYPE.GROUP" cols="12">
             <component
               :is="RoleMenuNestedDraggable"
               v-model="item.children"

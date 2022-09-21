@@ -1,18 +1,18 @@
 <template>
   <div>
-    <PageTitle @click="showAddDialog" :button-loading="saving">
+    <PageTitle :button-loading="saving" @click="showAddDialog">
       <template #more-buttons>
         <v-btn
-          @click="saveAll"
+          v-if="hasWriteAuthority"
           color="primary"
           outlined
           x-large
-          v-if="hasWriteAuthority"
+          @click="saveAll"
         >
           <v-icon> mdi-sort</v-icon>
           순서저장
         </v-btn>
-        <v-btn @click="fetchList" color="primary" outlined x-large>
+        <v-btn color="primary" outlined x-large @click="fetchList">
           <v-icon> mdi-refresh</v-icon>
           새로고침
         </v-btn>
@@ -21,32 +21,32 @@
     <v-card :loading="loading || saving">
       <v-card-text>
         <a
+          v-if="!superAdminFlag"
           class="warning--text"
           v-text="accountRoleName"
-          v-if="!superAdminFlag"
         />
         <RoleNestedDraggable
+          v-if="superAdminFlag"
           v-model="items"
           root-flag
           @click:edit="showEditDialog"
           @remove-role="deleteRole"
-          v-if="superAdminFlag"
         />
         <RoleNestedDraggable
+          v-else-if="items && items.length > 0"
           v-model="items[0].children"
           root-flag
           @click:edit="showEditDialog"
           @remove-role="deleteRole"
-          v-else-if="items && items.length > 0"
         />
       </v-card-text>
     </v-card>
     <RoleEditDialog
+      v-if="dialog"
       v-model="editItem"
       :dialog.sync="dialog"
       @created="fetchList"
       @updated="fetchList"
-      v-if="dialog"
     />
   </div>
 </template>

@@ -6,19 +6,19 @@
       :class="menu.type === MENU_TYPE.GROUP ? '' : 'd-inline-block'"
     >
       <v-chip
+        v-if="menu.id"
         :value="menu.id"
         :outlined="!value.includes(menu.id)"
         :color="value.includes(menu.id) ? 'primary' : 'secondary'"
         class="px-4"
         label
         :disabled="disabled || !hasWriteAuthority"
-        v-if="menu.id"
       >
         <v-icon
-          v-text="menu.icon"
           v-if="menu.type === MENU_TYPE.GROUP"
           class="pr-1"
           size="22"
+          v-text="menu.icon"
         />
         {{ menu.name }}
       </v-chip>

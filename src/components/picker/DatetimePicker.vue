@@ -9,9 +9,9 @@
   >
     <template #activator="{ on }">
       <validation-provider
+        v-slot="{ errors }"
         :name="hideLabel ? placeholder : label"
         :rules="required ? 'required' : ''"
-        v-slot="{ errors }"
       >
         <v-text-field
           :value="textFieldString"
@@ -20,18 +20,19 @@
           :hint="hideHint ? undefined : hint"
           persistent-hint
           :messages="message"
+          filled
           prepend-inner-icon="mdi-calendar-clock"
-          @click:prepend-inner="dialog = true"
           readonly
           :disabled="disabled"
           :dense="dense"
-          :hide-details="hideDetails"
+          :hide-details="hideDetails || 'auto'"
           :clearable="clearable"
-          @click:clear="value = null"
           :error-messages="errors"
           :append-outer-icon="startType ? 'mdi-tilde' : undefined"
           :class="classSet"
           :style="style"
+          @click:prepend-inner="dialog = true"
+          @click:clear="value = null"
           v-on="on"
         />
       </validation-provider>
@@ -43,8 +44,7 @@
       reactive
       :max="maxDate"
       :min="minDate"
-    >
-    </v-date-picker>
+    />
     <v-time-picker
       ref="refTimePicker"
       v-model="timePicker"
@@ -55,8 +55,8 @@
       :min="minTime"
       @click:hour="selectingHourIfNoneTimerOption"
     >
-      <v-btn outlined @click="setNow" :disabled="disableToday"> 지금</v-btn>
-      <div class="flex-grow-1"></div>
+      <v-btn outlined :disabled="disableToday" @click="setNow"> 지금</v-btn>
+      <div class="flex-grow-1" />
       <v-btn outlined @click="dialog = false"> 취소</v-btn>
       <v-btn outlined @click="save"> 확인</v-btn>
     </v-time-picker>

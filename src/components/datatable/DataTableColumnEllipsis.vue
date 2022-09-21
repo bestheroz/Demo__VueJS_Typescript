@@ -11,9 +11,9 @@
       }"
     >
       <v-tooltip
-        top
-        v-model="show"
         v-if="value"
+        v-model="show"
+        top
         color="secondary"
         :max-width="tooltipWidth"
         open-on-click
@@ -21,14 +21,14 @@
       >
         <template #activator="{ on, attrs }">
           <div
-            v-on="on"
             v-bind="attrs"
-            @click="show = !show"
             :style="{
               'max-width': maxWidth + '!important',
               'text-overflow': 'ellipsis',
               overflow: 'hidden',
             }"
+            v-on="on"
+            @click="show = !show"
           >
             {{ value }}
           </div>

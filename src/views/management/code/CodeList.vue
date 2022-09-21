@@ -1,18 +1,18 @@
 <template>
   <div>
-    <PageTitle @click="showAddDialog" :button-loading="saving">
+    <PageTitle :button-loading="saving" @click="showAddDialog">
       <template #more-buttons>
         <v-btn
-          @click="saveItems"
+          v-if="hasWriteAuthority"
           color="primary"
           outlined
           x-large
-          v-if="hasWriteAuthority"
+          @click="saveItems"
         >
           <v-icon> mdi-sort</v-icon>
           순서저장
         </v-btn>
-        <v-btn @click="fetchList" color="primary" outlined x-large>
+        <v-btn color="primary" outlined x-large @click="fetchList">
           <v-icon> mdi-refresh</v-icon>
           새로고침
         </v-btn>
@@ -30,14 +30,14 @@
                   <th class="text-left">코드명</th>
                   <th class="text-center">사용 가능</th>
                   <th class="text-center">작업 일시</th>
-                  <th class="text-center" v-if="hasDeleteAuthority">Action</th>
+                  <th v-if="hasDeleteAuthority" class="text-center">Action</th>
                 </tr>
                 <tr>
                   <td colspan="10" class="px-0" style="height: 0">
                     <v-progress-linear
+                      v-if="loading"
                       height="0.5rem"
                       indeterminate
-                      v-if="loading"
                     />
                   </td>
                 </tr>
@@ -50,12 +50,12 @@
                 </tr>
                 <tr
                   v-for="item in items"
+                  v-else
                   :key="item.id"
                   class="sortableTable"
-                  v-else
                 >
                   <td>
-                    <v-btn icon v-if="hasWriteAuthority">
+                    <v-btn v-if="hasWriteAuthority" icon>
                       <v-icon class="drag-handle"> mdi-sort</v-icon>
                     </v-btn>
                     <a
@@ -71,7 +71,7 @@
                   <td class="text-center">
                     {{ formatDatetime(item.updated) }}
                   </td>
-                  <td class="text-center my-0" v-if="hasDeleteAuthority">
+                  <td v-if="hasDeleteAuthority" class="text-center my-0">
                     <div class="actions">
                       <v-btn icon @click="remove(item)">
                         <v-icon color="error"> mdi-delete-outline</v-icon>
@@ -83,11 +83,11 @@
             </template>
           </v-simple-table>
           <CodeEditDialog
+            v-if="dialog"
             v-model="editItem"
             :dialog.sync="dialog"
             @created="onCreated"
             @updated="onUpdated"
-            v-if="dialog"
           />
         </div>
       </v-card-text>

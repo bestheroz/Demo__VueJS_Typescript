@@ -10,10 +10,9 @@
         {{ createdDateTimeString }}
       </span>
       <span
-        class="px-2 grey--text text--darken-1"
         v-if="createdDateTimeString && updatedDateTimeString"
-        >|</span
-      >
+        class="px-2 grey--text text--darken-1"
+      >|</span>
       <span v-if="updatedDateTimeString">
         Updated by
         {{ getAdminNm(updatedBy) }}

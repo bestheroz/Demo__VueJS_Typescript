@@ -1,17 +1,17 @@
 <template>
   <div>
-    <v-menu rounded="lg" v-model="isOpen" offset-y>
+    <v-menu v-model="isOpen" rounded="lg" offset-y>
       <template #activator="{ on }">
         <v-chip
+          v-show="chipLabel"
           :close="!value.required"
-          @click:close="emptySelectFilters"
           outlined
           :color="value.required ? 'error' : 'primary'"
-          v-on="on"
           class="pa-2"
-          v-show="chipLabel"
           label
           style="z-index: 9"
+          @click:close="emptySelectFilters"
+          v-on="on"
           @mouseenter="emits('close-on-click-change', false)"
           @mouseleave="emits('close-on-click-change', true)"
         >
@@ -21,8 +21,8 @@
       <v-card
         v-if="
           isOpen &&
-          filtered.items.length > 0 &&
-          filtered.type !== FILTER_TYPE.TEXT
+            filtered.items.length > 0 &&
+            filtered.type !== FILTER_TYPE.TEXT
         "
       >
         <DataTableFilterItems

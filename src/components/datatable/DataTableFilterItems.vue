@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-list class="py-0" v-if="!(datePickerType || datetimePickerType)">
+    <v-list v-if="!(datePickerType || datetimePickerType)" class="py-0">
       <v-list-item
         v-for="item in value.items"
         :key="value.type === FILTER_TYPE.CHECKBOX ? item.value : item.text"
@@ -10,8 +10,8 @@
         }"
       >
         <v-list-item-action
-          class="mr-4"
           v-if="value.type === FILTER_TYPE.CHECKBOX"
+          class="mr-4"
         >
           <v-checkbox
             v-model="item.checked"
@@ -27,8 +27,8 @@
         </v-list-item-action>
         <v-list-item-action v-if="value.type === FILTER_TYPE.CHECKBOX">
           <v-list-itemTitle
-            v-text="item.text"
             :class="item.checked ? 'primary--text' : 'secondary--text'"
+            v-text="item.text"
           />
         </v-list-item-action>
         <v-list-item-content
@@ -38,17 +38,17 @@
           <v-text-field
             :value="item.value"
             :placeholder="item.text"
-            @input="(_item) => onUpdateTextField(_item, item)"
             :rules="[textFilterRules.counter]"
             :disabled="fromChip"
             clearable
             counter
             maxlength="20"
+            @input="(_item) => onUpdateTextField(_item, item)"
           />
         </v-list-item-content>
       </v-list-item>
     </v-list>
-    <v-list class="py-0" v-else>
+    <v-list v-else class="py-0">
       <v-list-item
         v-if="value.type === FILTER_TYPE.DATE_PICKER"
         :ripple="false"

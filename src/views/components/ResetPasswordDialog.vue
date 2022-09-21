@@ -5,7 +5,7 @@
         <DialogTitle text="비밀번호 초기화" @click:close="dialog = false" />
         <v-card-text>
           <validation-observer ref="observer">
-            <v-row>
+            <v-row dense>
               <v-col cols="12">
                 <validation-provider
                   v-slot="{ errors }"
@@ -22,8 +22,8 @@
                     hide-details="auto"
                     :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
                     :type="showPassword ? 'text' : 'password'"
-                    @click:append="showPassword = !showPassword"
                     class="required"
+                    @click:append="showPassword = !showPassword"
                   />
                 </validation-provider>
               </v-col>
@@ -42,9 +42,9 @@
                     hide-details="auto"
                     :append-icon="showPasswordCheck ? 'mdi-eye' : 'mdi-eye-off'"
                     :type="showPasswordCheck ? 'text' : 'password'"
+                    class="required"
                     @keyup.enter="resetPassword"
                     @click:append="showPasswordCheck = !showPasswordCheck"
-                    class="required"
                   />
                 </validation-provider>
               </v-col>

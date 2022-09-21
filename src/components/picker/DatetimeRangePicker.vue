@@ -18,17 +18,18 @@
           :label="hideLabel ? undefined : label"
           :placeholder="placeholder"
           persistent-hint
+          filled
           :messages="message"
           prepend-inner-icon="mdi-calendar-clock"
-          @click:prepend-inner="dialog = true"
           readonly
           :disabled="disabled"
           :dense="dense"
-          :hide-details="hideDetails"
+          :hide-details="hideDetails || 'auto'"
           :clearable="clearable"
-          @click:clear="[start, end, endTimePickerShow] = [null, null, false]"
           :error-messages="errors"
           :class="required ? 'required' : ''"
+          @click:prepend-inner="dialog = true"
+          @click:clear="[start, end, endTimePickerShow] = [null, null, false]"
           v-on="on"
         />
       </validation-provider>
@@ -43,8 +44,7 @@
       :max="maxDate"
       :min="minDate"
       range
-    >
-    </v-date-picker>
+    />
     <v-time-picker
       v-show="!endTimePickerShow"
       ref="refStartTimePicker"
@@ -65,7 +65,7 @@
         :disabled="!pickerArray[0]"
         @click="autoEndDatePush"
       />
-      <v-btn outlined @click="setNow" :disabled="disableToday"> 지금</v-btn>
+      <v-btn outlined :disabled="disableToday" @click="setNow"> 지금</v-btn>
       <v-btn outlined @click="dialog = false"> 취소</v-btn>
       <v-btn outlined @click="save"> 확인</v-btn>
     </v-time-picker>
@@ -87,7 +87,7 @@
         hint="종료시간"
         persistent-hint
       />
-      <v-btn outlined @click="setNow" :disabled="disableToday"> 지금</v-btn>
+      <v-btn outlined :disabled="disableToday" @click="setNow"> 지금</v-btn>
       <v-btn outlined @click="dialog = false"> 취소</v-btn>
       <v-btn outlined @click="save"> 확인</v-btn>
     </v-time-picker>

@@ -14,7 +14,7 @@
         <v-card-text>
           <v-form :readonly="noneWriteAuthority">
             <validation-observer ref="observer">
-              <v-row>
+              <v-row dense>
                 <v-col cols="12" md="3">
                   <validation-provider
                     v-slot="{ errors }"
@@ -24,8 +24,10 @@
                     <v-text-field
                       v-model="value.loginId"
                       label="관리자 아이디"
+                      filled
                       :counter="20"
                       :error-messages="loginIdErrorText || errors"
+                      hide-details="auto"
                       :success-messages="loginIdSuccessText"
                       :append-icon="loginIdAppendIcon"
                       class="required"
@@ -43,8 +45,10 @@
                     <v-text-field
                       v-model="value.name"
                       label="관리자 이름"
+                      filled
                       :counter="20"
                       :error-messages="errors"
+                      hide-details="auto"
                       class="required"
                     />
                   </validation-provider>
@@ -74,7 +78,7 @@
                     required
                   />
                 </v-col>
-                <v-col cols="12" md="3" v-if="isNew">
+                <v-col v-if="isNew" cols="12" md="3">
                   <validation-provider
                     v-slot="{ errors }"
                     name="비밀번호"
@@ -84,15 +88,17 @@
                     <v-text-field
                       v-model="password"
                       label="비밀번호"
+                      filled
                       :counter="20"
                       :error-messages="errors"
+                      hide-details="auto"
                       :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
                       :type="show1 ? 'text' : 'password'"
                       @click:append="show1 = !show1"
                     />
                   </validation-provider>
                 </v-col>
-                <v-col cols="12" md="3" v-if="!noneWriteAuthority">
+                <v-col v-if="!noneWriteAuthority" cols="12" md="3">
                   <validation-provider
                     v-if="isNew"
                     v-slot="{ errors }"
@@ -102,13 +108,15 @@
                     <v-text-field
                       v-model="password2"
                       label="비밀번호 확인"
+                      filled
                       :counter="20"
                       :error-messages="errors"
+                      hide-details="auto"
                       :append-icon="show2 ? 'mdi-eye' : 'mdi-eye-off'"
                       :type="show2 ? 'text' : 'password'"
                       clearable
-                      @click:append="show2 = !show2"
                       class="required"
+                      @click:append="show2 = !show2"
                     />
                   </validation-provider>
                   <v-btn
@@ -123,6 +131,7 @@
               </v-row>
             </validation-observer>
             <ButtonWithIcon
+              v-if="!noneWriteAuthority"
               block
               text="저장"
               icon="mdi-content-save"
@@ -131,7 +140,6 @@
               "
               :loading="saving"
               @click="save"
-              v-if="!noneWriteAuthority"
             />
           </v-form>
         </v-card-text>
@@ -145,9 +153,9 @@
     </v-bottom-sheet>
 
     <ResetPasswordDialog
+      v-if="resetPasswordDialog && value.id"
       :dialog.sync="resetPasswordDialog"
       :admin-id="value.id"
-      v-if="resetPasswordDialog && value.id"
     />
   </div>
 </template>

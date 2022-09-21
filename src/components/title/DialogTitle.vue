@@ -5,24 +5,24 @@
       <v-spacer />
       <v-switch class="d-none" />
       <v-switch
+        v-if="withSwitch"
         v-model="value"
         :label="getSwitchLabel(value, switchText)"
         inset
         color="primary"
         :disabled="disabledSwitch || !hasWriteAuthority"
         class="pr-4"
-        v-if="withSwitch"
       />
       <v-tooltip bottom>
         <template #activator="{ on, attrs }">
           <v-btn
             icon
             fab
-            @click="emits('click:close')"
             v-bind="attrs"
+            @click="emits('click:close')"
             v-on="on"
           >
-            <v-icon v-text="'mdi-window-close'" large />
+            <v-icon large v-text="'mdi-window-close'" />
           </v-btn>
         </template>
         <span v-text="'닫기'" />

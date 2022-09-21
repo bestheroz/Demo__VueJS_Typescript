@@ -13,9 +13,9 @@
           filter-icon="mdi-filter-variant"
           :input-value="true"
           v-bind="attrs"
-          v-on="on"
           class="pa-2"
           label
+          v-on="on"
         >
           필터 ({{ filteredLength }} / {{ cloneFilters.length }})
         </v-chip>
@@ -50,19 +50,17 @@
       </v-card>
     </v-menu>
     <!--    필터 선택 Chip 부분-->
-    <template>
-      <span
-        v-for="(filter, _index) in cloneFilters"
-        :key="filter.key"
-        class="d-inline-flex ml-1 mt-0 mb-1"
-      >
-        <DataTableFilterSelectedChip
-          v-model="cloneFilters[_index]"
-          @change="onChangeFilter"
-          @close-on-click-change="closeOnClickChange"
-        />
-      </span>
-    </template>
+    <span
+      v-for="(filter, _index) in cloneFilters"
+      :key="filter.key"
+      class="d-inline-flex ml-1 mt-0 mb-1"
+    >
+      <DataTableFilterSelectedChip
+        v-model="cloneFilters[_index]"
+        @change="onChangeFilter"
+        @close-on-click-change="closeOnClickChange"
+      />
+    </span>
   </div>
 </template>
 

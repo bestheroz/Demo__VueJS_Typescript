@@ -5,7 +5,7 @@
         <v-btn icon class="elevation-2" v-on="on">
           <v-badge color="success" dot bordered offset-x="10" offset-y="10">
             <v-avatar size="40">
-              <v-img src="/images/avatars/avatar1.svg"></v-img>
+              <v-img src="/images/avatars/avatar1.svg" />
             </v-avatar>
           </v-badge>
         </v-btn>
@@ -37,13 +37,13 @@
       </v-list>
     </v-menu>
     <EditMeDialog
+      v-if="editMeDialog"
       :dialog.sync="editMeDialog"
       :admin-password="adminEncodedPassword"
-      v-if="editMeDialog"
     />
     <EditPasswordDialog
-      :dialog.sync="editMePasswordDialog"
       v-if="editMePasswordDialog"
+      :dialog.sync="editMePasswordDialog"
     />
     <ToolbarTheme v-model="toolbarThemeDialog" />
   </div>

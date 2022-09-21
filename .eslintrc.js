@@ -21,13 +21,13 @@ module.exports = {
     "vue/setup-compiler-macros": true, // DELETE: vue3 에서 제거
   },
   extends: [
-    "plugin:vue/strongly-recommended",
-    "eslint:recommended",
-    "plugin:vuetify/base",
     "plugin:@typescript-eslint/recommended",
+    "plugin:vue/recommended",
+    "@vue/prettier",
     "plugin:prettier/recommended",
+    "@vue/typescript",
   ],
-  plugins: ["vue"],
+  plugins: ["vue", "@typescript-eslint"],
   rules: {
     "no-console":
       process.env.NODE_ENV === "production"
@@ -43,5 +43,7 @@ module.exports = {
     "prettier/prettier": "off",
     "lines-between-class-members": "off",
     "vue/no-v-text-v-html-on-component": "off",
+    "vue/max-attributes-per-line": "off",
+    "vue/singleline-html-element-content-newline": "off",
   },
 };

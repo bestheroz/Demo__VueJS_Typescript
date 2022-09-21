@@ -19,14 +19,14 @@
           />
           <div
             class="text-overline grey--text"
-            v-text="envs.PRODUCT_VERSION"
             style="text-transform: none"
+            v-text="envs.PRODUCT_VERSION"
           />
         </div>
       </template>
 
       <!-- Navigation menu -->
-      <NavMenu :drawers="drawerList" v-if="drawerList.length > 0" />
+      <NavMenu v-if="drawerList.length > 0" :drawers="drawerList" />
     </v-navigation-drawer>
 
     <!-- Toolbar -->

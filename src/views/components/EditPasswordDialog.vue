@@ -5,7 +5,7 @@
         <DialogTitle text="비밀번호 변경" @click:close="dialog = false" />
         <v-card-text>
           <validation-observer ref="observer">
-            <v-row>
+            <v-row dense>
               <v-col cols="12">
                 <validation-provider
                   v-slot="{ errors }"
@@ -16,12 +16,14 @@
                   <v-text-field
                     v-model="oldPassword"
                     label="이전 비밀번호"
+                    filled
                     :counter="20"
                     :error-messages="errors"
+                    hide-details="auto"
                     :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
                     :type="show1 ? 'text' : 'password'"
-                    @click:append="show1 = !show1"
                     class="required"
+                    @click:append="show1 = !show1"
                   />
                 </validation-provider>
               </v-col>
@@ -35,12 +37,14 @@
                   <v-text-field
                     v-model="password"
                     label="비밀번호"
+                    filled
                     :counter="20"
                     :error-messages="errors"
+                    hide-details="auto"
                     :append-icon="show2 ? 'mdi-eye' : 'mdi-eye-off'"
                     :type="show2 ? 'text' : 'password'"
-                    @click:append="show2 = !show2"
                     class="required"
+                    @click:append="show2 = !show2"
                   />
                 </validation-provider>
               </v-col>
@@ -53,13 +57,15 @@
                   <v-text-field
                     v-model="password2"
                     label="비밀번호 확인"
+                    filled
                     :counter="20"
                     :error-messages="errors"
+                    hide-details="auto"
                     :append-icon="show3 ? 'mdi-eye' : 'mdi-eye-off'"
                     :type="show3 ? 'text' : 'password'"
+                    class="required"
                     @keyup.enter="save"
                     @click:append="show3 = !show3"
-                    class="required"
                   />
                 </validation-provider>
               </v-col>

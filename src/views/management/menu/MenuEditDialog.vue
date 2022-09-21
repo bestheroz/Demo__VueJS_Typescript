@@ -10,7 +10,7 @@
         <v-card-text>
           <v-form :readonly="!hasWriteAuthority">
             <validation-observer ref="observer">
-              <v-row>
+              <v-row dense>
                 <v-col cols="12" md="3">
                   <validation-provider
                     v-slot="{ errors }"
@@ -20,6 +20,7 @@
                     <v-text-field
                       v-model="value.name"
                       label="메뉴명"
+                      filled
                       :counter="50"
                       :error-messages="errors"
                       class="required"
@@ -36,12 +37,14 @@
                       v-model="value.type"
                       :items="MenuTypes"
                       label="타입"
+                      filled
                       :error-messages="errors"
+                      hide-details="auto"
                       class="required"
                     />
                   </validation-provider>
                 </v-col>
-                <v-col cols="12" md="6" v-if="value.type !== MENU_TYPE.GROUP">
+                <v-col v-if="value.type !== MENU_TYPE.GROUP" cols="12" md="6">
                   <validation-provider
                     v-slot="{ errors }"
                     name="링크 URL"
@@ -50,8 +53,10 @@
                     <v-text-field
                       v-model="value.url"
                       label="링크 URL"
+                      filled
                       :counter="255"
                       :error-messages="errors"
+                      hide-details="auto"
                       clearable
                     />
                   </validation-provider>
@@ -65,26 +70,28 @@
                     <v-text-field
                       v-model="value.icon"
                       label="메뉴 아이콘"
+                      filled
                       append-icon="mdi-open-in-new"
                       :counter="50"
                       :error-messages="errors"
-                      @click:append="linkIconSite"
+                      hide-details="auto"
                       class="required"
+                      @click:append="linkIconSite"
                     />
                   </validation-provider>
                 </v-col>
                 <v-col v-if="value.type === MENU_TYPE.GROUP" cols="12" md="1">
-                  <v-icon v-text="value.icon" size="3.5rem" />
+                  <v-icon size="3.5rem" v-text="value.icon" />
                 </v-col>
               </v-row>
             </validation-observer>
             <ButtonWithIcon
+              v-if="hasWriteAuthority"
               block
               text="저장"
               icon="mdi-content-save"
               :loading="loading"
               @click="save"
-              v-if="hasWriteAuthority"
             />
           </v-form>
         </v-card-text>
@@ -163,7 +170,7 @@ async function update(): Promise<void> {
 }
 
 function linkIconSite(): void {
-  window.open("https://pictogrammers.github.io/@mdi/font/7.0.96/", "_blank");
+  window.open("https://pictogrammers.github.io/@mdi/font/6.5.95/", "_blank");
 }
 
 const observer = ref();

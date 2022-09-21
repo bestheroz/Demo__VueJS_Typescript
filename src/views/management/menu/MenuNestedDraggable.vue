@@ -11,15 +11,15 @@
       :force-fallback="true"
       :style="`${value.length === 0 ? 'border-style: dotted' : ''}`"
     >
-      <v-list-item dense :key="_menu.id" v-for="_menu in value" class="pr-0">
+      <v-list-item v-for="_menu in value" :key="_menu.id" dense class="pr-0">
         <v-list-item-icon
-          :class="{ 'pt-1': hasWriteAuthority }"
           v-if="_menu.type === MENU_TYPE.GROUP"
+          :class="{ 'pt-1': hasWriteAuthority }"
         >
           <v-icon v-text="_menu.icon" />
         </v-list-item-icon>
         <v-list-item-title class="d-inline pt-1">
-          <v-btn icon v-if="hasWriteAuthority">
+          <v-btn v-if="hasWriteAuthority" icon>
             <v-icon class="drag-handle"> mdi-sort </v-icon>
           </v-btn>
           <a
@@ -29,10 +29,10 @@
           />
           {{ _menu.url ? `(${_menu.url})` : "" }}
           <v-btn
+            v-if="hasDeleteAuthority"
             icon
             small
             @click="emits('click:delete', _menu)"
-            v-if="hasDeleteAuthority"
           >
             <v-icon color="error"> mdi-delete-outline </v-icon>
           </v-btn>

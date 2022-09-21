@@ -9,9 +9,9 @@
     <div class="my-3">
       Sorry we can't seem to find the page you're looking for.
     </div>
-    <v-btn block large color="primary" @click="router.back()"
-      >Send me Back</v-btn
-    >
+    <v-btn block large color="primary" @click="router.back()">
+      Send me Back
+    </v-btn>
   </v-card>
 </template>
 

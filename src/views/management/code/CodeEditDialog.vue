@@ -12,7 +12,7 @@
         <v-card-text>
           <v-form :readonly="!hasWriteAuthority">
             <validation-observer ref="observer">
-              <v-row>
+              <v-row dense>
                 <v-col cols="12" md="4">
                   <validation-provider
                     v-slot="{ errors }"
@@ -23,7 +23,9 @@
                       v-model="value.type"
                       label="그룹 코드"
                       :counter="50"
+                      filled
                       :error-messages="errors"
+                      hide-details="auto"
                       class="required"
                     />
                   </validation-provider>
@@ -37,8 +39,10 @@
                     <v-text-field
                       v-model="value.value"
                       label="코드"
+                      filled
                       :counter="50"
                       :error-messages="errors"
+                      hide-details="auto"
                       class="required"
                     />
                   </validation-provider>
@@ -52,8 +56,10 @@
                     <v-text-field
                       v-model="value.text"
                       label="코드명"
+                      filled
                       :counter="100"
                       :error-messages="errors"
+                      hide-details="auto"
                       class="required"
                     />
                   </validation-provider>
@@ -61,12 +67,12 @@
               </v-row>
             </validation-observer>
             <ButtonWithIcon
+              v-if="hasWriteAuthority"
               block
               text="저장"
               icon="mdi-content-save"
               :loading="loading"
               @click="save"
-              v-if="hasWriteAuthority"
             />
           </v-form>
         </v-card-text>

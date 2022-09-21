@@ -2,8 +2,8 @@
   <div class="flex-grow-1 align-center justify-center d-flex flex-column">
     <h1
       style="font-size: 3rem"
-      v-text="envs.PRODUCT_TITLE"
       class="primary--text"
+      v-text="envs.PRODUCT_TITLE"
     />
     <h1 :style="`color: ${color}`" v-text="now" />
   </div>
