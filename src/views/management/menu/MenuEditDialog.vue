@@ -21,7 +21,6 @@
                       v-model="value.name"
                       label="메뉴명"
                       filled
-                      :counter="50"
                       :error-messages="errors"
                       class="required"
                     />
@@ -54,7 +53,6 @@
                       v-model="value.url"
                       label="링크 URL"
                       filled
-                      :counter="255"
                       :error-messages="errors"
                       hide-details="auto"
                       clearable
@@ -72,7 +70,6 @@
                       label="메뉴 아이콘"
                       filled
                       append-icon="mdi-open-in-new"
-                      :counter="50"
                       :error-messages="errors"
                       hide-details="auto"
                       class="required"

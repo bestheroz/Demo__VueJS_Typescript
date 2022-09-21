@@ -25,7 +25,6 @@
                     v-model="item.name"
                     label="나의 이름"
                     filled
-                    :counter="100"
                     :error-messages="errors"
                     hide-details="auto"
                     class="required"

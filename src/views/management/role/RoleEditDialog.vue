@@ -23,7 +23,6 @@
                       v-model="value.name"
                       label="역할명"
                       filled
-                      :counter="50"
                       :error-messages="errors"
                       hide-details="auto"
                       class="required"

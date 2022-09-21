@@ -22,7 +22,6 @@
                     <v-text-field
                       v-model="value.type"
                       label="그룹 코드"
-                      :counter="50"
                       filled
                       :error-messages="errors"
                       hide-details="auto"
@@ -40,7 +39,6 @@
                       v-model="value.value"
                       label="코드"
                       filled
-                      :counter="50"
                       :error-messages="errors"
                       hide-details="auto"
                       class="required"
@@ -57,7 +55,6 @@
                       v-model="value.text"
                       label="코드명"
                       filled
-                      :counter="100"
                       :error-messages="errors"
                       hide-details="auto"
                       class="required"

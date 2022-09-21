@@ -17,7 +17,6 @@
                     v-model="password"
                     label="비밀번호"
                     filled
-                    :counter="20"
                     :error-messages="errors"
                     hide-details="auto"
                     :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
@@ -37,7 +36,6 @@
                     v-model="passwordCheck"
                     label="비밀번호 확인"
                     filled
-                    :counter="20"
                     :error-messages="errors"
                     hide-details="auto"
                     :append-icon="showPasswordCheck ? 'mdi-eye' : 'mdi-eye-off'"

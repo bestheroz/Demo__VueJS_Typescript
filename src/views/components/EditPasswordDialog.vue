@@ -17,7 +17,6 @@
                     v-model="oldPassword"
                     label="이전 비밀번호"
                     filled
-                    :counter="20"
                     :error-messages="errors"
                     hide-details="auto"
                     :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
@@ -38,7 +37,6 @@
                     v-model="password"
                     label="비밀번호"
                     filled
-                    :counter="20"
                     :error-messages="errors"
                     hide-details="auto"
                     :append-icon="show2 ? 'mdi-eye' : 'mdi-eye-off'"
@@ -58,7 +56,6 @@
                     v-model="password2"
                     label="비밀번호 확인"
                     filled
-                    :counter="20"
                     :error-messages="errors"
                     hide-details="auto"
                     :append-icon="show3 ? 'mdi-eye' : 'mdi-eye-off'"

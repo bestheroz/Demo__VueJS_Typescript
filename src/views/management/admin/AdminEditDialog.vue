@@ -25,7 +25,6 @@
                       v-model="value.loginId"
                       label="관리자 아이디"
                       filled
-                      :counter="20"
                       :error-messages="loginIdErrorText || errors"
                       hide-details="auto"
                       :success-messages="loginIdSuccessText"
@@ -46,7 +45,6 @@
                       v-model="value.name"
                       label="관리자 이름"
                       filled
-                      :counter="20"
                       :error-messages="errors"
                       hide-details="auto"
                       class="required"
@@ -89,7 +87,6 @@
                       v-model="password"
                       label="비밀번호"
                       filled
-                      :counter="20"
                       :error-messages="errors"
                       hide-details="auto"
                       :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
@@ -109,7 +106,6 @@
                       v-model="password2"
                       label="비밀번호 확인"
                       filled
-                      :counter="20"
                       :error-messages="errors"
                       hide-details="auto"
                       :append-icon="show2 ? 'mdi-eye' : 'mdi-eye-off'"
