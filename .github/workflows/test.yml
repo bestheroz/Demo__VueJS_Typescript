@@ -29,7 +29,7 @@ jobs:
           MATRIX_CONTEXT: ${{ toJson(matrix) }}
         with:
           status: ${{ job.status }}
-          fields: repo,message,author,ref,workflow,took
+          fields: repo,message,author,ref,job,took
           author_name: ''
         if: failure()
 
@@ -58,7 +58,7 @@ jobs:
           MATRIX_CONTEXT: ${{ toJson(matrix) }}
         with:
           status: ${{ job.status }}
-          fields: repo,message,author,ref,workflow,took
+          fields: repo,message,author,ref,job,took
           author_name: ''
         if: failure()
 
@@ -87,6 +87,6 @@ jobs:
           MATRIX_CONTEXT: ${{ toJson(matrix) }}
         with:
           status: ${{ job.status }}
-          fields: repo,message,author,ref,workflow,took
+          fields: repo,message,author,ref,job,took
           author_name: ''
         if: failure()
