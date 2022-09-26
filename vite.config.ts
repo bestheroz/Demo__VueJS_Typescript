@@ -2,6 +2,7 @@ import vue2 from "@vitejs/plugin-vue2";
 import Components from "unplugin-vue-components/vite";
 import eslint from "vite-plugin-eslint";
 import tsconfigPaths from "vite-tsconfig-paths";
+import checker from "vite-plugin-checker";
 import { defineConfig } from "vite";
 import path from "path";
 import { VuetifyResolver } from "unplugin-vue-components/resolvers";
@@ -14,7 +15,8 @@ export default defineConfig({
       resolvers: [VuetifyResolver()],
     }),
     tsconfigPaths(),
-    eslint(),
+    eslint({ useEslintrc: true }),
+    checker({ vueTsc: true }),
   ],
   resolve: {
     alias: {
@@ -25,6 +27,7 @@ export default defineConfig({
     port: 8081,
   },
   css: {
+    devSourcemap: true,
     preprocessorOptions: {
       sass: {
         additionalData: [
