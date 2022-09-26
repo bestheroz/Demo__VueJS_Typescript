@@ -30,7 +30,6 @@
   },
   "devDependencies": {
     "@mdi/font": "7.0.96",
-    "@sentry/webpack-plugin": "1.19.0",
     "@types/crypto-js": "4.1.1",
     "@types/lodash-es": "4.17.6",
     "@types/qs": "6.9.7",
@@ -41,7 +40,6 @@
     "@vue/eslint-config-typescript": "11.0.2",
     "@vueuse/core": "9.3.0",
     "eslint-plugin-vue": "9.5.1",
-    "node-polyfill-webpack-plugin": "2.0.1",
     "prettier": "2.7.1",
     "sass": "1.32.13",
     "unplugin-vue-components": "0.22.7",
