@@ -87,7 +87,7 @@
 import DatetimePicker from "@/components/picker/DatetimePicker.vue";
 import dayjs from "dayjs";
 import { DateTime } from "@/definitions/types";
-import { computed } from "vue";
+import { computed, watch } from "vue";
 import { useVModels } from "@vueuse/core";
 import envs from "@/constants/envs";
 import { isValidDateFormat } from "@/utils/formatter";
@@ -148,5 +148,22 @@ const max = computed((): string =>
   isValidDateFormat(end.value)
     ? dayjs(end.value).format(DATETIMEPICKER_FORMAT.value)
     : "",
+);
+
+watch(
+  () => [start.value],
+  () => {
+    if (dayjs(start.value).isAfter(end.value)) {
+      start.value = end.value;
+    }
+  },
+);
+watch(
+  () => [end.value],
+  () => {
+    if (dayjs(start.value).isAfter(end.value)) {
+      end.value = start.value;
+    }
+  },
 );
 </script>

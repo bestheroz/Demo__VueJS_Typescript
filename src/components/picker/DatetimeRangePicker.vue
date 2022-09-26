@@ -356,6 +356,23 @@ watch(
   { immediate: true },
 );
 
+watch(
+  () => [start.value],
+  () => {
+    if (dayjs(start.value).isAfter(end.value)) {
+      start.value = end.value;
+    }
+  },
+);
+watch(
+  () => [end.value],
+  () => {
+    if (dayjs(start.value).isAfter(end.value)) {
+      end.value = start.value;
+    }
+  },
+);
+
 const refDialog = ref();
 const refStartTimePicker = ref();
 const refEndTimePicker = ref();
