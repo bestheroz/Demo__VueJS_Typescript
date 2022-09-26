@@ -67,7 +67,7 @@ const computedTitle = computed(
   (): string =>
     props.title ??
     flatAuthorities.value.find(
-      (f: RoleMenuMap) => f.menu.url === router.currentRoute.path,
+      (f: RoleMenuMap) => f.menu.url === router.app?.$route?.path,
     )?.menu.name ??
     "",
 );
