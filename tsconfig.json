@@ -24,7 +24,7 @@
     "removeComments": true,
     "sourceMap": true,
     "baseUrl": ".",
-    "types": ["webpack-env", "vuetify"],
+    "types": ["vuetify", "vite/client"],
     "paths": {
       "@/*": ["src/*"]
     },

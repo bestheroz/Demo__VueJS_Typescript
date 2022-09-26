@@ -84,7 +84,7 @@ const routes = (): RouteConfig[] => {
 
 export default new Router({
   mode: "history",
-  base: process.env.BASE_URL,
+  base: import.meta.env.BASE_URL,
   scrollBehavior(_to: Route, _from: Route, savedPosition) {
     return savedPosition || { x: 0, y: 0 };
   },

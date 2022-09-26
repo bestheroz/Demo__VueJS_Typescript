@@ -1,6 +1,6 @@
 import "@mdi/font/css/materialdesignicons.css";
 import Vue from "vue";
-import Vuetify from "vuetify/lib";
+import Vuetify from "vuetify/lib/framework";
 import ko from "vuetify/src/locale/ko";
 import config from "../configs";
 
@@ -24,7 +24,7 @@ export default new Vuetify({
     options: {
       customProperties: true,
       minifyTheme: function (css) {
-        return process.env.NODE_ENV === "production"
+        return import.meta.env.NODE_ENV === "production"
           ? css.replace(/[\r|\n]/g, "")
           : css;
       },

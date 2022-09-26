@@ -70,7 +70,7 @@ axiosInstance.interceptors.response.use(
         return { data: { success: false, code: "E" } } as ApiDataResult;
       }
     }
-    if (process.env.NODE_ENV === "development") {
+    if (envs.ENVIRONMENT === "local") {
       alertAxiosError(error);
     }
     console.warn(error);
