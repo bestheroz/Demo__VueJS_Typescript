@@ -47,7 +47,6 @@
     "vite-plugin-checker": "^0.5.1",
     "vite-plugin-eslint": "1.8.1",
     "vite-tsconfig-paths": "3.5.1",
-    "vue-cli-plugin-vuetify": "2.5.8",
     "vue-tsc": "0.40.13",
     "vuetify-loader": "1.9.2"
   },
