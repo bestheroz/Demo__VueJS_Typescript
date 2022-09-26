@@ -55,7 +55,6 @@ onMounted(() => {
 watch(
   () => router.app.$route.fullPath,
   (val: string) => {
-    console.log("??? =>  " + val);
     reloadCurrentAuthority(val);
   },
 );
