@@ -1,6 +1,6 @@
-import type dayjs from "dayjs";
+import type { ConfigType } from "dayjs";
 
-export type DateTime = dayjs.ConfigType;
+export type DateTime = ConfigType;
 
 export interface SelectItem<T = string> {
   value: T;
