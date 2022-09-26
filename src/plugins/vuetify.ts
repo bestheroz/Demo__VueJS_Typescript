@@ -1,4 +1,3 @@
-import "@mdi/font/css/materialdesignicons.min.css";
 import Vue from "vue";
 import Vuetify from "vuetify/lib/framework";
 import ko from "vuetify/src/locale/ko";
