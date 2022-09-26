@@ -12,7 +12,8 @@
       <span
         v-if="createdDateTimeString && updatedDateTimeString"
         class="px-2 grey--text text--darken-1"
-      >|</span>
+        >|</span
+      >
       <span v-if="updatedDateTimeString">
         Updated by
         {{ getAdminNm(updatedBy) }}
@@ -28,7 +29,7 @@
 <script setup lang="ts">
 import { formatDatetime, getAdminNm } from "@/utils/formatter";
 import { computed } from "vue";
-import { DateTime } from "@/definitions/types";
+import type { DateTime } from "@/definitions/types";
 
 const props = defineProps<{
   createdBy?: number;

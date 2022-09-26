@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
-import { Drawer } from "@/definitions/types";
-import { Role, RoleMenuMap } from "@/definitions/models";
+import type { Drawer } from "@/definitions/types";
+import type { Role, RoleMenuMap } from "@/definitions/models";
 import { getApi } from "@/utils/apis";
 import {
   getCurrentAuthority,

@@ -86,7 +86,7 @@
 <script setup lang="ts">
 import DatetimePicker from "@/components/picker/DatetimePicker.vue";
 import dayjs from "dayjs";
-import { DateTime } from "@/definitions/types";
+import type { DateTime } from "@/definitions/types";
 import { computed, watch } from "vue";
 import { useVModels } from "@vueuse/core";
 import envs from "@/constants/envs";

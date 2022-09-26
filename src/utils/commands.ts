@@ -1,9 +1,10 @@
 import router from "@/router";
 import axios from "axios";
 import envs from "@/constants/envs";
-import { ApiDataResult, axiosInstance, deleteApi, getApi } from "@/utils/apis";
-import { AdminConfig, RoleMenuMap } from "@/definitions/models";
-import { Drawer, SelectItem } from "@/definitions/types";
+import type { ApiDataResult } from "@/utils/apis";
+import { axiosInstance, deleteApi, getApi } from "@/utils/apis";
+import type { AdminConfig, RoleMenuMap } from "@/definitions/models";
+import type { Drawer, SelectItem } from "@/definitions/types";
 import { defaultAdminConfig, defaultRoleMenuMap } from "@/definitions/defaults";
 import { cloneDeep, debounce } from "lodash-es";
 import store from "@/stores";

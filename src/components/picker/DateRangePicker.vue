@@ -55,7 +55,7 @@
 <script setup lang="ts">
 import envs from "@/constants/envs";
 import dayjs from "dayjs";
-import { DateTime } from "@/definitions/types";
+import type { DateTime } from "@/definitions/types";
 import { computed, ref, watch } from "vue";
 import { useVModels } from "@vueuse/core";
 import { isValidDateFormat } from "@/utils/formatter";

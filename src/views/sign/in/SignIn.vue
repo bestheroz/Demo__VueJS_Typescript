@@ -67,10 +67,11 @@
 </template>
 
 <script setup lang="ts">
-import { ApiDataResult, axiosInstance } from "@/utils/apis";
+import { axiosInstance } from "@/utils/apis";
+import type { ApiDataResult } from "@/utils/apis";
 import { toastCloseAll } from "@/utils/alerts";
 import { getYourConfig, routerReplace } from "@/utils/commands";
-import { AxiosResponse } from "axios";
+import type { AxiosResponse } from "axios";
 import { ValidationObserver } from "vee-validate";
 import { onBeforeMount, onMounted, onUnmounted, ref } from "vue";
 import Vuetify from "@/plugins/vuetify";

@@ -1,9 +1,9 @@
 import { computed, reactive, toRefs } from "vue";
-import { FilterOutput, Pagination } from "@/definitions/types";
+import type { FilterOutput, Pagination } from "@/definitions/types";
 import qs from "qs";
 import useList from "@/composition/useList";
 import { watchDebounced } from "@vueuse/core";
-import { Id } from "@/definitions/models";
+import type { Id } from "@/definitions/models";
 
 export default function <T extends Id>(
   url?: string,

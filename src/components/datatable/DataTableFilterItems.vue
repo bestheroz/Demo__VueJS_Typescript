@@ -137,7 +137,7 @@
 
 <script setup lang="ts">
 import type { DateTime, Filter, FilterItem } from "@/definitions/types";
-import { FilterItemType } from "@/definitions/types";
+import type { FilterItemType } from "@/definitions/types";
 import { computed, ref, watch } from "vue";
 import dayjs from "dayjs";
 import DatePicker from "@/components/picker/DatePicker.vue";

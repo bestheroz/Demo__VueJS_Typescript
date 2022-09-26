@@ -45,7 +45,7 @@
   </v-list>
 </template>
 <script setup lang="ts">
-import { Role } from "@/definitions/models";
+import type { Role } from "@/definitions/models";
 import * as Vuedraggable from "vuedraggable";
 import RoleNestedDraggable from "@/views/management/role/RoleNestedDraggable.vue";
 import { useVModel } from "@vueuse/core";

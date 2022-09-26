@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import config from "@/configs";
 import { defaultAdminConfig } from "@/definitions/defaults";
-import { AdminConfig } from "@/definitions/models";
+import type { AdminConfig } from "@/definitions/models";
 
 export const useConfigStore = defineStore("config", {
   state: () => {

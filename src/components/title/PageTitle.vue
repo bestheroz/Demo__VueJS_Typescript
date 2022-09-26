@@ -41,7 +41,7 @@
 
 <script setup lang="ts">
 import ButtonIconTooltip from "@/components/button/ButtonIconTooltip.vue";
-import { RoleMenuMap } from "@/definitions/models";
+import type { RoleMenuMap } from "@/definitions/models";
 import { computed } from "vue";
 import router from "@/router";
 import { storeToRefs } from "pinia";

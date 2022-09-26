@@ -66,7 +66,7 @@ import { patchApi } from "@/utils/apis";
 import { ValidationObserver } from "vee-validate";
 import DialogTitle from "@/components/title/DialogTitle.vue";
 import ButtonWithIcon from "@/components/button/ButtonWithIcon.vue";
-import { Admin } from "@/definitions/models";
+import type { Admin } from "@/definitions/models";
 import { ref } from "vue";
 import { SHA512 } from "crypto-js";
 import { useVModels } from "@vueuse/core";

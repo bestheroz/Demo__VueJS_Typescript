@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { SelectItem } from "@/definitions/types";
+import type { SelectItem } from "@/definitions/types";
 import { getAdminCodes } from "@/utils/commands";
 
 export const useCodesStore = defineStore("codes", {

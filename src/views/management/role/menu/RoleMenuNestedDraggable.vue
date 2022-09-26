@@ -94,7 +94,7 @@
   </v-list>
 </template>
 <script setup lang="ts">
-import { RoleMenuMap } from "@/definitions/models";
+import type { RoleMenuMap } from "@/definitions/models";
 import * as Vuedraggable from "vuedraggable";
 import { MENU_TYPE, ROLE_AUTHORITY_TYPE } from "@/definitions/selections";
 import { useVModel } from "@vueuse/core";

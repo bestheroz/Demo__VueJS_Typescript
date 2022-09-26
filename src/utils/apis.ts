@@ -1,4 +1,5 @@
-import axios, { AxiosError, AxiosResponse } from "axios";
+import axios from "axios";
+import type { AxiosError, AxiosResponse } from "axios";
 import envs from "@/constants/envs";
 import store from "@/stores";
 import { toastError, toastSuccess } from "@/utils/alerts";
@@ -7,7 +8,7 @@ import {
   getValidatedRefreshToken,
   goSignInPage,
 } from "@/utils/commands";
-import { Code } from "@/definitions/models";
+import type { Code } from "@/definitions/models";
 import dayjs from "dayjs";
 import jwt_decode from "jwt-decode";
 import { useAdminStore } from "@/stores/admin";

@@ -18,12 +18,17 @@
     "noUnusedParameters": true,
     "isolatedModules": true,
     "preserveConstEnums": true,
-    "forceConsistentCasingInFileNames": true,
     "noImplicitReturns": false,
     "noImplicitAny": false,
     "removeComments": true,
+    "composite": true,
     "sourceMap": true,
     "baseUrl": ".",
+    // For `<script setup>`
+    // See <https://devblogs.microsoft.com/typescript/announcing-typescript-4-5-beta/#preserve-value-imports>
+    "preserveValueImports": true,
+    "importsNotUsedAsValues": "error",
+    "forceConsistentCasingInFileNames": true,
     "types": ["vuetify", "vite/client"],
     "paths": {
       "@/*": ["src/*"]

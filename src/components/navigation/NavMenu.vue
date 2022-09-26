@@ -15,7 +15,7 @@
 <script setup lang="ts">
 import NavMenu from "@/components/navigation/NavMenu.vue";
 import NavMenuItem from "@/components/navigation/NavMenuItem.vue";
-import { Drawer } from "@/definitions/types";
+import type { Drawer } from "@/definitions/types";
 
 withDefaults(
   defineProps<{

@@ -107,10 +107,11 @@ import { computed, onMounted, ref, watch } from "vue";
 import useListDialog from "@/composition/useListDialog";
 import useList from "@/composition/useList";
 import CheckboxMarker from "@/components/datatable/CheckboxMarker.vue";
-import Sortable, { SortableEvent } from "sortablejs";
+import Sortable from "sortablejs";
+import type { SortableEvent } from "sortablejs";
 import { formatDatetime } from "@/utils/formatter";
 import { useCurrentElement } from "@vueuse/core";
-import { Filter, FilterOutput } from "@/definitions/types";
+import type { Filter, FilterOutput } from "@/definitions/types";
 import { FILTER_TYPE } from "@/definitions/selections";
 import { useAuthorityStore } from "@/stores/authority";
 

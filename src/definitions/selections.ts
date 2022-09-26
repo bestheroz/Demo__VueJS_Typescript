@@ -1,4 +1,4 @@
-import { SelectItem } from "@/definitions/types";
+import type { SelectItem } from "@/definitions/types";
 
 export const ROLE_AUTHORITY_TYPE = {
   WRITE: "WRITE",

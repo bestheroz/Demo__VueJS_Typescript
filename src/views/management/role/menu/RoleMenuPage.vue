@@ -25,9 +25,9 @@
 <script setup lang="ts">
 import RoleMenuList from "@/views/management/role/menu/RoleMenuList.vue";
 import PageTitle from "@/components/title/PageTitle.vue";
-import { Role } from "@/definitions/models";
+import type { Role } from "@/definitions/models";
 import DataTableFilter from "@/components/datatable/DataTableFilter.vue";
-import { Filter, FilterOutput } from "@/definitions/types";
+import type { Filter, FilterOutput } from "@/definitions/types";
 import { getApi } from "@/utils/apis";
 import { computed, onBeforeMount, ref } from "vue";
 import { FILTER_TYPE } from "@/definitions/selections";

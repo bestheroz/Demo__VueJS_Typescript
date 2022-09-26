@@ -49,7 +49,7 @@
   </v-list>
 </template>
 <script setup lang="ts">
-import { Menu } from "@/definitions/models";
+import type { Menu } from "@/definitions/models";
 import * as Vuedraggable from "vuedraggable";
 import { MENU_TYPE } from "@/definitions/selections";
 import { useVModel } from "@vueuse/core";

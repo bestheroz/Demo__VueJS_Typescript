@@ -86,7 +86,7 @@
 import ToolbarAdmin from "../components/toolbar/ToolbarAdmin.vue";
 import envs from "@/constants/envs";
 import NavMenu from "@/components/navigation/NavMenu.vue";
-import { Drawer } from "@/definitions/types";
+import type { Drawer } from "@/definitions/types";
 import { computed, onBeforeMount, ref } from "vue";
 import { storeToRefs } from "pinia";
 import { useAuthorityStore } from "@/stores/authority";

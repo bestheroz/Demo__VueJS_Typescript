@@ -1,6 +1,7 @@
 import Vue from "vue";
-import Router, { Route } from "vue-router";
-import { NavigationGuardNext, RouteConfig } from "vue-router/types/router";
+import Router from "vue-router";
+import type { Route } from "vue-router";
+import type { NavigationGuardNext, RouteConfig } from "vue-router/types/router";
 import store from "@/stores";
 import { goSignInPage } from "@/utils/commands";
 import { useAdminStore } from "@/stores/admin";

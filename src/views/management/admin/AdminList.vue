@@ -64,8 +64,8 @@
             <CheckboxMarker
               :value="
                 item.availableFlag &&
-                  item.role.availableFlag &&
-                  dayjs(item.expired).isAfter(dayjs())
+                item.role.availableFlag &&
+                dayjs(item.expired).isAfter(dayjs())
               "
             />
           </template>
@@ -104,7 +104,7 @@ import DataTableFilter from "@/components/datatable/DataTableFilter.vue";
 import { computed, onMounted, ref } from "vue";
 import { confirmDelete } from "@/utils/alerts";
 import useListDialog from "@/composition/useListDialog";
-import { DataTableHeader } from "vuetify";
+import type { DataTableHeader } from "vuetify";
 import useDatatable from "@/composition/useDatatable";
 import qs from "qs";
 import CheckboxMarker from "@/components/datatable/CheckboxMarker.vue";

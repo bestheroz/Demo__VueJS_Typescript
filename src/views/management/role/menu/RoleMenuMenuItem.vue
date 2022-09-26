@@ -35,7 +35,7 @@
 
 <script setup lang="ts">
 import { MENU_TYPE } from "@/definitions/selections";
-import { Menu } from "@/definitions/models";
+import type { Menu } from "@/definitions/models";
 import { useVModel } from "@vueuse/core";
 import RoleMenuMenuItem from "@/views/management/role/menu/RoleMenuMenuItem.vue";
 import { useAuthorityStore } from "@/stores/authority";

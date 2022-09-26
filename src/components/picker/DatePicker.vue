@@ -64,7 +64,7 @@
 import envs from "@/constants/envs";
 import dayjs from "dayjs";
 import { ValidationObserver } from "vee-validate";
-import { DateTime } from "@/definitions/types";
+import type { DateTime } from "@/definitions/types";
 import { computed, ref, watch } from "vue";
 import { useVModel } from "@vueuse/core";
 import { formatDate } from "@/utils/formatter";

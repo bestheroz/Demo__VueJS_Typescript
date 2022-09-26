@@ -1,4 +1,4 @@
-import {
+import type {
   Admin,
   AdminConfig,
   Code,
@@ -9,7 +9,7 @@ import {
 import dayjs from "dayjs";
 import { MENU_TYPE, ROLE_AUTHORITY_TYPE } from "@/definitions/selections";
 import config from "../configs";
-import { FilterItem, FilterItemType } from "@/definitions/types";
+import type { FilterItem, FilterItemType } from "@/definitions/types";
 
 export function defaultAdminConfig(): AdminConfig {
   return {

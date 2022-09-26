@@ -1,7 +1,8 @@
-import { reactive, Ref, ref, toRefs } from "vue";
+import { reactive, ref, toRefs } from "vue";
+import type { Ref } from "vue";
 import { patchApi } from "@/utils/apis";
-import { AvailableFlagDTO } from "@/definitions/types";
-import { Id } from "@/definitions/models";
+import type { AvailableFlagDTO } from "@/definitions/types";
+import type { Id } from "@/definitions/models";
 
 export default function <T extends Id>(url?: string) {
   const state = reactive({
