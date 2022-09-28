@@ -55,6 +55,9 @@
     "supports es6-module"
   ],
   "engines": {
-    "node": "16"
+    "node": "18"
+  },
+  "volta": {
+    "node": "18.9.1"
   }
 }
