@@ -1,8 +1,3 @@
 {
-  "reject": [
-    "vue",
-    "vue-router",
-    "vee-validate",
-    "sass-loader"
-  ]
+  "reject": ["vue", "vue-router", "vee-validate", "sass"]
 }
