@@ -1,7 +1,7 @@
 <template>
   <v-card class="text-center w-full error-page pa-3">
     <v-img
-      src="/images/illustrations/500-illustration.svg"
+      src="@/assets/images/illustrations/500-illustration.svg"
       max-height="400"
       contain
     />

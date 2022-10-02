@@ -1,9 +1,9 @@
 import Vue from "vue";
 import vuetify from "@/plugins/vuetify";
-import App from "./App.vue";
-import router from "./router";
-import "./plugins/vee-validate";
-import "./assets/scss/theme.scss";
+import App from "@/App.vue";
+import router from "@/router";
+import "@/plugins/vee-validate";
+import "@/assets/scss/theme.scss";
 import envs from "@/constants/envs";
 import * as Sentry from "@sentry/vue";
 import { Integrations } from "@sentry/tracing";

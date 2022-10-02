@@ -4,7 +4,7 @@
       class="mb-5"
       max-height="400"
       contain
-      src="/images/illustrations/maintenance-illustration.svg"
+      src="@/assets/images/illustrations/maintenance-illustration.svg"
     />
 
     <h1 class="text-h3 font-weight-bold">유지 보수 중</h1>

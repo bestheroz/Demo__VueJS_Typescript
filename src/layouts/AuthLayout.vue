@@ -9,7 +9,10 @@
           v-text="envs.PRODUCT_TITLE"
         />
       </div>
-      <img class="w-full" src="/images/illustrations/signin-illustration.svg">
+      <img
+        class="w-full"
+        src="@/assets/images/illustrations/signin-illustration.svg"
+      />
     </v-sheet>
 
     <div
