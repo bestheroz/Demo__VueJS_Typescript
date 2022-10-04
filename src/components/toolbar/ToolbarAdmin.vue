@@ -5,7 +5,11 @@
         <v-btn icon class="elevation-2" v-on="on">
           <v-badge color="success" dot bordered offset-x="10" offset-y="10">
             <v-avatar size="40">
-              <v-img src="/src/assets/images/avatars/avatar1.svg" />
+              <v-img>
+                <template #default>
+                  <img src="/src/assets/images/avatars/avatar1.svg" alt="" />
+                </template>
+              </v-img>
             </v-avatar>
           </v-badge>
         </v-btn>
