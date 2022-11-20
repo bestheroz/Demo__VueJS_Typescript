@@ -20,7 +20,8 @@
                     <v-text-field
                       v-model="value.name"
                       label="메뉴명"
-                      filled
+                      outlined
+                      dense
                       :error-messages="errors"
                       class="required"
                     />
@@ -36,9 +37,9 @@
                       v-model="value.type"
                       :items="MenuTypes"
                       label="타입"
-                      filled
+                      outlined
+                      dense
                       :error-messages="errors"
-                      hide-details="auto"
                       class="required"
                     />
                   </validation-provider>
@@ -52,9 +53,9 @@
                     <v-text-field
                       v-model="value.url"
                       label="링크 URL"
-                      filled
+                      outlined
+                      dense
                       :error-messages="errors"
-                      hide-details="auto"
                       clearable
                     />
                   </validation-provider>
@@ -68,10 +69,10 @@
                     <v-text-field
                       v-model="value.icon"
                       label="메뉴 아이콘"
-                      filled
+                      outlined
+                      dense
                       append-icon="mdi-open-in-new"
                       :error-messages="errors"
-                      hide-details="auto"
                       class="required"
                       @click:append="linkIconSite"
                     />

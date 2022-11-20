@@ -4,6 +4,8 @@ import eslint from "vite-plugin-eslint";
 import tsconfigPaths from "vite-tsconfig-paths";
 import checker from "vite-plugin-checker";
 import { defineConfig } from "vite";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import path from "path";
 import { VuetifyResolver } from "unplugin-vue-components/resolvers";
 
@@ -20,6 +22,8 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       "@": path.resolve(__dirname, "src"),
     },
   },

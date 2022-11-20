@@ -33,7 +33,6 @@
               prepend-inner-icon="mdi-magnify"
               clearable
               outlined
-              hide-details="auto"
               dense
             />
           </v-col>

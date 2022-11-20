@@ -16,9 +16,9 @@
                   <v-text-field
                     v-model="password"
                     label="비밀번호"
-                    filled
+                    outlined
+                    dense
                     :error-messages="errors"
-                    hide-details="auto"
                     :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
                     :type="showPassword ? 'text' : 'password'"
                     class="required"
@@ -35,9 +35,9 @@
                   <v-text-field
                     v-model="passwordCheck"
                     label="비밀번호 확인"
-                    filled
+                    outlined
+                    dense
                     :error-messages="errors"
-                    hide-details="auto"
                     :append-icon="showPasswordCheck ? 'mdi-eye' : 'mdi-eye-off'"
                     :type="showPasswordCheck ? 'text' : 'password'"
                     class="required"

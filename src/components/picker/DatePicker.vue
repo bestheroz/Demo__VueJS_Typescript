@@ -20,14 +20,14 @@
               :label="hideLabel ? undefined : label"
               :placeholder="placeholder"
               :hint="hideHint ? undefined : hint"
-              filled
+              outlined
               persistent-hint
               :messages="message"
               prepend-inner-icon="mdi-calendar-cursor"
               readonly
               :disabled="disabled"
               :dense="dense"
-              :hide-details="hideDetails ?? 'auto'"
+              :hide-details="hideDetails"
               :clearable="clearable"
               :error-messages="errors"
               :append-outer-icon="startType ? 'mdi-tilde' : undefined"
@@ -91,6 +91,7 @@ const props = withDefaults(
   {
     value: null,
     label: "날짜 선택",
+    dense: true,
     placeholder: undefined,
     message: undefined,
     max: undefined,

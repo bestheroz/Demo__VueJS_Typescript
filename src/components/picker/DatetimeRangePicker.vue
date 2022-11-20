@@ -18,13 +18,13 @@
           :label="hideLabel ? undefined : label"
           :placeholder="placeholder"
           persistent-hint
-          filled
+          outlined
           :messages="message"
           prepend-inner-icon="mdi-calendar-clock"
           readonly
           :disabled="disabled"
           :dense="dense"
-          :hide-details="hideDetails || 'auto'"
+          :hide-details="hideDetails"
           :clearable="clearable"
           :error-messages="errors"
           :class="required ? 'required' : ''"
@@ -124,6 +124,7 @@ const props = withDefaults(
   }>(),
   {
     label: "일시 또는 기간 선택",
+    dense: true,
     placeholder: undefined,
     message: undefined,
     max: undefined,

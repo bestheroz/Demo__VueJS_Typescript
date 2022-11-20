@@ -22,9 +22,9 @@
                     <v-text-field
                       v-model="value.name"
                       label="역할명"
-                      filled
+                      outlined
+                      dense
                       :error-messages="errors"
-                      hide-details="auto"
                       class="required"
                     />
                   </validation-provider>

@@ -16,9 +16,9 @@
                   <v-text-field
                     v-model="oldPassword"
                     label="이전 비밀번호"
-                    filled
+                    outlined
+                    dense
                     :error-messages="errors"
-                    hide-details="auto"
                     :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
                     :type="show1 ? 'text' : 'password'"
                     class="required"
@@ -36,9 +36,9 @@
                   <v-text-field
                     v-model="password"
                     label="비밀번호"
-                    filled
+                    outlined
+                    dense
                     :error-messages="errors"
-                    hide-details="auto"
                     :append-icon="show2 ? 'mdi-eye' : 'mdi-eye-off'"
                     :type="show2 ? 'text' : 'password'"
                     class="required"
@@ -55,9 +55,9 @@
                   <v-text-field
                     v-model="password2"
                     label="비밀번호 확인"
-                    filled
+                    outlined
+                    dense
                     :error-messages="errors"
-                    hide-details="auto"
                     :append-icon="show3 ? 'mdi-eye' : 'mdi-eye-off'"
                     :type="show3 ? 'text' : 'password'"
                     class="required"

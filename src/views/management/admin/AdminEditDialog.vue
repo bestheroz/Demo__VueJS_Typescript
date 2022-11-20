@@ -24,9 +24,9 @@
                     <v-text-field
                       v-model="value.loginId"
                       label="관리자 아이디"
-                      filled
+                      outlined
+                      dense
                       :error-messages="loginIdErrorText || errors"
-                      hide-details="auto"
                       :success-messages="loginIdSuccessText"
                       :append-icon="loginIdAppendIcon"
                       class="required"
@@ -44,9 +44,9 @@
                     <v-text-field
                       v-model="value.name"
                       label="관리자 이름"
-                      filled
+                      outlined
+                      dense
                       :error-messages="errors"
-                      hide-details="auto"
                       class="required"
                     />
                   </validation-provider>
@@ -86,9 +86,9 @@
                     <v-text-field
                       v-model="password"
                       label="비밀번호"
-                      filled
+                      outlined
+                      dense
                       :error-messages="errors"
-                      hide-details="auto"
                       :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
                       :type="show1 ? 'text' : 'password'"
                       @click:append="show1 = !show1"
@@ -105,9 +105,9 @@
                     <v-text-field
                       v-model="password2"
                       label="비밀번호 확인"
-                      filled
+                      outlined
+                      dense
                       :error-messages="errors"
-                      hide-details="auto"
                       :append-icon="show2 ? 'mdi-eye' : 'mdi-eye-off'"
                       :type="show2 ? 'text' : 'password'"
                       clearable

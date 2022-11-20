@@ -18,12 +18,12 @@
           :label="hideLabel ? undefined : label"
           :placeholder="placeholder"
           :messages="message"
-          filled
+          outlined
           prepend-inner-icon="mdi-calendar-cursor"
           readonly
           :disabled="disabled"
           :dense="dense"
-          :hide-details="hideDetails || 'auto'"
+          :hide-details="hideDetails"
           :error-messages="errors"
           :clearable="clearable"
           :class="required ? 'required' : ''"
@@ -79,6 +79,7 @@ const props = withDefaults(
   {
     label: "날짜 또는 기간 선택",
     placeholder: undefined,
+    dense: true,
     message: undefined,
     max: undefined,
     min: undefined,
