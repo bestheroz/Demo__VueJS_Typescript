@@ -1,5 +1,6 @@
 import axios from "axios";
-import type { AxiosError, AxiosResponse } from "axios";
+import type { AxiosError, AxiosRequestConfig } from "axios";
+import type { AxiosResponse } from "axios";
 import envs from "@/constants/envs";
 import store from "@/stores";
 import { toastError, toastSuccess } from "@/utils/alerts";
@@ -12,6 +13,8 @@ import type { Code } from "@/definitions/models";
 import dayjs from "dayjs";
 import jwt_decode from "jwt-decode";
 import { useAdminStore } from "@/stores/admin";
+import qs from "qs";
+import { useIntervalFn } from "@vueuse/core";
 
 const { reIssueAccessToken } = useAdminStore(store);
 export const axiosInstance = axios.create({
@@ -22,61 +25,63 @@ export const axiosInstance = axios.create({
 });
 
 axiosInstance.interceptors.request.use(
-  async function (config) {
-    if (!config.headers) {
-      console.error("Failed to set 'request headers' : headers is not exist");
-      return;
-    }
-    config.headers.Authorization = await getValidatedAccessToken();
-    return config;
-  },
-  function (error) {
-    alertAxiosError(error);
-    return Promise.reject(error);
-  },
+    async function (config) {
+      if (!config.headers) {
+        console.error("Failed to set 'request headers' : headers is not exist");
+        return {} as AxiosRequestConfig;
+      }
+      config.headers.Authorization = await getValidatedAccessToken();
+      return config;
+    },
+    function (error) {
+      alertAxiosError(error);
+      return Promise.reject(error);
+    },
 );
 axiosInstance.interceptors.response.use(
-  function (response) {
-    if (response?.data) {
-      response.data.success =
-        [200, 201].includes(response.status) &&
-        response.data.code?.startsWith("S");
-      return response;
-    } else {
-      console.error(response);
-      return { data: { success: false, code: "E" } } as ApiDataResult;
-    }
-  },
-  async function (error: AxiosError) {
-    console.error(error.message);
-    if (error.message === "Network Error") {
-      toastError("Service Unavailable");
-      return;
-    }
-    if (error.response) {
-      if (error.response.headers.refreshtoken === "must") {
-        const refreshToken = await apiRefreshToken(error);
-        if (refreshToken?.config?.headers) {
-          refreshToken.config.headers.Authorization =
-            await getValidatedAccessToken();
-          return axiosInstance.request(refreshToken.config);
-        } else {
+    function (response) {
+      if (response?.data) {
+        response.data.success =
+            [200, 201].includes(response.status) &&
+            response.data.code?.startsWith("S");
+        return response;
+      } else {
+        console.error(response);
+        return {
+          data: { success: false, code: "E" } as ApiDataResult,
+        } as AxiosResponse;
+      }
+    },
+    async function (error: AxiosError) {
+      console.error(error.message);
+      if (error.message === "Network Error") {
+        toastError("Service Unavailable");
+        return;
+      }
+      if (error.response) {
+        if (error.response.headers.refreshtoken === "must") {
+          const refreshToken = await apiRefreshToken(error);
+          if (refreshToken?.config?.headers) {
+            refreshToken.config.headers.Authorization =
+                await getValidatedAccessToken();
+            return axiosInstance.request(refreshToken.config);
+          } else {
+            return;
+          }
+        }
+        if ([400, 401].includes(error.response.status)) {
+          await goSignInPage();
           return;
+        } else if ([403, 404, 500].includes(error.response.status)) {
+          return { data: { success: false, code: "E" } } as ApiDataResult;
         }
       }
-      if ([400, 401].includes(error.response.status)) {
-        await goSignInPage();
-        return;
-      } else if ([403, 404, 500].includes(error.response.status)) {
-        return { data: { success: false, code: "E" } } as ApiDataResult;
+      if (envs.ENVIRONMENT === "local") {
+        alertAxiosError(error);
       }
-    }
-    if (envs.ENVIRONMENT === "local") {
-      alertAxiosError(error);
-    }
-    console.warn(error);
-    return Promise.reject(error);
-  },
+      console.warn(error);
+      return Promise.reject(error);
+    },
 );
 
 export interface ApiDataResult<T = unknown> {
@@ -87,17 +92,17 @@ export interface ApiDataResult<T = unknown> {
 }
 
 export async function getApi<T = never, R = T>(
-  url: string,
-  failAlert = true,
+    url: string,
+    failAlert = true,
 ): Promise<ApiDataResult<R>> {
   const response = await axiosInstance.get<T, AxiosResponse<ApiDataResult<R>>>(
-    `api/${url}`,
+      `api/${url}`,
   );
   if (response?.data) {
     // accessToken 재발급시 success 값을 만들어줘야함.
     response.data.success =
-      [200, 201].includes(response.status) &&
-      response.data.code?.startsWith("S");
+        [200, 201].includes(response.status) &&
+        response.data.code?.startsWith("S");
     if (!response.data.success && failAlert) {
       alertResponseMessage(response.data);
     }
@@ -109,14 +114,14 @@ export async function getApi<T = never, R = T>(
 }
 
 export async function postApi<T = never, R = T>(
-  url: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types
-  data: any,
-  alert = true,
+    url: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types
+    data: any,
+    alert = true,
 ): Promise<ApiDataResult<R>> {
   const response = await axiosInstance.post<T, AxiosResponse<ApiDataResult<R>>>(
-    `api/${url}`,
-    data,
+      `api/${url}`,
+      data,
   );
   // response.status === 201
   if (alert) {
@@ -126,14 +131,14 @@ export async function postApi<T = never, R = T>(
 }
 
 export async function putApi<T = never, R = T>(
-  url: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types
-  data: any,
-  alert = true,
+    url: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types
+    data: any,
+    alert = true,
 ): Promise<ApiDataResult<R>> {
   const response = await axiosInstance.put<T, AxiosResponse<ApiDataResult<R>>>(
-    `api/${url}`,
-    data,
+      `api/${url}`,
+      data,
   );
   // response.status === 200
   if (alert) {
@@ -143,15 +148,15 @@ export async function putApi<T = never, R = T>(
 }
 
 export async function patchApi<T = never, R = T>(
-  url: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types
-  data: any,
-  alert = true,
+    url: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types
+    data: any,
+    alert = true,
 ): Promise<ApiDataResult<R>> {
   const response = await axiosInstance.patch<
-    T,
-    AxiosResponse<ApiDataResult<R>>
-  >(`api/${url}`, data);
+      T,
+      AxiosResponse<ApiDataResult<R>>
+      >(`api/${url}`, data);
   // response.status === 200
   if (alert) {
     alertResponseMessage(response.data);
@@ -160,13 +165,13 @@ export async function patchApi<T = never, R = T>(
 }
 
 export async function deleteApi<T = never, R = T>(
-  url: string,
-  alert = true,
+    url: string,
+    alert = true,
 ): Promise<ApiDataResult<R>> {
   const response = await axiosInstance.delete<
-    T,
-    AxiosResponse<ApiDataResult<R>>
-  >(`api/${url}`);
+      T,
+      AxiosResponse<ApiDataResult<R>>
+      >(`api/${url}`);
   // response.status === 204
   if (alert) {
     alertResponseMessage(response.data);
@@ -181,9 +186,9 @@ export async function getCodesApi(type: string): Promise<Code[]> {
   } else {
     try {
       const response = await axiosInstance.get<
-        string,
-        AxiosResponse<ApiDataResult<Code[]>>
-      >(`api/v1/codes/?type=${type}&availableFlag=true`);
+          string,
+          AxiosResponse<ApiDataResult<Code[]>>
+          >(`api/v1/codes/?type=${type}&availableFlag=true`);
       const result = response.data.data ?? [];
       if (result.length > 0) {
         window.sessionStorage.setItem(`code__${type}`, JSON.stringify(result));
@@ -196,7 +201,7 @@ export async function getCodesApi(type: string): Promise<Code[]> {
 }
 
 export async function getEnvironmentApi<T = string>(
-  key: string,
+    key: string,
 ): Promise<T | null> {
   const item = window.sessionStorage.getItem(`environment__${key}`);
   if (item) {
@@ -204,14 +209,14 @@ export async function getEnvironmentApi<T = string>(
   } else {
     try {
       const response = await axiosInstance.get<
-        T,
-        AxiosResponse<ApiDataResult<T>>
-      >(`api/v1/environments/${key}`);
+          T,
+          AxiosResponse<ApiDataResult<T>>
+          >(`api/v1/environments/${key}`);
       const result = response.data.data || null;
       if (result) {
         window.sessionStorage.setItem(
-          `environment__${key}`,
-          JSON.stringify(result),
+            `environment__${key}`,
+            JSON.stringify(result),
         );
       }
       return result;
@@ -230,33 +235,54 @@ function alertResponseMessage(data: ApiDataResult<unknown>): void {
   }
 }
 
+export async function uploadFileApi<T = string>(
+    url: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types
+    formData: FormData,
+    alert = false,
+): Promise<ApiDataResult<T>> {
+  const response = await axiosInstance.post<
+      FormData,
+      AxiosResponse<ApiDataResult<T>>
+      >(`${envs.FILE_API_HOST}api/${url}`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  // response.status === 201
+  if (alert) {
+    alertResponseMessage(response.data);
+  }
+  return response.data;
+}
+
 export async function downloadExcelApi(url: string): Promise<void> {
   const response = await axiosInstance.get<Blob>(`api/${url}`, {
     responseType: "blob",
     headers: {
       "Content-Type":
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     },
   });
   const newUrl = window.URL.createObjectURL(
-    new Blob([response.data], { type: response.headers["content-type"] }),
+      new Blob([response.data], { type: response.headers["content-type"] }),
   );
   const tempLink = document.createElement("a");
   tempLink.style.display = "none";
   tempLink.href = newUrl;
   const contentDisposition = response.headers["content-disposition"];
   tempLink.setAttribute(
-    "download",
-    (contentDisposition
-      ? contentDisposition
-          .split("=")
-          .pop()
-          ?.split(";")
-          .join("")
-          // eslint-disable-next-line
-          .split('"')
-          .join("")
-      : url.split("/").pop()) || "",
+      "download",
+      (contentDisposition
+          ? contentDisposition
+              .split("=")
+              .pop()
+              ?.split(";")
+              .join("")
+              // eslint-disable-next-line
+              .split('"')
+              .join("")
+          : url.split("/").pop()) || "",
   );
   document.body.appendChild(tempLink);
   tempLink.click();
@@ -268,10 +294,10 @@ async function apiRefreshToken(error: AxiosError) {
   try {
     const refreshToken = window.localStorage.getItem("refreshToken");
     if (
-      !refreshToken ||
-      dayjs((jwt_decode(refreshToken) as { exp: number }).exp * 1000).isBefore(
-        dayjs(),
-      )
+        !refreshToken ||
+        dayjs((jwt_decode(refreshToken) as { exp: number }).exp * 1000).isBefore(
+            dayjs(),
+        )
     ) {
       await goSignInPage();
     }
@@ -281,7 +307,7 @@ async function apiRefreshToken(error: AxiosError) {
     await goSignInPage();
     return;
   }
-  if (!error.config.headers) {
+  if (!error.config?.headers) {
     console.error("Failed to set 'request headers' : headers is not exist");
     return;
   }
@@ -291,4 +317,56 @@ async function apiRefreshToken(error: AxiosError) {
 
 export function alertAxiosError(e: AxiosError): void {
   e.response && toastError(e.response.statusText || "System Error");
+}
+
+export async function getPresignedUploadURLApi({
+                                                 bucket,
+                                                 folder,
+                                                 filename,
+                                                 acl,
+                                                 contentType,
+                                               }: {
+  bucket: string;
+  folder: string;
+  filename: string;
+  acl: string;
+  contentType?: string;
+}): Promise<string> {
+  return (
+      await getApi(
+          `files/presigned-upload-url?${qs.stringify({
+            bucket,
+            folder,
+            filename,
+            acl,
+            contentType,
+          })}`,
+      )
+  ).data;
+}
+
+export function pollingApi(
+    url: string,
+    successFunction: () => void,
+    failure403Function?: () => void,
+    intervalMilliseconds = 1500,
+) {
+  const { pause, isActive, resume } = useIntervalFn(async () => {
+    try {
+      const response = await axios.head(url);
+      if (response.status === 200) {
+        pause();
+        successFunction();
+        return;
+      }
+    } catch (error) {
+      // 403 응답일 경우는 재시도. 아닌 경우 clear
+      if (!((error as AxiosError)?.response?.status === 403)) {
+        pause();
+        failure403Function && failure403Function();
+        return;
+      }
+    }
+  }, intervalMilliseconds);
+  return { pause, isActive, resume };
 }

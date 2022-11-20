@@ -6,8 +6,8 @@
           <RoleMenuNestedDraggable
             v-if="roleId"
             v-model="items"
+            :parent-id="0"
             :role-id="roleId"
-            root-flag
           />
         </v-col>
         <v-col sm="12" md="6">

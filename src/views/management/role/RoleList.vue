@@ -28,14 +28,14 @@
         <RoleNestedDraggable
           v-if="superAdminFlag"
           v-model="items"
-          root-flag
+          :parent-id="0"
           @click:edit="showEditDialog"
           @remove-role="deleteRole"
         />
         <RoleNestedDraggable
           v-else-if="items && items.length > 0"
           v-model="items[0].children"
-          root-flag
+          :parent-id="0"
           @click:edit="showEditDialog"
           @remove-role="deleteRole"
         />

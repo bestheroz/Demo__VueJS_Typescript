@@ -20,7 +20,7 @@
       <v-card-text>
         <MenuNestedDraggable
           v-model="items"
-          root-flag
+          :parent-id="0"
           @click:edit="showEditDialog"
           @click:delete="onDelete"
         />

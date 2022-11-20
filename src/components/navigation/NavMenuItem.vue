@@ -14,7 +14,7 @@
         <v-icon v-text="drawer.icon" />
       </v-list-item-icon>
       <v-list-item-content>
-        <v-list-item-title v-text="drawer.name" />
+        <v-list-item-title style="font-size: 0.9rem" v-text="drawer.name" />
       </v-list-item-content>
     </v-list-item>
 
@@ -36,7 +36,7 @@
           <v-icon v-text="drawer.icon" />
         </v-list-item-icon>
         <v-list-item-content>
-          <v-list-item-title v-text="drawer.name" />
+          <v-list-item-title style="font-size: 1rem" v-text="drawer.name" />
         </v-list-item-content>
       </template>
       <slot />

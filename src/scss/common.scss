@@ -1,51 +1,65 @@
 .v-application {
   button:not(.v-btn) {
     transition: box-shadow 0.2s, transform 0.2s;
+
     &:hover {
       transform: scale(1.2);
     }
   }
+
   button.v-btn,
   .v-chip {
     transition: box-shadow 0.2s, transform 0.2s;
+
     &:hover {
       transform: scale(1.07);
     }
   }
+
   button.v-btn--icon {
     transition: box-shadow 0.2s, transform 0.2s;
+
     &:hover {
       transform: scale(1.3) !important;
     }
   }
+
   button.v-btn--block {
     transition: initial;
+
     &:hover {
       transform: scaleY(1.1) !important;
     }
   }
+
   .menuable__content__active button.v-btn,
   .v-list-item,
   tr:not(.v-data-table__selected) {
     transition: initial;
+
     &:hover {
       transform: initial !important;
     }
   }
+
   .container {
     padding: 1rem;
   }
+
   .text--anchor {
     color: var(--v-primary-base);
     cursor: pointer;
     font-weight: bold;
+
     &:hover {
       text-decoration: underline;
     }
   }
+
   .theme--dark.v-btn:not(.v-btn--flat):not(.v-btn--text):not(.v-btn--outlined) {
     background-color: initial;
   }
+
   .v-data-table {
     thead {
       .v-data-table__progress {
@@ -55,6 +69,7 @@
       }
     }
   }
+
   .v-card--loading {
     .v-card__progress {
       .v-progress-linear {
@@ -62,6 +77,7 @@
       }
     }
   }
+
   .required {
     label::after {
       content: " *";
@@ -69,13 +85,16 @@
       color: red;
     }
   }
+
   .v-bottom-sheet.v-dialog.v-bottom-sheet--inset {
     min-width: 650px;
     width: 70%;
+
     div.v-card__text {
       padding-bottom: 0.5rem;
     }
   }
+
   .v-navigation-drawer__content .v-list-item {
     box-shadow: initial !important;
   }
@@ -83,39 +102,15 @@
   .v-snack {
     .v-snack__content {
       font-size: 1rem;
+
       i {
         font-size: 1rem !important;
       }
     }
   }
-  > .page-title-menu {
-    padding-right: 66px;
-    box-shadow: initial;
-  }
 
-  .dragArea {
-    min-height: 30px;
-    border: 4px solid var(--v-info-base);
-    .dragArea {
-      min-height: 30px;
-      border: 4px solid var(--v-warning-base);
-      .dragArea {
-        min-height: 30px;
-        border: 4px solid var(--v-success-base);
-        .dragArea {
-          min-height: 30px;
-          border: 4px solid var(--v-error-base);
-          .dragArea {
-            min-height: 30px;
-            border: 4px solid var(--v-success-base);
-            .dragArea {
-              min-height: 30px;
-              border: 4px solid var(--v-accent-base);
-            }
-          }
-        }
-      }
-    }
+  > .page-title-menu {
+    box-shadow: initial;
   }
 
   // dark theme
@@ -125,6 +120,7 @@
       box-shadow: inset 0 -1px 0 rgb(255 255 255 / 12%);
     }
   }
+
   // light theme
   .theme--light {
     table tr,
