@@ -3,8 +3,8 @@
     <PageTitle :button-loading="saving" @click="showAddDialog">
       <template #more-buttons>
         <v-btn
-          tile
           v-if="hasWriteAuthority"
+          tile
           color="primary"
           outlined
           large

@@ -3,8 +3,8 @@
     <PageTitle :button-loading="saving" @click="showAddDialog">
       <template #more-buttons>
         <v-btn
-          tile
           v-if="hasExcelAuthority"
+          tile
           color="primary"
           outlined
           large
@@ -72,7 +72,7 @@
             {{ formatDatetime(item.expired) }}
           </template>
           <template v-if="hasDeleteAuthority" #[`item.actions`]="{ item }">
-            <v-btn tile v-if="id !== item.id" icon @click="remove(item)">
+            <v-btn v-if="id !== item.id" tile icon @click="remove(item)">
               <v-icon color="error"> mdi-delete-outline</v-icon>
             </v-btn>
           </template>

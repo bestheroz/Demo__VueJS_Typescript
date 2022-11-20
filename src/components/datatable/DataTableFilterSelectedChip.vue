@@ -17,7 +17,7 @@
           @mouseleave="emits('close-on-click-change', true)"
         >
           {{ chipLabel }}
-          <v-icon small @click="emptySelectFilters" v-if="!value.required">
+          <v-icon v-if="!value.required" small @click="emptySelectFilters">
             mdi-close
           </v-icon>
         </v-btn>

@@ -116,8 +116,8 @@
                     />
                   </validation-provider>
                   <v-btn
-                    tile
                     v-else-if="roleId !== value.role.id"
+                    tile
                     color="primary"
                     filled
                     @click="resetPasswordDialog = true"

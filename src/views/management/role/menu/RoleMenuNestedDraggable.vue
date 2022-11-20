@@ -21,7 +21,7 @@
       <v-list-item-title class="pt-1">
         <v-row no-gutters>
           <v-col cols="4">
-            <v-btn tile v-if="hasWriteAuthority" icon>
+            <v-btn v-if="hasWriteAuthority" tile icon>
               <v-icon class="drag-handle"> mdi-sort </v-icon>
             </v-btn>
             {{ item.menu.name }}

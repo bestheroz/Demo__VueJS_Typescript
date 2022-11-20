@@ -13,7 +13,7 @@
     >
       <v-list-item-title v-if="role.id !== 1" class="d-inline pt-1">
         <div>
-          <v-btn tile v-if="hasWriteAuthority" icon>
+          <v-btn v-if="hasWriteAuthority" tile icon>
             <v-icon class="drag-handle"> mdi-sort</v-icon>
           </v-btn>
           <a

@@ -19,7 +19,7 @@
         <v-icon v-text="_menu.icon" />
       </v-list-item-icon>
       <v-list-item-title class="d-inline pt-1">
-        <v-btn tile v-if="hasWriteAuthority" icon>
+        <v-btn v-if="hasWriteAuthority" tile icon>
           <v-icon class="drag-handle"> mdi-sort </v-icon>
         </v-btn>
         <a
@@ -29,8 +29,8 @@
         />
         {{ _menu.url ? `(${_menu.url})` : "" }}
         <v-btn
-          tile
           v-if="hasDeleteAuthority"
+          tile
           icon
           small
           @click="emits('click:delete', _menu)"
