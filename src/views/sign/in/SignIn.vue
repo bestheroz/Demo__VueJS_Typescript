@@ -18,7 +18,8 @@
                 :validate-on-blur="false"
                 label="ID"
                 name="loginId"
-                outlined
+                filled
+                dense
                 :error-messages="errors"
                 :success="valid"
                 @keyup.enter="submit"
@@ -36,7 +37,8 @@
                 :type="showPassword ? 'text' : 'password'"
                 label="Password"
                 name="password"
-                outlined
+                filled
+                dense
                 :error-messages="errors"
                 :success="valid"
                 @input="resetErrors"

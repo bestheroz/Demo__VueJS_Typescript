@@ -18,7 +18,7 @@
           :label="hideLabel ? undefined : label"
           :placeholder="placeholder"
           :messages="message"
-          outlined
+          filled
           prepend-inner-icon="mdi-calendar-cursor"
           readonly
           :disabled="disabled"
@@ -44,10 +44,10 @@
       range
       @change="sortPickerArray"
     >
-      <v-btn outlined @click="setToday"> 오늘</v-btn>
+      <v-btn filled @click="setToday"> 오늘</v-btn>
       <div class="flex-grow-1" />
-      <v-btn outlined @click="dialog = false"> 취소</v-btn>
-      <v-btn outlined @click="save"> 확인</v-btn>
+      <v-btn filled @click="dialog = false"> 취소</v-btn>
+      <v-btn filled @click="save"> 확인</v-btn>
     </v-date-picker>
   </v-dialog>
 </template>

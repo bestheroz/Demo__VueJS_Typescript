@@ -20,7 +20,7 @@
               :label="hideLabel ? undefined : label"
               :placeholder="placeholder"
               :hint="hideHint ? undefined : hint"
-              outlined
+              filled
               persistent-hint
               :messages="message"
               prepend-inner-icon="mdi-calendar-cursor"
@@ -48,12 +48,12 @@
           :max="max"
           :min="min"
         >
-          <v-btn outlined :disabled="disableToday" @click="setToday">
+          <v-btn filled :disabled="disableToday" @click="setToday">
             오늘
           </v-btn>
           <div class="flex-grow-1" />
-          <v-btn outlined @click="dialog = false"> 취소</v-btn>
-          <v-btn outlined @click="save"> 확인</v-btn>
+          <v-btn filled @click="dialog = false"> 취소</v-btn>
+          <v-btn filled @click="save"> 확인</v-btn>
         </v-date-picker>
       </v-dialog>
     </validation-observer>

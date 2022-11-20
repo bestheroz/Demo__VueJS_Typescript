@@ -5,14 +5,14 @@
         <v-btn
           v-if="hasExcelAuthority"
           color="primary"
-          outlined
+          filled
           x-large
           @click="excel"
         >
           <v-icon> mdi-file-excel</v-icon>
           엑셀다운로드
         </v-btn>
-        <v-btn color="primary" outlined x-large @click="fetchList">
+        <v-btn color="primary" filled x-large @click="fetchList">
           <v-icon> mdi-refresh</v-icon>
           새로고침
         </v-btn>
@@ -28,11 +28,10 @@
           <v-col cols="12" sm="3">
             <v-text-field
               v-model="search"
-              solo
               label="검색 (ID, 관리자 아이디, 관리자 이름)"
               prepend-inner-icon="mdi-magnify"
               clearable
-              outlined
+              filled
               dense
             />
           </v-col>

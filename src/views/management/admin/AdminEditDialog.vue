@@ -24,7 +24,7 @@
                     <v-text-field
                       v-model="value.loginId"
                       label="관리자 아이디"
-                      outlined
+                      filled
                       dense
                       :error-messages="loginIdErrorText || errors"
                       :success-messages="loginIdSuccessText"
@@ -44,7 +44,7 @@
                     <v-text-field
                       v-model="value.name"
                       label="관리자 이름"
-                      outlined
+                      filled
                       dense
                       :error-messages="errors"
                       class="required"
@@ -86,7 +86,7 @@
                     <v-text-field
                       v-model="password"
                       label="비밀번호"
-                      outlined
+                      filled
                       dense
                       :error-messages="errors"
                       :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
@@ -105,7 +105,7 @@
                     <v-text-field
                       v-model="password2"
                       label="비밀번호 확인"
-                      outlined
+                      filled
                       dense
                       :error-messages="errors"
                       :append-icon="show2 ? 'mdi-eye' : 'mdi-eye-off'"
@@ -118,7 +118,7 @@
                   <v-btn
                     v-else-if="roleId !== value.role.id"
                     color="primary"
-                    outlined
+                    filled
                     @click="resetPasswordDialog = true"
                   >
                     비밀번호 초기화

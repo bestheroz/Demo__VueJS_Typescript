@@ -22,7 +22,7 @@
                     <v-text-field
                       v-model="value.name"
                       label="역할명"
-                      outlined
+                      filled
                       dense
                       :error-messages="errors"
                       class="required"

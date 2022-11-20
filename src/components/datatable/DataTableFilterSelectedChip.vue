@@ -5,7 +5,7 @@
         <v-chip
           v-show="chipLabel"
           :close="!value.required"
-          outlined
+          filled
           :color="value.required ? 'error' : 'primary'"
           class="pa-2"
           label
@@ -21,8 +21,8 @@
       <v-card
         v-if="
           isOpen &&
-            filtered.items.length > 0 &&
-            filtered.type !== FILTER_TYPE.TEXT
+          filtered.items.length > 0 &&
+          filtered.type !== FILTER_TYPE.TEXT
         "
       >
         <DataTableFilterItems

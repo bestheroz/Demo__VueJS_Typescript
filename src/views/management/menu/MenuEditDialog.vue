@@ -20,7 +20,7 @@
                     <v-text-field
                       v-model="value.name"
                       label="메뉴명"
-                      outlined
+                      filled
                       dense
                       :error-messages="errors"
                       class="required"
@@ -37,7 +37,7 @@
                       v-model="value.type"
                       :items="MenuTypes"
                       label="타입"
-                      outlined
+                      filled
                       dense
                       :error-messages="errors"
                       class="required"
@@ -53,7 +53,7 @@
                     <v-text-field
                       v-model="value.url"
                       label="링크 URL"
-                      outlined
+                      filled
                       dense
                       :error-messages="errors"
                       clearable
@@ -69,7 +69,7 @@
                     <v-text-field
                       v-model="value.icon"
                       label="메뉴 아이콘"
-                      outlined
+                      filled
                       dense
                       append-icon="mdi-open-in-new"
                       :error-messages="errors"

@@ -8,7 +8,7 @@
       <v-chip
         v-if="menu.id"
         :value="menu.id"
-        :outlined="!value.includes(menu.id)"
+        :filled="!value.includes(menu.id)"
         :color="value.includes(menu.id) ? 'primary' : 'secondary'"
         class="px-4"
         label

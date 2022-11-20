@@ -2,7 +2,7 @@
   <div>
     <v-select
       v-model="value"
-      outlined
+      filled
       dense
       :items="items"
       item-text="name"

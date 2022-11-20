@@ -22,7 +22,7 @@
                     <v-text-field
                       v-model="value.type"
                       label="그룹 코드"
-                      outlined
+                      filled
                       dense
                       :error-messages="errors"
                       class="required"
@@ -38,7 +38,7 @@
                     <v-text-field
                       v-model="value.value"
                       label="코드"
-                      outlined
+                      filled
                       dense
                       :error-messages="errors"
                       class="required"
@@ -54,7 +54,7 @@
                     <v-text-field
                       v-model="value.text"
                       label="코드명"
-                      outlined
+                      filled
                       dense
                       :error-messages="errors"
                       class="required"

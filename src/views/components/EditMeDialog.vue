@@ -10,7 +10,7 @@
                 <v-text-field
                   :value="item.loginId"
                   label="나의 아이디"
-                  outlined
+                  filled
                   dense
                   disabled
                   hide-details
@@ -25,7 +25,7 @@
                   <v-text-field
                     v-model="item.name"
                     label="나의 이름"
-                    outlined
+                    filled
                     dense
                     :error-messages="errors"
                     class="required"
@@ -36,7 +36,7 @@
                 <v-text-field
                   :value="item.role.name"
                   label="나의 역할"
-                  outlined
+                  filled
                   dense
                   disabled
                   hide-details

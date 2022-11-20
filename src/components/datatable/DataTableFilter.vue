@@ -8,7 +8,7 @@
       <template #activator="{ on, attrs }">
         <v-chip
           :color="filteredLength === 0 ? 'secondary' : 'primary'"
-          outlined
+          filled
           filter
           filter-icon="mdi-filter-variant"
           :input-value="true"

@@ -8,7 +8,7 @@
       @click="saveItems"
     >
       <template #more-buttons>
-        <v-btn color="primary" outlined x-large @click="fetchList">
+        <v-btn color="primary" filled x-large @click="fetchList">
           <v-icon> mdi-refresh </v-icon> 새로고침
         </v-btn>
       </template>

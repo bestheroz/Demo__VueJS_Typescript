@@ -16,7 +16,7 @@
                   <v-text-field
                     v-model="oldPassword"
                     label="이전 비밀번호"
-                    outlined
+                    filled
                     dense
                     :error-messages="errors"
                     :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
@@ -36,7 +36,7 @@
                   <v-text-field
                     v-model="password"
                     label="비밀번호"
-                    outlined
+                    filled
                     dense
                     :error-messages="errors"
                     :append-icon="show2 ? 'mdi-eye' : 'mdi-eye-off'"
@@ -55,7 +55,7 @@
                   <v-text-field
                     v-model="password2"
                     label="비밀번호 확인"
-                    outlined
+                    filled
                     dense
                     :error-messages="errors"
                     :append-icon="show3 ? 'mdi-eye' : 'mdi-eye-off'"
