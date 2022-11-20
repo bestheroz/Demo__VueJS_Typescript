@@ -3,16 +3,17 @@
     <PageTitle :button-loading="saving" @click="showAddDialog">
       <template #more-buttons>
         <v-btn
+          tile
           v-if="hasExcelAuthority"
           color="primary"
-          filled
-          x-large
+          outlined
+          large
           @click="excel"
         >
           <v-icon> mdi-file-excel</v-icon>
           엑셀다운로드
         </v-btn>
-        <v-btn color="primary" filled x-large @click="fetchList">
+        <v-btn tile color="primary" outlined large @click="fetchList">
           <v-icon> mdi-refresh</v-icon>
           새로고침
         </v-btn>
@@ -71,7 +72,7 @@
             {{ formatDatetime(item.expired) }}
           </template>
           <template v-if="hasDeleteAuthority" #[`item.actions`]="{ item }">
-            <v-btn v-if="id !== item.id" icon @click="remove(item)">
+            <v-btn tile v-if="id !== item.id" icon @click="remove(item)">
               <v-icon color="error"> mdi-delete-outline</v-icon>
             </v-btn>
           </template>

@@ -48,6 +48,7 @@
             </validation-provider>
 
             <v-btn
+              tile
               :loading="loading"
               block
               x-large

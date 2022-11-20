@@ -22,8 +22,7 @@
         />
         {{ menu.name }}
       </v-chip>
-      <component
-        :is="RoleMenuMenuItem"
+      <RoleMenuMenuItem
         v-model="value"
         :menus="menu.children"
         :depth="depth + 1"

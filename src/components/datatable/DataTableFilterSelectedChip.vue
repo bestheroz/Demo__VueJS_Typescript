@@ -2,21 +2,25 @@
   <div>
     <v-menu v-model="isOpen" rounded="lg" offset-y>
       <template #activator="{ on }">
-        <v-chip
+        <v-btn
           v-show="chipLabel"
           :close="!value.required"
           filled
+          tile
+          small
           :color="value.required ? 'error' : 'primary'"
           class="pa-2"
           label
           style="z-index: 9"
-          @click:close="emptySelectFilters"
           v-on="on"
           @mouseenter="emits('close-on-click-change', false)"
           @mouseleave="emits('close-on-click-change', true)"
         >
           {{ chipLabel }}
-        </v-chip>
+          <v-icon small @click="emptySelectFilters" v-if="!value.required">
+            mdi-close
+          </v-icon>
+        </v-btn>
       </template>
       <v-card
         v-if="

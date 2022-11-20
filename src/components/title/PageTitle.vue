@@ -5,13 +5,13 @@
     <v-menu
       v-if="!hideMoreActions"
       content-class="page-title-menu"
-      bottom
       left
       transition="slide-x-reverse-transition"
     >
       <template #activator="{ on, attrs }">
         <v-btn
           icon
+          plain
           x-large
           :loading="buttonLoading"
           v-bind="attrs"
@@ -23,7 +23,7 @@
         </v-btn>
       </template>
 
-      <v-list style="margin-top: 9px" class="pa-0">
+      <v-list style="margin-top: 11px; margin-right: 1rem; padding: 1px">
         <slot name="more-buttons" />
       </v-list>
     </v-menu>

@@ -3,16 +3,17 @@
     <PageTitle :button-loading="saving" @click="showAddDialog">
       <template #more-buttons>
         <v-btn
+          tile
           v-if="hasWriteAuthority"
           color="primary"
-          filled
-          x-large
+          outlined
+          large
           @click="saveItems"
         >
           <v-icon> mdi-sort</v-icon>
           순서저장
         </v-btn>
-        <v-btn color="primary" filled x-large @click="fetchList">
+        <v-btn tile color="primary" outlined large @click="fetchList">
           <v-icon> mdi-refresh</v-icon>
           새로고침
         </v-btn>
@@ -55,7 +56,7 @@
                   class="sortableTable"
                 >
                   <td>
-                    <v-btn v-if="hasWriteAuthority" icon>
+                    <v-btn v-if="hasWriteAuthority" icon tile>
                       <v-icon class="drag-handle"> mdi-sort</v-icon>
                     </v-btn>
                     <a
@@ -73,7 +74,7 @@
                   </td>
                   <td v-if="hasDeleteAuthority" class="text-center my-0">
                     <div class="actions">
-                      <v-btn icon @click="remove(item)">
+                      <v-btn tile icon @click="remove(item)">
                         <v-icon color="error"> mdi-delete-outline</v-icon>
                       </v-btn>
                     </div>

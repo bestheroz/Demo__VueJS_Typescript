@@ -48,12 +48,12 @@
           :max="max"
           :min="min"
         >
-          <v-btn filled :disabled="disableToday" @click="setToday">
+          <v-btn tile filled :disabled="disableToday" @click="setToday">
             오늘
           </v-btn>
           <div class="flex-grow-1" />
-          <v-btn filled @click="dialog = false"> 취소</v-btn>
-          <v-btn filled @click="save"> 확인</v-btn>
+          <v-btn tile filled @click="dialog = false"> 취소</v-btn>
+          <v-btn tile filled @click="save"> 확인</v-btn>
         </v-date-picker>
       </v-dialog>
     </validation-observer>

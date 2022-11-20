@@ -8,6 +8,7 @@
     >
       <template #activator="{ on, attrs }">
         <v-btn
+          tile
           :color="color"
           v-bind="attrs"
           :disabled="disabled"

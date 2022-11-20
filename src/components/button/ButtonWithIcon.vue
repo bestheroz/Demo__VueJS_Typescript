@@ -1,6 +1,7 @@
 <template>
   <div>
     <v-btn
+      tile
       :color="color"
       :disabled="disabled"
       :loading="loading"

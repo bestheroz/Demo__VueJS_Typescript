@@ -12,7 +12,7 @@
       <div class="d-flex align-center pa-2">
         <div class="text-h6">Settings</div>
         <v-spacer />
-        <v-btn icon @click="value = false">
+        <v-btn tile icon @click="value = false">
           <v-icon>mdi-close</v-icon>
         </v-btn>
       </div>
@@ -27,8 +27,8 @@
           mandatory
           class="mb-2"
         >
-          <v-btn x-large value="light"> Light </v-btn>
-          <v-btn x-large value="dark"> Dark </v-btn>
+          <v-btn tile x-large value="light"> Light </v-btn>
+          <v-btn tile x-large value="dark"> Dark </v-btn>
         </v-btn-toggle>
 
         <div class="font-weight-bold my-1">Toolbar Theme</div>
@@ -38,9 +38,9 @@
           mandatory
           class="mb-2"
         >
-          <v-btn x-large value="global"> Global </v-btn>
-          <v-btn x-large value="light"> Light </v-btn>
-          <v-btn x-large value="dark"> Dark </v-btn>
+          <v-btn tile x-large value="global"> Global </v-btn>
+          <v-btn tile x-large value="light"> Light </v-btn>
+          <v-btn tile x-large value="dark"> Dark </v-btn>
         </v-btn-toggle>
 
         <div class="font-weight-bold my-1">Menu Theme</div>
@@ -50,9 +50,9 @@
           mandatory
           class="mb-2"
         >
-          <v-btn x-large value="global"> Global </v-btn>
-          <v-btn x-large value="light"> Light </v-btn>
-          <v-btn x-large value="dark"> Dark </v-btn>
+          <v-btn tile x-large value="global"> Global </v-btn>
+          <v-btn tile x-large value="light"> Light </v-btn>
+          <v-btn tile x-large value="dark"> Dark </v-btn>
         </v-btn-toggle>
 
         <div class="font-weight-bold my-1">Toolbar Style</div>
@@ -62,8 +62,8 @@
           mandatory
           class="mb-2"
         >
-          <v-btn x-large :value="false"> Full </v-btn>
-          <v-btn x-large :value="true"> Solo </v-btn>
+          <v-btn tile x-large :value="false"> Full </v-btn>
+          <v-btn tile x-large :value="true"> Solo </v-btn>
         </v-btn-toggle>
 
         <div class="font-weight-bold my-1">Content Layout</div>
@@ -73,14 +73,15 @@
           mandatory
           class="mb-2"
         >
-          <v-btn x-large :value="false"> Fluid </v-btn>
-          <v-btn x-large :value="true"> Boxed </v-btn>
+          <v-btn tile x-large :value="false"> Fluid </v-btn>
+          <v-btn tile x-large :value="true"> Boxed </v-btn>
         </v-btn-toggle>
 
         <div class="font-weight-bold my-1">Primary Color</div>
 
         <v-color-picker v-model="primaryColor" mode="hexa" show-swatches />
         <v-btn
+          tile
           block
           large
           color="primary"

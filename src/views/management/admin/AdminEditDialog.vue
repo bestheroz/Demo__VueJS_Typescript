@@ -116,6 +116,7 @@
                     />
                   </validation-provider>
                   <v-btn
+                    tile
                     v-else-if="roleId !== value.role.id"
                     color="primary"
                     filled

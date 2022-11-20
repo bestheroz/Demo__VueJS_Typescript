@@ -97,6 +97,7 @@ async function getMenus(roleId: number): Promise<Menu[]> {
 function onChangeSelectedChip(selected: number[]): void {
   // 삭제!
   items.value = removeNotSelectedChildrenItem(selected, items.value);
+  console.log("-> items.value", selected);
 
   for (const selectedId of selected.filter((selectedId) =>
     flatItems.value.every((item) => item.menu.id !== selectedId),

@@ -55,10 +55,10 @@
       :min="minTime"
       @click:hour="selectingHourIfNoneTimerOption"
     >
-      <v-btn filled :disabled="disableToday" @click="setNow"> 지금</v-btn>
+      <v-btn tile filled :disabled="disableToday" @click="setNow"> 지금</v-btn>
       <div class="flex-grow-1" />
-      <v-btn filled @click="dialog = false"> 취소</v-btn>
-      <v-btn filled @click="save"> 확인</v-btn>
+      <v-btn tile filled @click="dialog = false"> 취소</v-btn>
+      <v-btn tile filled @click="save"> 확인</v-btn>
     </v-time-picker>
   </v-dialog>
 </template>

@@ -44,10 +44,10 @@
       range
       @change="sortPickerArray"
     >
-      <v-btn filled @click="setToday"> 오늘</v-btn>
+      <v-btn tile filled @click="setToday"> 오늘</v-btn>
       <div class="flex-grow-1" />
-      <v-btn filled @click="dialog = false"> 취소</v-btn>
-      <v-btn filled @click="save"> 확인</v-btn>
+      <v-btn tile filled @click="dialog = false"> 취소</v-btn>
+      <v-btn tile filled @click="save"> 확인</v-btn>
     </v-date-picker>
   </v-dialog>
 </template>

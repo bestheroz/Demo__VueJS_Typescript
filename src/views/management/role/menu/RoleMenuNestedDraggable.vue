@@ -1,7 +1,9 @@
 <template>
   <v-list
-    class="pt-0 mb-1 sortableListItem"
-    :class="`${!rootFlag ? 'ml-5' : ''} ${className}`"
+    class="pt-0 sortableListItem"
+    :class="`${!rootFlag ? 'ml-5' : ''} ${className} ${
+      hasGroupMenuChild ? 'pb-1' : 'pb-0'
+    }`"
   >
     <v-list-item
       v-for="item in value"
@@ -10,85 +12,94 @@
       class="pr-0"
       :data-value="JSON.stringify({ ...item, children: [] })"
     >
-      <v-row no-gutters>
-        <v-col sm="12" lg="5">
-          <v-list-item-icon>
-            <v-icon style="top: 4px" v-text="item.menu.icon" />
-          </v-list-item-icon>
-          <v-list-item-title class="d-inline">
-            <v-btn v-if="hasWriteAuthority" icon small>
+      <v-list-item-icon
+        v-if="item.menu.type === MENU_TYPE.GROUP"
+        :class="{ 'pt-1': hasWriteAuthority }"
+      >
+        <v-icon v-text="item.menu.icon" />
+      </v-list-item-icon>
+      <v-list-item-title class="pt-1">
+        <v-row no-gutters>
+          <v-col cols="4">
+            <v-btn tile v-if="hasWriteAuthority" icon>
               <v-icon class="drag-handle"> mdi-sort </v-icon>
             </v-btn>
             {{ item.menu.name }}
-          </v-list-item-title>
-        </v-col>
-        <v-col sm="12" lg="7" class="text-right">
-          <v-btn-toggle
-            v-if="item.menu.type !== MENU_TYPE.GROUP"
-            v-model="item.authoritiesJson"
-            active-class="primary"
-            tile
-            multiple
-            class="transparent"
-          >
-            <v-btn
-              :value="ROLE_AUTHORITY_TYPE.VIEW"
-              disabled
-              style="
-                background-color: var(--v-primary-base) !important;
-                color: white !important;
-              "
+          </v-col>
+          <v-col cols="8" class="text-right">
+            <v-btn-toggle
+              v-if="item.menu.type !== MENU_TYPE.GROUP"
+              v-model="item.authoritiesJson"
+              active-class="primary"
+              tile
+              multiple
+              class="transparent"
             >
-              보기
-            </v-btn>
+              <v-btn
+                tile
+                small
+                :value="ROLE_AUTHORITY_TYPE.VIEW"
+                disabled
+                style="
+                  background-color: var(--v-primary-base) !important;
+                  color: white !important;
+                "
+              >
+                보기
+              </v-btn>
 
-            <v-btn
-              :value="ROLE_AUTHORITY_TYPE.WRITE"
-              :disabled="hasWriteAuthority && roleId === adminStore.roleId"
-              :class="
-                item.authoritiesJson.includes(ROLE_AUTHORITY_TYPE.WRITE)
-                  ? 'white--text'
-                  : 'text--secondary'
-              "
-            >
-              편집
-            </v-btn>
+              <v-btn
+                tile
+                small
+                :value="ROLE_AUTHORITY_TYPE.WRITE"
+                :disabled="hasWriteAuthority && roleId === adminStore.roleId"
+                :class="
+                  item.authoritiesJson.includes(ROLE_AUTHORITY_TYPE.WRITE)
+                    ? 'white--text'
+                    : 'text--secondary'
+                "
+              >
+                편집
+              </v-btn>
 
-            <v-btn
-              :value="ROLE_AUTHORITY_TYPE.DELETE"
-              :disabled="hasWriteAuthority && roleId === adminStore.roleId"
-              :class="
-                item.authoritiesJson.includes(ROLE_AUTHORITY_TYPE.DELETE)
-                  ? 'white--text'
-                  : 'text--secondary'
-              "
-            >
-              삭제
-            </v-btn>
+              <v-btn
+                tile
+                small
+                :value="ROLE_AUTHORITY_TYPE.DELETE"
+                :disabled="hasWriteAuthority && roleId === adminStore.roleId"
+                :class="
+                  item.authoritiesJson.includes(ROLE_AUTHORITY_TYPE.DELETE)
+                    ? 'white--text'
+                    : 'text--secondary'
+                "
+              >
+                삭제
+              </v-btn>
 
-            <v-btn
-              :value="ROLE_AUTHORITY_TYPE.EXCEL"
-              :disabled="hasWriteAuthority && roleId === adminStore.roleId"
-              :class="
-                item.authoritiesJson.includes(ROLE_AUTHORITY_TYPE.EXCEL)
-                  ? 'white--text'
-                  : 'text--secondary'
-              "
-            >
-              엑셀
-            </v-btn>
-          </v-btn-toggle>
-        </v-col>
-        <v-col v-if="item.menu.type === MENU_TYPE.GROUP" cols="12">
-          <RoleMenuNestedDraggable
-            v-if="item.id"
-            v-model="item.children"
-            :parent-id="item.id"
-            :role-id="roleId"
-            @completed-load="onCompletedLoad"
-          />
-        </v-col>
-      </v-row>
+              <v-btn
+                tile
+                small
+                :value="ROLE_AUTHORITY_TYPE.EXCEL"
+                :disabled="hasWriteAuthority && roleId === adminStore.roleId"
+                :class="
+                  item.authoritiesJson.includes(ROLE_AUTHORITY_TYPE.EXCEL)
+                    ? 'white--text'
+                    : 'text--secondary'
+                "
+              >
+                엑셀
+              </v-btn>
+            </v-btn-toggle>
+          </v-col>
+        </v-row>
+        <RoleMenuNestedDraggable
+          v-if="item.menu.type === MENU_TYPE.GROUP"
+          v-model="item.children"
+          :parent-id="item.menu.id"
+          :role-id="roleId"
+          @completed-load="onCompletedLoad"
+        />
+      </v-list-item-title>
     </v-list-item>
   </v-list>
 </template>
@@ -108,7 +119,7 @@ const adminStore = useAdminStore();
 const props = defineProps<{
   value: RoleMenuMap[];
   roleId: number;
-  parentId: number;
+  parentId?: number;
 }>();
 const emits = defineEmits<{
   (e: "input", v: RoleMenuMap[]): void;
@@ -119,6 +130,10 @@ const rootFlag = computed(() => props.parentId === 0);
 const value = useVModel(props, "value", emits, { eventName: "input" });
 
 const className = computed(() => `sortableListItem-${props.parentId}`);
+
+const hasGroupMenuChild = computed(() =>
+  value.value.some((v) => v.menu.type === MENU_TYPE.GROUP),
+);
 
 const createSortable = useDebounceFn(() => {
   const querySelectors =
@@ -145,10 +160,13 @@ function extractSortableData(parentMenuId) {
   for (let i = 0; i < querySelectors.length; i++) {
     const attribute = querySelectors[i].getAttribute("data-value");
     if (attribute) {
-      const menu = JSON.parse(attribute) as RoleMenuMap;
+      const map = JSON.parse(attribute) as RoleMenuMap;
       result.push({
-        ...menu,
-        children: extractSortableData(menu.id),
+        ...map,
+        children:
+          map.menu.type === MENU_TYPE.GROUP
+            ? extractSortableData(map.menu.id)
+            : [],
       });
     }
   }

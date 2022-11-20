@@ -3,15 +3,16 @@
     <PageTitle :button-loading="saving" @click="showAddDialog">
       <template #more-buttons>
         <v-btn
+          tile
           v-if="hasWriteAuthority"
           color="primary"
-          filled
-          x-large
+          outlined
+          large
           @click="saveAll"
         >
           <v-icon> mdi-sort </v-icon> 순서저장
         </v-btn>
-        <v-btn color="primary" filled x-large @click="fetchList">
+        <v-btn tile color="primary" outlined large @click="fetchList">
           <v-icon> mdi-refresh </v-icon> 새로고침
         </v-btn>
       </template>

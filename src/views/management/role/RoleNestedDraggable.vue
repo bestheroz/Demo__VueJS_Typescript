@@ -8,13 +8,12 @@
       :key="role.id"
       :class="role.id === 1 ? 'd-none' : undefined"
       dense
-      style="box-shadow: none"
       class="pr-0"
       :data-value="JSON.stringify({ ...role, children: [] })"
     >
-      <v-list-item-title v-if="role.id !== 1" class="d-inline">
+      <v-list-item-title v-if="role.id !== 1" class="d-inline pt-1">
         <div>
-          <v-btn v-if="hasWriteAuthority" icon>
+          <v-btn tile v-if="hasWriteAuthority" icon>
             <v-icon class="drag-handle"> mdi-sort</v-icon>
           </v-btn>
           <a
@@ -22,7 +21,7 @@
             @click="emits('click:edit', role)"
             v-text="role.name"
           />
-          <v-btn icon @click="emits('remove-role', role)">
+          <v-btn tile icon small @click="emits('remove-role', role)">
             <v-icon color="error"> mdi-delete-outline </v-icon>
           </v-btn>
         </div>

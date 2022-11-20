@@ -6,10 +6,12 @@
       :close-on-click="closeOnClick"
     >
       <template #activator="{ on, attrs }">
-        <v-chip
+        <v-btn
           :color="filteredLength === 0 ? 'secondary' : 'primary'"
-          filled
+          outlined
+          tile
           filter
+          small
           filter-icon="mdi-filter-variant"
           :input-value="true"
           v-bind="attrs"
@@ -18,9 +20,9 @@
           v-on="on"
         >
           필터 ({{ filteredLength }} / {{ cloneFilters.length }})
-        </v-chip>
+        </v-btn>
       </template>
-      <v-card min-width="400" class="mt-6">
+      <v-card min-width="400" class="mt-5">
         <v-row no-gutters>
           <div>
             <v-list-item-group v-model="index" mandatory>

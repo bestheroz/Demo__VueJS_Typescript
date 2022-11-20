@@ -1,7 +1,9 @@
 <template>
   <v-list
     class="pt-0 mb-1 sortableListItem"
-    :class="`${!rootFlag ? 'ml-5' : ''} ${className}`"
+    :class="`${!rootFlag ? 'ml-5' : ''} ${className} ${
+      hasGroupMenuChild ? 'pb-1' : 'pb-0'
+    }`"
   >
     <v-list-item
       v-for="_menu in value"
@@ -17,7 +19,7 @@
         <v-icon v-text="_menu.icon" />
       </v-list-item-icon>
       <v-list-item-title class="d-inline pt-1">
-        <v-btn v-if="hasWriteAuthority" icon>
+        <v-btn tile v-if="hasWriteAuthority" icon>
           <v-icon class="drag-handle"> mdi-sort </v-icon>
         </v-btn>
         <a
@@ -27,6 +29,7 @@
         />
         {{ _menu.url ? `(${_menu.url})` : "" }}
         <v-btn
+          tile
           v-if="hasDeleteAuthority"
           icon
           small
@@ -69,6 +72,10 @@ const value = useVModel(props, "value", emits, { eventName: "input" });
 
 const rootFlag = computed(() => props.parentId === 0);
 const className = computed(() => `sortableListItem-${props.parentId}`);
+
+const hasGroupMenuChild = computed(() =>
+  value.value.some((v) => v.type === MENU_TYPE.GROUP),
+);
 
 const createSortable = useDebounceFn(() => {
   const querySelectors =

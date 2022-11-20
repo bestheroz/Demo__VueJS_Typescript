@@ -16,6 +16,7 @@
       <v-tooltip bottom>
         <template #activator="{ on, attrs }">
           <v-btn
+            tile
             icon
             fab
             v-bind="attrs"
