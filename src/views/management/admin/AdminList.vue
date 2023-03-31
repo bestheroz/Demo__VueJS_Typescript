@@ -32,7 +32,8 @@
               label="검색 (ID, 관리자 아이디, 관리자 이름)"
               prepend-inner-icon="mdi-magnify"
               clearable
-              filled
+              solo
+              outlined
               dense
             />
           </v-col>

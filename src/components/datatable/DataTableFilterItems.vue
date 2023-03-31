@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-list v-if="!(datePickerType || datetimePickerType)" class="py-0">
+    <v-list v-if="!(datePickerType || datetimePickerType)" class="py-0" dense>
       <v-list-item
         v-for="item in value.items"
         :key="value.type === FILTER_TYPE.CHECKBOX ? item.value : item.text"
@@ -8,10 +8,11 @@
         :style="{
           boxShadow: value.type === FILTER_TYPE.TEXT ? 'none' : '',
         }"
+        dense
       >
-        <v-list-item-action
+        <v-list-item-title
           v-if="value.type === FILTER_TYPE.CHECKBOX"
-          class="mr-4"
+          :class="item.checked ? 'primary--text' : 'secondary--text'"
         >
           <v-checkbox
             v-model="item.checked"
@@ -22,15 +23,12 @@
                 ? 'color: var(--v-primary-base) !important'
                 : undefined
             "
+            :label="item.text"
+            dense
+            hide-details
             @click="onClickCheckbox(item)"
           />
-        </v-list-item-action>
-        <v-list-item-action v-if="value.type === FILTER_TYPE.CHECKBOX">
-          <v-list-itemTitle
-            :class="item.checked ? 'primary--text' : 'secondary--text'"
-            v-text="item.text"
-          />
-        </v-list-item-action>
+        </v-list-item-title>
         <v-list-item-content
           v-else-if="value.type === FILTER_TYPE.TEXT"
           class="py-0"
@@ -52,6 +50,7 @@
       <v-list-item
         v-if="value.type === FILTER_TYPE.DATE_PICKER"
         :ripple="false"
+        dense
       >
         <DatePicker
           v-model="datePicker"
